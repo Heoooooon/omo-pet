@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "kind": "sprite-gen-request",
+  "engine": "component-row",
+  "character": {
+    "id": "omo-edge",
+    "description": "Omo, an original chibi kitten who walks upright: soft charcoal-gray fur with no stripes, white muzzle, white chest and white paw tips, big round amber eyes, tiny pink nose, pointed ears with pink inner ear, long tail with a white tip, mint-green knitted scarf with a small white ring stitched on its end, small orange sneakers",
+    "base_image": "base-source.png"
+  },
+  "cell": {
+    "shape": "rect",
+    "width": 192,
+    "height": 256,
+    "safe_margin_x": 18,
+    "safe_margin_y": 16
+  },
+  "chroma_key": {
+    "name": "magenta",
+    "hex": "#FF00FF",
+    "rgb": [
+      255,
+      0,
+      255
+    ],
+    "selection": "auto",
+    "score": 205.7,
+    "min_subject_distance": 192.4,
+    "background": {
+      "mode": "transparent",
+      "opaque_border_fraction": 0.0,
+      "subject_pixels": 19762
+    },
+    "candidates": [
+      {
+        "name": "magenta",
+        "hex": "#FF00FF",
+        "score": 205.7,
+        "min_subject_distance": 192.4,
+        "clears_erase_radius": true
+      },
+      {
+        "name": "green",
+        "hex": "#00FF00",
+        "score": 184.57,
+        "min_subject_distance": 169.74,
+        "clears_erase_radius": true
+      },
+      {
+        "name": "cyan",
+        "hex": "#00FFFF",
+        "score": 181.92,
+        "min_subject_distance": 179.25,
+        "clears_erase_radius": true
+      },
+      {
+        "name": "blue",
+        "hex": "#004DFF",
+        "score": 193.41,
+        "min_subject_distance": 185.66,
+        "clears_erase_radius": true
+      }
+    ],
+    "selection_reason": "highest 1st-percentile subject distance among the 4 candidate(s) clearing the 96 erase radius"
+  },
+  "states": {
+    "edge": {
+      "frames": 4,
+      "fps": 6,
+      "loop": false,
+      "action": "climbing onto a ledge corner and sitting, side-view facing right: grabs the invisible ledge edge, pulls itself up, ends sitting relaxed on the corner with legs dangling and tail curled; the final frame is a steady sitting hold"
+    }
+  },
+  "style": "match the attached base reference image EXACTLY: same clean flat cartoon style, same body proportions (big round head), same dark-brown outline weight, same palette, same soft cel shading, same level of detail. Do not restyle, do not add new clothing or props beyond what the action requires, no text.",
+  "layout": "taxonomy/v1",
+  "fit": {
+    "align_x": "centroid",
+    "align_y": "bottom"
+  },
+  "chroma": {
+    "mode": "rgb",
+    "unmix_reach": 4,
+    "spill_max_fraction": 0.005
+  }
+}

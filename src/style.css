@@ -1,0 +1,229 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  cursor: grab;
+}
+
+#pet {
+  --flip: 1;
+  width: 176px;
+  pointer-events: none;
+  transform-origin: bottom center;
+  transform: scaleX(var(--flip));
+  animation: breathe 3.4s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scaleX(var(--flip)) scaleY(1);
+  }
+  50% {
+    transform: scaleX(var(--flip)) scaleY(1.014) translateY(-1.5px);
+  }
+}
+
+body[data-state="walk"] #pet {
+  animation: step 0.42s ease-in-out infinite;
+}
+
+/* The drawn idle loop breathes on its own; CSS breathe would double it. */
+body[data-state="idle"].has-idle #pet {
+  animation: none;
+}
+
+/* With a real drawn walk cycle, the CSS bob would fight the frames. */
+body[data-state="walk"].has-walk #pet {
+  animation: none;
+}
+
+/* The fall/parachute sequence is fully drawn — no CSS motion on top. */
+body[data-state="fall"].has-fall #pet {
+  animation: none;
+}
+
+/* Climb-and-sit is fully drawn; breathing would warp the drawn ledge. */
+body[data-state="edge"].has-edge #pet {
+  animation: none;
+}
+
+/* Rocket flames are drawn frames; the ignite class adds launch-pad shake. */
+body[data-state="rocket"].has-rocket #pet {
+  animation: none;
+}
+
+/* Sideways jet ride — wide sprite, flame trailing behind. */
+body[data-state="jet"].has-jet #pet {
+  animation: none;
+  width: 216px;
+}
+
+/* Omo cat pack: states whose cell is shared with a prop (parachute, rocket)
+   or drawn in a shorter cell get a wider display so the body reads the same
+   size as idle (measured: idle body ~205px tall at 176px wide). */
+body[data-pack="omo-cat"][data-state="walk"].has-walk #pet {
+  width: 220px;
+}
+body[data-pack="omo-cat"][data-state="fall"].has-fall #pet {
+  width: 238px;
+}
+body[data-pack="omo-cat"][data-state="fall"][data-fall-phase="land"] #pet {
+  width: 190px;
+}
+body[data-pack="omo-cat"][data-state="rocket"].has-rocket #pet {
+  width: 160px;
+}
+body[data-pack="omo-cat"][data-state="edge"].has-edge #pet {
+  width: 208px;
+}
+body[data-pack="omo-cat"][data-state="jet"].has-jet #pet {
+  width: 238px;
+}
+
+/* Fan-made Chiikawa packs (scripts/make-chiikawa-pack.mjs): LINE stickers
+   carry wide margins, so show them larger; a generated walk cycle fills its
+   cell and is shown smaller to keep the body size steady. */
+body[data-pack="chiikawa"] #pet,
+body[data-pack="hachiware"] #pet,
+body[data-pack="usagi"] #pet {
+  width: 232px;
+}
+body[data-pack="chiikawa"][data-state="walk"].has-walk #pet,
+body[data-pack="hachiware"][data-state="walk"].has-walk #pet,
+body[data-pack="usagi"][data-state="walk"].has-walk #pet {
+  width: 150px;
+}
+
+body.ignite #pet {
+  animation: shake 0.09s linear infinite !important;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: scaleX(var(--flip)) translateX(-1.5px);
+  }
+  50% {
+    transform: scaleX(var(--flip)) translateX(1.5px) translateY(-1px);
+  }
+}
+
+@keyframes step {
+  0%,
+  100% {
+    transform: scaleX(var(--flip)) translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: scaleX(var(--flip)) translateY(-5px) rotate(-1.2deg);
+  }
+  75% {
+    transform: scaleX(var(--flip)) translateY(-5px) rotate(1.2deg);
+  }
+}
+
+body[data-state="drag"] #stage {
+  cursor: grabbing;
+}
+
+body[data-state="drag"] #pet {
+  animation: dangle 0.9s ease-in-out infinite;
+}
+
+@keyframes dangle {
+  0%,
+  100% {
+    transform: scaleX(var(--flip)) rotate(-4deg) scale(1.03);
+  }
+  50% {
+    transform: scaleX(var(--flip)) rotate(4deg) scale(1.03);
+  }
+}
+
+body[data-state="react"] #pet {
+  animation: hop 0.55s ease-out;
+}
+
+@keyframes hop {
+  0% {
+    transform: scaleX(var(--flip)) translateY(0);
+  }
+  30% {
+    transform: scaleX(var(--flip)) translateY(-22px) scaleY(1.04);
+  }
+  55% {
+    transform: scaleX(var(--flip)) translateY(0) scaleY(0.97);
+  }
+  75% {
+    transform: scaleX(var(--flip)) translateY(-8px);
+  }
+  100% {
+    transform: scaleX(var(--flip)) translateY(0);
+  }
+}
+
+#effects {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.heart {
+  position: absolute;
+  font-size: 20px;
+  animation: float-up 1.1s ease-out forwards;
+}
+
+@keyframes float-up {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.6);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-70px) scale(1.15);
+  }
+}
+
+#menu {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+}
+
+#menu button {
+  font-size: 12px;
+  padding: 4px 10px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(20, 20, 24, 0.85);
+  color: #fff;
+  cursor: pointer;
+}
+
+#menu button:hover {
+  background: rgba(220, 60, 80, 0.9);
+}

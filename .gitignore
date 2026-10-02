@@ -1,0 +1,18 @@
+node_modules/
+dist/
+src-tauri/target/
+src-tauri/gen/
+.DS_Store
+.codegraph
+
+# Local character packs (e.g. fan-made packs from scripts/make-chiikawa-pack.mjs)
+# stay on your computer; only the bundled omo-cat pack is tracked.
+public/packs/*
+!public/packs/omo-cat/
+!public/packs/packs.json
+.cache/
+
+# sprite-gen run logs (contain local paths)
+art/sprites/*/reports/
+art/sprites/*/gen-set.log
+art/sprites/*/raw/*.raw.png

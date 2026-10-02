@@ -1,0 +1,5 @@
+Original mascot character "Omo", a chibi kitten who walks upright on two legs, full body, side view facing right in a relaxed standing pose, whole body visible head to toe.
+Design: round oversized head (about 45% of body height), soft charcoal-gray fur with NO stripes, white muzzle, white chest and white paw tips, big round warm amber eyes with a small highlight, tiny pink nose, short rounded ears with pink inner ear, a long tail with a white tip curling upward. Wears a mint-green knitted scarf with one small white ring "O" stitched on its end, and tiny orange sneakers.
+Style: clean flat cartoon illustration with soft cel shading, smooth dark-brown outline of even weight, friendly and cute, simple shapes readable at 96px. Not pixel art, no text, no background props.
+Must be an original design: must NOT resemble Hello Kitty, Pusheen, Chi, Doraemon, Luna, Garfield, Felix or any existing character.
+Transparent background, single character centered with padding.

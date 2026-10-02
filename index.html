@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>omo-pet</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body data-state="idle">
+    <div id="stage">
+      <img id="pet" src="/packs/omo-cat/idle.apng" alt="pet" draggable="false" />
+      <div id="effects"></div>
+      <div id="menu" hidden>
+        <button id="friend">친구+</button>
+        <button id="settings-open">설정</button>
+        <button id="debug-toggle">인식 표시</button>
+        <button id="quit">종료</button>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
