@@ -42,12 +42,47 @@ type State =
   | "rocket"
   | "jet";
 let state: State = "idle";
+let stateVersion = 0;
 let walkTimer: ReturnType<typeof setTimeout> | null = null;
-let walkFrame: ReturnType<typeof setInterval> | null = null;
-let fallFrame: ReturnType<typeof setInterval> | null = null;
+let walkFrame: (() => void) | null = null;
+let fallFrame: (() => void) | null = null;
 let edgeTimer: ReturnType<typeof setTimeout> | null = null;
-let rocketFrame: ReturnType<typeof setInterval> | null = null;
-let jetFrame: ReturnType<typeof setInterval> | null = null;
+let rocketFrame: (() => void) | null = null;
+let jetFrame: (() => void) | null = null;
+
+// Await each native move and tick: WebKit can throttle background timers
+// to 1 Hz, so neither setInterval nor requestAnimationFrame is a motion clock.
+function motionLoop(step: (dt: number) => Promise<void>): () => void {
+  let active = true;
+  let previous = performance.now();
+  async function tick() {
+    if (!active) return;
+    const now = performance.now();
+    const dt = Math.min(0.25, (now - previous) / 1000);
+    previous = now;
+    await step(dt);
+    if (active) {
+      await invoke("motion_tick");
+      void tick();
+    }
+  }
+  void tick();
+  return () => { active = false; };
+}
+
+function easeMotion(progress: number): number {
+  return progress * progress * (3 - 2 * progress);
+}
+
+function walkSpeed(): number {
+  // Six frames at 8 fps make one stride. Short-legged local packs take
+  // smaller steps; zoom/personality scale the stride, not the cycle rate.
+  const stride = currentPack === DEFAULTS.pack ? 56 : 32;
+  const rate = state === "walk"
+    ? [...walkPlayback.values()].find(({ src }) => src === pet.src)?.speed ?? 1
+    : cfg.speed;
+  return (stride / 0.75) * scale * personality * cfg.size * rate;
+}
 
 // Character packs: each pack is a directory of per-state APNGs. A state
 // without a (loaded) asset falls back to the pack's idle sprite; CSS
@@ -75,6 +110,7 @@ const EXTRA_SPRITES = ["fall-open", "fall-glide", "fall-land"] as const;
 // doesn't always look identical.
 const VARIANT_SUFFIXES = [2, 3, 4];
 const spriteVariants = new Map<string, string[]>();
+const walkPlayback = new Map<string, Readonly<{ speed: number; src: string }>>();
 let currentPack = "";
 
 function packUrl(pack: string, key: string): string {
@@ -82,6 +118,8 @@ function packUrl(pack: string, key: string): string {
 }
 
 function loadPack(pack: string) {
+  for (const { src } of walkPlayback.values()) URL.revokeObjectURL(src);
+  walkPlayback.clear();
   currentPack = pack;
   document.body.dataset.pack = pack; // pack-specific CSS (per-state sizes)
   spriteVariants.clear();
@@ -126,8 +164,49 @@ function spriteFor(target: string): string {
   return spriteVariants.get("idle")?.[0] ?? packUrl(currentPack, "idle");
 }
 
+// APNG images have no playbackRate. Change only frame delays (and their
+// PNG checksums) so speed tuning changes the drawn gait and travel together.
+async function timedWalk(url: string, speed: number): Promise<string> {
+  const cached = walkPlayback.get(url);
+  if (cached?.speed === speed) return cached.src;
+  const bytes = new Uint8Array(await (await fetch(url)).arrayBuffer());
+  const view = new DataView(bytes.buffer);
+  for (let offset = 8; offset < bytes.length;) {
+    const length = view.getUint32(offset);
+    if (view.getUint32(offset + 4) === 0x6663544c) { // fcTL
+      const delay = view.getUint16(offset + 28) / (view.getUint16(offset + 30) || 100);
+      view.setUint16(offset + 28, Math.max(1, Math.round(delay / speed * 10000)));
+      view.setUint16(offset + 30, 10000);
+      let crc = 0xffffffff;
+      for (let i = offset + 4; i < offset + 8 + length; i++) {
+        crc ^= bytes[i];
+        for (let bit = 0; bit < 8; bit++) {
+          crc = (crc >>> 1) ^ ((crc & 1) ? 0xedb88320 : 0);
+        }
+      }
+      view.setUint32(offset + 8 + length, (crc ^ 0xffffffff) >>> 0);
+    }
+    offset += length + 12;
+  }
+  const src = URL.createObjectURL(new Blob([bytes], { type: "image/png" }));
+  const image = new Image();
+  image.src = src;
+  await image.decode();
+  if (cached) URL.revokeObjectURL(cached.src);
+  walkPlayback.set(url, { speed, src });
+  return src;
+}
+
 function setState(next: State) {
   const changed = state !== next;
+  if (changed || ONE_SHOT.has(next)) stateVersion += 1;
+  if (changed) {
+    walkFrame?.();
+    fallFrame?.();
+    rocketFrame?.();
+    jetFrame?.();
+    crossFrame?.();
+  }
   state = next;
   document.body.dataset.state = next;
   delete document.body.dataset.fallPhase; // fall() re-tags its own phases
@@ -230,8 +309,9 @@ async function settle() {
 }
 
 async function fall(startY: number) {
-  if (fallFrame) clearInterval(fallFrame);
+  fallFrame?.();
   setState("fall");
+  const version = stateVersion;
   // Three-phase parachute when the pack ships the variants: deploy
   // (one-shot) → glide (loop) → landing (one-shot). Otherwise the single
   // fall sequence plays as before.
@@ -245,7 +325,6 @@ async function fall(startY: number) {
 
   const x = (await appWindow.outerPosition()).x; // x is fixed while falling
   const cx = x + winW / 2;
-  const dt = 0.016; // s per tick
   const gravity = 2600; // physical px/s², freefall
   const chuteDelayMs = 550; // parachute opens near the end of the APNG
   const drift = 260; // physical px/s descent under parachute
@@ -253,13 +332,13 @@ async function fall(startY: number) {
   let vy = 0;
   let elapsed = 0;
 
-  fallFrame = setInterval(async () => {
+  fallFrame = motionLoop(async (dt) => {
     if (state !== "fall") return stopFall();
-    elapsed += 16;
+    elapsed += dt * 1000;
     if (elapsed < chuteDelayMs) {
       vy += gravity * dt;
     } else {
-      vy = Math.max(drift, vy * 0.8); // brake into a gentle drift
+      vy = drift + (vy - drift) * Math.exp(-14 * dt);
       if (phased && !gliding) {
         gliding = true;
         pet.src = spriteFor("fall-glide");
@@ -272,27 +351,28 @@ async function fall(startY: number) {
     const restY = target.y - winH;
     y = Math.min(restY, y + vy * dt);
     await appWindow.setPosition(new PhysicalPosition(x, Math.round(y)));
+    if (stateVersion !== version) return;
     if (y >= restY) {
       stopFall();
       standingOn = target;
       if (phased && spriteVariants.has("fall-land")) {
         pet.src = `${spriteFor("fall-land")}?t=${Date.now()}`;
         document.body.dataset.fallPhase = "land";
-        setTimeout(() => {
-          if (state !== "fall") return; // grabbed during touchdown
+        void invoke("motion_tick", { durationMs: 450 }).then(() => {
+          if (stateVersion !== version) return; // grabbed during touchdown
           setState("idle");
           scheduleNext();
-        }, 450);
+        });
       } else {
         setState("idle");
         scheduleNext();
       }
     }
-  }, 16);
+  });
 }
 
 function stopFall() {
-  if (fallFrame) clearInterval(fallFrame);
+  fallFrame?.();
   fallFrame = null;
 }
 
@@ -348,39 +428,41 @@ async function jetDash() {
     pos.y - Math.round((60 + Math.random() * 160) * scale),
   );
 
+  standingOn = null;
   setFlip(dir);
   setState("jet");
+  const version = stateVersion;
 
-  const dt = 0.016;
-  let x = pos.x;
+  const duration = Math.max(1.1, Math.abs(targetX - pos.x) / (700 * scale) * 1.5);
   let y = pos.y;
-  let vx = 0;
   let t = 0;
 
-  jetFrame = setInterval(async () => {
+  jetFrame = motionLoop(async (dt) => {
     if (state !== "jet") return stopJet();
     t += dt;
-    vx = Math.min(vx + 4200 * dt, 2400); // physical px/s
-    x += dir * vx * dt;
-    const bobY = cruiseY + Math.sin(t * 5.5) * 7 * scale;
-    y += (bobY - y) * 0.09; // ease up to cruise altitude, then bob
-    const arrived = (dir === 1 && x >= targetX) || (dir === -1 && x <= targetX);
+    const progress = Math.min(1, t / duration);
+    const eased = easeMotion(progress);
+    const x = pos.x + (targetX - pos.x) * eased;
+    y = pos.y + (cruiseY - pos.y) * eased
+      + Math.sin(t * 5.5) * 7 * scale * Math.sin(Math.PI * progress) ** 2;
+    const arrived = progress === 1;
     if (arrived) {
       stopJet();
       await appWindow.setPosition(
         new PhysicalPosition(targetX, Math.round(y)),
       );
+      if (stateVersion !== version) return;
       void fall(Math.round(y)); // dismount → parachute
       return;
     }
     await appWindow.setPosition(
       new PhysicalPosition(Math.round(x), Math.round(y)),
     );
-  }, 16);
+  });
 }
 
 function stopJet() {
-  if (jetFrame) clearInterval(jetFrame);
+  jetFrame?.();
   jetFrame = null;
 }
 
@@ -414,35 +496,35 @@ async function rocketLaunch() {
     ? target.y - winH - Math.round(60 * scale) // overshoot, then drop onto it
     : monY + Math.round(16 * scale);
 
+  standingOn = null;
+  if (targetX !== startX) setFlip(targetX > startX ? 1 : -1);
   setState("rocket");
+  const version = stateVersion;
   document.body.classList.add("ignite");
-  await new Promise((resolve) => setTimeout(resolve, 650));
+  await invoke("motion_tick", { durationMs: 650 });
   document.body.classList.remove("ignite");
-  if ((state as State) !== "rocket") return; // grabbed during ignition
+  if (stateVersion !== version) return; // interrupted or re-entered during ignition
 
-  const dt = 0.016;
-  let y = pos.y;
-  let vy = 0;
   let t = 0;
   const climb = Math.max(1, pos.y - apexY);
+  const duration = Math.max(1.2, climb / (900 * scale) * 1.5);
 
-  rocketFrame = setInterval(async () => {
+  rocketFrame = motionLoop(async (dt) => {
     if (state !== "rocket") return stopRocket();
     t += dt;
-    vy = Math.min(vy + 3400 * dt, 2400); // physical px/s
-    y -= vy * dt;
-    const progress = Math.min(1, (pos.y - y) / climb);
-    const x = Math.round(
-      startX + (targetX - startX) * progress + Math.sin(t * 16) * 2.5 * scale,
-    );
-    if (y <= apexY) {
+    const progress = Math.min(1, t / duration);
+    const eased = easeMotion(progress);
+    const y = pos.y + (apexY - pos.y) * eased;
+    const x = Math.round(startX + (targetX - startX) * eased);
+    if (progress === 1) {
       stopRocket();
       await appWindow.setPosition(new PhysicalPosition(x, apexY));
+      if (stateVersion !== version) return;
       void fall(apexY); // engine cut → parachute
       return;
     }
     await appWindow.setPosition(new PhysicalPosition(x, Math.round(y)));
-  }, 16);
+  });
 }
 
 function platformCenterX(p: Platform): number {
@@ -450,7 +532,7 @@ function platformCenterX(p: Platform): number {
 }
 
 function stopRocket() {
-  if (rocketFrame) clearInterval(rocketFrame);
+  rocketFrame?.();
   rocketFrame = null;
   document.body.classList.remove("ignite");
 }
@@ -459,10 +541,17 @@ function stopRocket() {
 
 async function walk() {
   if (state !== "idle") return scheduleNext();
+  const idleVersion = stateVersion;
+  const tuning = cfg;
+  const pack = currentPack;
   const p = standingOn ?? floorPlatform();
   standingOn = p;
 
   const pos = await appWindow.outerPosition();
+  const timed = tuning.speed !== 1 && spriteVariants.has("walk");
+  const src = timed ? await timedWalk(spriteFor("walk"), tuning.speed) : "";
+  if (stateVersion !== idleVersion || pressed) return;
+  if (cfg !== tuning || currentPack !== pack) return scheduleNext();
   const minX = Math.max(p.x1, monX);
   const maxX = Math.min(p.x2, monX + monW) - winW;
   if (maxX <= minX) return scheduleNext();
@@ -471,21 +560,29 @@ async function walk() {
   let targetX = Math.round(minX + Math.random() * (maxX - minX));
   if (Math.random() < 0.35) targetX = Math.random() < 0.5 ? minX : maxX;
   const dir: -1 | 1 = targetX > pos.x ? 1 : -1;
-  const speed = Math.max(1, Math.round(2 * scale * personality * cfg.speed));
+  const speed = walkSpeed();
+  const acceleration = speed / 0.24;
   const edgeZone = Math.round(16 * scale);
 
   setFlip(dir);
   setState("walk");
+  if (timed) pet.src = src;
+  const version = stateVersion;
 
   let x = pos.x;
-  walkFrame = setInterval(async () => {
+  let velocity = 0;
+  walkFrame = motionLoop(async (dt) => {
     if (state !== "walk") return stopWalk();
-    x += speed * dir;
+    const previous = velocity;
+    const desired = Math.min(speed, Math.sqrt(2 * acceleration * Math.abs(targetX - x)));
+    velocity += Math.max(-acceleration * dt, Math.min(acceleration * dt, desired - velocity));
+    x += (previous + velocity) / 2 * dt * dir;
     const arrived = (dir === 1 && x >= targetX) || (dir === -1 && x <= targetX);
     if (arrived) x = targetX;
-    await appWindow.setPosition(new PhysicalPosition(x, p.y - winH));
+    await appWindow.setPosition(new PhysicalPosition(Math.round(x), p.y - winH));
+    if (stateVersion !== version) return;
     if (!arrived) return;
-    if (walkFrame) clearInterval(walkFrame);
+    walkFrame?.();
     walkFrame = null;
     if (x - minX <= edgeZone) void arriveAtEnd(-1);
     else if (maxX - x <= edgeZone) void arriveAtEnd(1);
@@ -493,7 +590,7 @@ async function walk() {
       setState("idle");
       scheduleNext();
     }
-  }, 16);
+  });
 }
 
 // Reaching the end of a platform: on the floor, cross into an adjacent
@@ -634,10 +731,10 @@ async function adjacentMonitor(dir: -1 | 1): Promise<Monitor | undefined> {
   }
 }
 
-let crossFrame: ReturnType<typeof setInterval> | null = null;
+let crossFrame: (() => void) | null = null;
 
 function stopCross() {
-  if (crossFrame) clearInterval(crossFrame);
+  crossFrame?.();
   crossFrame = null;
 }
 
@@ -690,36 +787,40 @@ async function crossVertical(m: Monitor, dir: -1 | 1) {
     void fall(Math.round(y * scale));
   };
 
+  standingOn = null;
+  if (targetX !== x) setFlip(targetX > x ? 1 : -1);
   if (dir === -1) {
     setState("rocket");
+    const version = stateVersion;
     document.body.classList.add("ignite");
-    await new Promise((resolve) => setTimeout(resolve, 650));
+    await invoke("motion_tick", { durationMs: 650 });
     document.body.classList.remove("ignite");
-    if ((state as State) !== "rocket") return; // grabbed during ignition
+    if (stateVersion !== version) return;
   } else {
     setState("fall");
   }
 
-  const dt = 0.016;
+  const version = stateVersion;
   let vy = 0;
   let elapsed = 0;
-  crossFrame = setInterval(async () => {
+  crossFrame = motionLoop(async (dt) => {
     if (state !== (dir === -1 ? "rocket" : "fall")) return stopCross();
-    elapsed += 16;
+    elapsed += dt * 1000;
     if (dir === -1) {
       vy = Math.min(vy + 1700 * dt, 1200); // logical pt/s, upward
       y -= vy * dt;
     } else {
       // Freefall off the edge, then the chute opens and brakes the drop.
       if (elapsed < 550) vy += 1300 * dt;
-      else vy = Math.max(300, vy * 0.8);
+      else vy = 300 + (vy - 300) * Math.exp(-14 * dt);
       y += vy * dt;
     }
-    x += (targetX - x) * 0.05;
+    x += (targetX - x) * (1 - Math.exp(-3.2 * dt));
     const arrived = dir === -1 ? y <= arriveY : y >= arriveY;
     await appWindow.setPosition(new LogicalPosition(x, y));
+    if (stateVersion !== version) return;
     if (arrived) await arrive();
-  }, 16);
+  });
 }
 
 // Cross into the adjacent monitor without teleporting. Floors rarely line
@@ -736,7 +837,7 @@ async function crossTo(m: Monitor, dir: -1 | 1) {
   const floorTop = r.y + r.h - lh; // window y when standing on the new floor
   const climbing = floorTop < y - 8;
   const cruiseY = floorTop - 110; // enough headroom to parachute onto the floor
-  const speed = Math.max(1, 2 * personality * cfg.speed); // logical pt per tick
+  const speed = walkSpeed() / scale; // logical pt/s
 
   const arrive = async () => {
     stopCross();
@@ -749,36 +850,41 @@ async function crossTo(m: Monitor, dir: -1 | 1) {
 
   setFlip(dir);
   setState(climbing ? "jet" : "walk");
+  const version = stateVersion;
 
-  const dt = 0.016;
   let vx = 0;
   let t = 0;
-  crossFrame = setInterval(async () => {
+  crossFrame = motionLoop(async (dt) => {
     if (state !== (climbing ? "jet" : "walk")) return stopCross();
     let arrived = false;
     if (climbing) {
       t += dt;
       // Climb first so she never dips below the taller monitor's visible
       // area, then cruise sideways over the boundary.
-      y += (cruiseY - y) * 0.06 + Math.sin(t * 5.5) * 0.5;
+      y += (cruiseY - y) * (1 - Math.exp(-3.9 * dt));
       if (y - cruiseY < 40) {
-        vx = Math.min(vx + 2600 * dt, 1300); // logical pt/s
+        const desired = Math.min(1300, Math.sqrt(5200 * Math.abs(endX - x)));
+        vx += Math.max(-2600 * dt, Math.min(2600 * dt, desired - vx));
         x += dir * vx * dt;
       }
     } else {
-      x += speed * dir;
+      const acceleration = speed / 0.24;
+      const desired = Math.min(speed, Math.sqrt(2 * acceleration * Math.abs(endX - x)));
+      vx += Math.max(-acceleration * dt, Math.min(acceleration * dt, desired - vx));
+      x += vx * dt * dir;
     }
     if ((dir === 1 && x >= endX) || (dir === -1 && x <= endX)) {
       x = endX;
       arrived = true;
     }
     await appWindow.setPosition(new LogicalPosition(x, y));
+    if (stateVersion !== version) return;
     if (arrived) await arrive();
-  }, 16);
+  });
 }
 
 function stopWalk() {
-  if (walkFrame) clearInterval(walkFrame);
+  walkFrame?.();
   walkFrame = null;
   if (state === "walk") setState("idle");
   scheduleNext();
@@ -807,9 +913,25 @@ function enterEdge(dir: -1 | 1) {
 
 async function hopOff(dir: -1 | 1) {
   const pos = await appWindow.outerPosition();
-  const x = pos.x + dir * Math.round(winW * 0.6);
-  await appWindow.setPosition(new PhysicalPosition(x, pos.y));
-  void settle();
+  const distance = dir * Math.round(winW * 0.6);
+  standingOn = null;
+  setFlip(dir);
+  setState("walk");
+  const version = stateVersion;
+  let elapsed = 0;
+  crossFrame = motionLoop(async (dt) => {
+    if (state !== "walk") return stopCross();
+    elapsed += dt;
+    const progress = Math.min(1, elapsed / 0.35);
+    const x = pos.x + distance * easeMotion(progress);
+    const y = pos.y - Math.sin(Math.PI * progress) ** 2 * 12 * scale;
+    await appWindow.setPosition(new PhysicalPosition(Math.round(x), Math.round(y)));
+    if (stateVersion !== version) return;
+    if (progress === 1) {
+      stopCross();
+      void settle();
+    }
+  });
 }
 
 // ---------- stranded-window watchdog ----------
@@ -868,7 +990,7 @@ setInterval(async () => {
   const cx = pos.x + winW / 2;
   if (!fresh || cx < fresh.x1 || cx > fresh.x2) {
     if (walkFrame) {
-      clearInterval(walkFrame);
+      walkFrame();
       walkFrame = null;
     }
     void settle(); // ground vanished from under her feet
@@ -898,6 +1020,10 @@ stage.addEventListener("mousedown", (e) => {
   // mousedown would remove the target before its click event fires.
   if (menu.contains(e.target as Node)) return;
   menu.hidden = true;
+  if (state === "fall" || state === "rocket" || state === "jet") {
+    stateVersion += 1; // cancel pending ignition/touchdown, even before dragging
+    stopCross();
+  }
   if (state === "fall") stopFall(); // caught mid-air
   if (state === "rocket") stopRocket(); // plucked off the rocket
   if (state === "jet") stopJet();

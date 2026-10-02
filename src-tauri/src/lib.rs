@@ -296,8 +296,15 @@ pub fn run() {
             list_windows,
             pet_bridge_state,
             pet_bridge_handoff,
-            pet_bridge_settings
+            pet_bridge_settings,
+            motion_tick
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+// The desktop pet keeps moving when WebKit throttles background JS timers.
+#[tauri::command]
+async fn motion_tick(duration_ms: Option<u64>) {
+    tokio::time::sleep(std::time::Duration::from_millis(duration_ms.unwrap_or(16))).await;
 }
