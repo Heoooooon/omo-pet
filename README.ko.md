@@ -57,22 +57,35 @@ npm run tauri build   # build a release app
 
 ## 팬메이드 치이카와 팩(내 컴퓨터에서 만들기)
 
-LINE 공식 치이카와·하치와레·우사기 움직이는 스티커의 미리보기 이미지를
-로컬 캐릭터 팩으로 바꿀 수 있습니다:
+LINE 공식 치이카와 캐릭터들의 움직이는 스티커 미리보기를 로컬 캐릭터 팩으로 바꿀 수 있습니다.
+`--generate`를 주면 오모가 하는 모든 동작(걷기·로켓·제트·낙하산·모서리·착지 등)도 캐릭터별로 그립니다:
 
 ```bash
-node scripts/make-chiikawa-pack.mjs                  # chiikawa, hachiware, usagi
-node scripts/make-chiikawa-pack.mjs usagi            # just one
-node scripts/make-chiikawa-pack.mjs --generate-walk  # also draw a walk cycle with sprite-gen
-node scripts/make-chiikawa-pack.mjs --remove         # delete them again
+node scripts/make-chiikawa-pack.mjs                                # sticker-only packs (quick)
+node scripts/make-chiikawa-pack.mjs --generate                     # every action, all 7 characters
+node scripts/make-chiikawa-pack.mjs --chars usagi,momonga --generate
+node scripts/make-chiikawa-pack.mjs --chars usagi --generate --regen walk,jet  # redraw some actions
+node scripts/make-chiikawa-pack.mjs --remove                       # delete them again
 ```
 
-스크립트는 LINE STORE에서 스티커 이미지를 내 컴퓨터로 내려받아
-`public/packs/<character>/`와 `public/packs/local.json`에 저장합니다.
-그다음 설정에서 캐릭터를 고르면 됩니다. 스티커가 없는 동작은 idle 스프라이트로 대신합니다.
-`--generate-walk`를 쓰려면 `ffmpeg`, [sprite-gen](https://github.com/aldegad/sprite-gen) 체크아웃
-(`SPRITE_GEN_DIR`, `.venv`까지 설치된 상태), 로그인된 `codex` CLI가 필요합니다
-(ChatGPT 구독을 쓰기 때문에 API 키도, 호출당 요금도 없습니다).
+| 팩(`--chars`) | 공식 스티커에서 | `--generate`로 그림 |
+|---|---|---|
+| `chiikawa`(치이카와) | idle, react | 나머지 전부 |
+| `hachiware`(하치와레) | — | 모든 동작 |
+| `usagi`(우사기) | idle(2), react, drag | 나머지 전부 |
+| `momonga`(모몽가) | idle, react, drag | 나머지 전부 |
+| `kurimanju`(밤만쥬) | — | 모든 동작 |
+| `yoroi`(갑옷 씨) | react | 나머지 전부 |
+| `yusangyun`(유산균, むちゃうマン) | — | 모든 동작 |
+
+스크립트는 LINE STORE에서 스티커 이미지를 내 컴퓨터로 내려받아 떠 있는 효과 글자를 지우고,
+모든 동작을 같은 몸 크기로 맞춰 `public/packs/<character>/`와 `public/packs/local.json`에 씀니다.
+그다음 설정에서 캐릭터를 고르면 됩니다. 캐릭터 혼자 전신이 나오는 스티커만 씁니다.
+`--generate` 없이 만들면 스티커가 없는 동작은 idle로 대신하고, 전신 스티커가 없는 캐릭터는 건너뜁니다.
+스크립트에는 `ffmpeg`가 필요합니다. `--generate`에는 [sprite-gen](https://github.com/aldegad/sprite-gen) 체크아웃
+(`SPRITE_GEN_DIR`, `.venv`까지 설치된 상태)과 로그인된 `codex` CLI도 필요합니다
+(ChatGPT 구독을 쓰기 때문에 API 키도, 호출당 요금도 없습니다). 그 캐릭터의 스티커와 공식 굿즈 사진을
+보고 그리며, 동작당 1분쯤 걸리고, 프레임은 `.cache/chiikawa/gen/`에 저장해 다시 씁니다.
 
 > **팬메이드 · 비공식 · 비상업 프로젝트입니다.** 이 프로젝트는 치이카와 권리자와 관계가 없으며
 > 승인을 받지도 않았습니다. **이 저장소에는 치이카와 그림이 전혀 들어 있지 않습니다.**

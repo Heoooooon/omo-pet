@@ -100,18 +100,20 @@ body[data-pack="omo-cat"][data-state="jet"].has-jet #pet {
   width: 238px;
 }
 
-/* Fan-made Chiikawa packs (scripts/make-chiikawa-pack.mjs): LINE stickers
-   carry wide margins, so show them larger; a generated walk cycle fills its
-   cell and is shown smaller to keep the body size steady. */
-body[data-pack="chiikawa"] #pet,
-body[data-pack="hachiware"] #pet,
-body[data-pack="usagi"] #pet {
-  width: 232px;
-}
-body[data-pack="chiikawa"][data-state="walk"].has-walk #pet,
-body[data-pack="hachiware"][data-state="walk"].has-walk #pet,
-body[data-pack="usagi"][data-state="walk"].has-walk #pet {
-  width: 150px;
+/* Fan-made Chiikawa packs (scripts/make-chiikawa-pack.mjs): every state is
+   drawn on a window-sized 240x320 canvas at one body scale, so show them
+   1:1 in every state (this also overrides the wider jet rule above). */
+body:is(
+    [data-pack="chiikawa"],
+    [data-pack="hachiware"],
+    [data-pack="usagi"],
+    [data-pack="momonga"],
+    [data-pack="kurimanju"],
+    [data-pack="yoroi"],
+    [data-pack="yusangyun"]
+  )[data-state]
+  #pet {
+  width: 240px;
 }
 
 body.ignite #pet {

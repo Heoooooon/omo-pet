@@ -58,23 +58,40 @@ npm run tauri build   # build a release app
 
 ## Fan-made Chiikawa packs (built on your computer)
 
-You can turn the official LINE animated-sticker previews of Chiikawa,
-Hachiware, and Usagi into local character packs:
+You can turn the official LINE animated-sticker previews of the Chiikawa cast
+into local character packs. With `--generate`, every action Omo has (walk,
+rocket, jet, parachute, ledge, landing, …) is drawn for each character too:
 
 ```bash
-node scripts/make-chiikawa-pack.mjs                  # chiikawa, hachiware, usagi
-node scripts/make-chiikawa-pack.mjs usagi            # just one
-node scripts/make-chiikawa-pack.mjs --generate-walk  # also draw a walk cycle with sprite-gen
-node scripts/make-chiikawa-pack.mjs --remove         # delete them again
+node scripts/make-chiikawa-pack.mjs                                # sticker-only packs (quick)
+node scripts/make-chiikawa-pack.mjs --generate                     # every action, all 7 characters
+node scripts/make-chiikawa-pack.mjs --chars usagi,momonga --generate
+node scripts/make-chiikawa-pack.mjs --chars usagi --generate --regen walk,jet  # redraw some actions
+node scripts/make-chiikawa-pack.mjs --remove                       # delete them again
 ```
 
-The script downloads the sticker images from LINE STORE to your computer and
-writes them to `public/packs/<character>/` plus `public/packs/local.json`.
-Then pick the character in Settings. Actions without a sticker fall back to
-the idle sprite. `--generate-walk` needs `ffmpeg`, a
+| Pack (`--chars`) | From the official stickers | Drawn with `--generate` |
+|---|---|---|
+| `chiikawa` | idle, react | everything else |
+| `hachiware` | — | all actions |
+| `usagi` | idle (2), react, drag | everything else |
+| `momonga` | idle, react, drag | everything else |
+| `kurimanju` | — | all actions |
+| `yoroi` (Yoroi-san) | react | everything else |
+| `yusangyun` (Muchauman) | — | all actions |
+
+The script downloads the sticker images from LINE STORE to your computer,
+erases the floating effect text, scales every action to the same body size,
+and writes `public/packs/<character>/` plus `public/packs/local.json`. Then
+pick the character in Settings. Only stickers that show the character alone
+and in full body are used; without `--generate`, actions without a sticker
+fall back to the idle sprite, and characters without a full-body sticker are
+skipped. The script needs `ffmpeg`. `--generate` also needs a
 [sprite-gen](https://github.com/aldegad/sprite-gen) checkout
-(`SPRITE_GEN_DIR`, with its `.venv` installed), and a logged-in `codex` CLI
-(it uses your ChatGPT subscription — no API key, no per-call charge).
+(`SPRITE_GEN_DIR`, with its `.venv` installed) and a logged-in `codex` CLI
+(it uses your ChatGPT subscription — no API key, no per-call charge). It draws
+from the character's own stickers and official goods photos, takes about a
+minute per action, and caches the frames in `.cache/chiikawa/gen/`.
 
 > **Fan-made, unofficial, non-commercial.** This project is not affiliated with
 > or endorsed by the Chiikawa rights holders. **No Chiikawa artwork is included

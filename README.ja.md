@@ -57,22 +57,35 @@ npm run tauri build   # build a release app
 
 ## ファンメイドのちいかわパック（あなたのパソコンで作ります）
 
-LINE 公式のちいかわ・ハチワレ・うさぎの動くスタンプのプレビューを、
-ローカルのキャラクターパックに変換できます：
+LINE 公式のちいかわたちの動くスタンプのプレビューを、ローカルのキャラクターパックに変換できます。
+`--generate` を付けると、オモの全動作（歩く・ロケット・ジェット・パラシュート・ふち・着地など）もキャラクターごとに描きます：
 
 ```bash
-node scripts/make-chiikawa-pack.mjs                  # chiikawa, hachiware, usagi
-node scripts/make-chiikawa-pack.mjs usagi            # just one
-node scripts/make-chiikawa-pack.mjs --generate-walk  # also draw a walk cycle with sprite-gen
-node scripts/make-chiikawa-pack.mjs --remove         # delete them again
+node scripts/make-chiikawa-pack.mjs                                # sticker-only packs (quick)
+node scripts/make-chiikawa-pack.mjs --generate                     # every action, all 7 characters
+node scripts/make-chiikawa-pack.mjs --chars usagi,momonga --generate
+node scripts/make-chiikawa-pack.mjs --chars usagi --generate --regen walk,jet  # redraw some actions
+node scripts/make-chiikawa-pack.mjs --remove                       # delete them again
 ```
 
-スクリプトは LINE STORE からスタンプ画像をあなたのパソコンにダウンロードし、
-`public/packs/<character>/` と `public/packs/local.json` に書き出します。
-あとは設定でキャラクターを選ぶだけです。スタンプがない動作は idle スプライトで代用されます。
-`--generate-walk` を使うには `ffmpeg`、[sprite-gen](https://github.com/aldegad/sprite-gen) のチェックアウト
-（`SPRITE_GEN_DIR`。`.venv` をインストール済みのもの）、ログイン済みの `codex` CLI が必要です
-（ChatGPT のサブスクリプションを使うので、API キーも呼び出しごとの課金もいりません）。
+| パック（`--chars`） | 公式スタンプから | `--generate` で描く |
+|---|---|---|
+| `chiikawa`（ちいかわ） | idle, react | そのほか全部 |
+| `hachiware`（ハチワレ） | — | すべての動作 |
+| `usagi`（うさぎ） | idle（2）, react, drag | そのほか全部 |
+| `momonga`（モモンガ） | idle, react, drag | そのほか全部 |
+| `kurimanju`（くりまんじゅう） | — | すべての動作 |
+| `yoroi`（鎧さん） | react | そのほか全部 |
+| `yusangyun`（むちゃうマン） | — | すべての動作 |
+
+スクリプトは LINE STORE からスタンプ画像をあなたのパソコンにダウンロードして、浮いている効果文字を消し、
+すべての動作を同じ体の大きさにそろえて `public/packs/<character>/` と `public/packs/local.json` に書き出します。
+あとは設定でキャラクターを選ぶだけです。使うのはキャラクターがひとりで全身が写っているスタンプだけです。
+`--generate` なしでは、スタンプがない動作は idle で代用し、全身スタンプがないキャラクターは飛ばします。
+スクリプトには `ffmpeg` が必要です。`--generate` には [sprite-gen](https://github.com/aldegad/sprite-gen) のチェックアウト
+（`SPRITE_GEN_DIR`。`.venv` をインストール済みのもの）とログイン済みの `codex` CLI も必要です
+（ChatGPT のサブスクリプションを使うので、API キーも呼び出しごとの課金もいりません）。そのキャラクターのスタンプと
+公式グッズの写真を参考に描き、動作ごとに 1 分ほどかかります。フレームは `.cache/chiikawa/gen/` に保存して再利用します。
 
 > **ファンメイド・非公式・非営利です。** このプロジェクトは、ちいかわの権利者とは関係がなく、
 > 承認も受けていません。**このリポジトリにちいかわのイラストは一切含まれていません。**
