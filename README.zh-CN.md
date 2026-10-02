@@ -54,20 +54,34 @@ npm run tauri build   # build a release app
 
 ## 粉丝自制的吉伊卡哇角色包（在你自己的电脑上生成）
 
-你可以把 LINE 官方动态贴图里吉伊卡哇、小八和乌萨奇的预览图，做成本地角色包：
+你可以把 LINE 官方动态贴图里吉伊卡哇角色们的预览图做成本地角色包。
+加上 `--generate`，还会为每个角色画出 Omo 的全部动作（走路、火箭、喷射、降落伞、爬上边缘、着陆等）：
 
 ```bash
-node scripts/make-chiikawa-pack.mjs                  # chiikawa, hachiware, usagi
-node scripts/make-chiikawa-pack.mjs usagi            # just one
-node scripts/make-chiikawa-pack.mjs --generate-walk  # also draw a walk cycle with sprite-gen
-node scripts/make-chiikawa-pack.mjs --remove         # delete them again
+node scripts/make-chiikawa-pack.mjs                                # sticker-only packs (quick)
+node scripts/make-chiikawa-pack.mjs --generate                     # every action, all 7 characters
+node scripts/make-chiikawa-pack.mjs --chars usagi,momonga --generate
+node scripts/make-chiikawa-pack.mjs --chars usagi --generate --regen walk,jet  # redraw some actions
+node scripts/make-chiikawa-pack.mjs --remove                       # delete them again
 ```
 
-脚本会把 LINE STORE 上的贴图下载到你的电脑里，写入 `public/packs/<character>/`
-和 `public/packs/local.json`。之后在设置里选中这个角色就行。没有对应贴图的动作会退回使用 idle 精灵图。
-`--generate-walk` 需要 `ffmpeg`、一份 [sprite-gen](https://github.com/aldegad/sprite-gen) 代码
-（`SPRITE_GEN_DIR`，并装好它的 `.venv`），以及已登录的 `codex` CLI
-（它用的是你的 ChatGPT 订阅，不需要 API key，也不会按次计费）。
+| 角色包（`--chars`） | 来自官方贴图 | 用 `--generate` 画 |
+|---|---|---|
+| `chiikawa`（吉伊卡哇） | idle, react | 其余全部 |
+| `hachiware`（小八） | — | 全部动作 |
+| `usagi`（乌萨奇） | idle（2 个）, react, drag | 其余全部 |
+| `momonga`（飞鼠） | idle, react, drag | 其余全部 |
+| `kurimanju`（栗子馒头） | — | 全部动作 |
+| `yoroi`（铠甲先生） | react | 其余全部 |
+| `yusangyun`（むちゃうマン） | — | 全部动作 |
+
+脚本会把 LINE STORE 上的贴图下载到你的电脑里，擦掉飘在旁边的效果文字，把所有动作缩放到同样的身体大小，
+再写入 `public/packs/<character>/` 和 `public/packs/local.json`。之后在设置里选中这个角色就行。
+只会用角色单独出现、全身可见的贴图。不加 `--generate` 时，没有贴图的动作会退回使用 idle，
+没有全身贴图的角色会被跳过。脚本需要 `ffmpeg`。`--generate` 还需要一份 [sprite-gen](https://github.com/aldegad/sprite-gen) 代码
+（`SPRITE_GEN_DIR`，并装好它的 `.venv`）和已登录的 `codex` CLI
+（它用的是你的 ChatGPT 订阅，不需要 API key，也不会按次计费）。它会参考该角色的贴图和官方周边照片来画，
+每个动作大约一分钟，帧会缓存在 `.cache/chiikawa/gen/` 里供下次使用。
 
 > **粉丝自制、非官方、非商业。** 本项目与吉伊卡哇的版权方没有任何关联，也未获得其认可。
 > **本仓库不包含任何吉伊卡哇的图像**：图片由每位用户在自己的电脑上下载，仅供个人使用，
