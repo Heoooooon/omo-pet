@@ -14,9 +14,9 @@ character and support for local character packs.
 ## Preview
 
 <p align="center">
-  <img src="docs/media/demo.gif" width="560" alt="Omo the cat walking along the top edge of an app window">
+  <img src="docs/media/demo.gif" width="560" alt="Omo the cat walking, riding a rocket and a jet, parachuting down, and climbing up to sit">
 </p>
-<p align="center"><sub>🚶 Omo walks along the top edge of a real app window</sub></p>
+<p align="center"><sub>🚶 Walk → 🚀 rocket → ✈️ jet → 🪂 parachute → climb and sit (Omo pack sprites)</sub></p>
 
 Every action is an APNG sprite (they play right here):
 

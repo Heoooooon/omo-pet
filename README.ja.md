@@ -13,9 +13,9 @@ omo-pet は [hermes-pet](https://github.com/Heoooooon/hermes-pet) のフォー�
 ## プレビュー
 
 <p align="center">
-  <img src="docs/media/demo.gif" width="560" alt="アプリのウィンドウの上端を歩くネコのオモ">
+  <img src="docs/media/demo.gif" width="560" alt="猫のオモが歩き、ロケットとジェットに乗り、パラシュートで降りて、よじ登って座る">
 </p>
-<p align="center"><sub>🚶 本物のアプリウィンドウの上端を歩くオモ</sub></p>
+<p align="center"><sub>🚶 歩く → 🚀 ロケット → ✈️ ジェット → 🪂 パラシュート → よじ登って座る（オモパックのスプライト）</sub></p>
 
 動作はすべて APNG スプライトです（このページでそのまま再生されます）：
 

@@ -12,9 +12,9 @@ omo-pet 是 [hermes-pet](https://github.com/Heoooooon/hermes-pet) 的分支，�
 ## 预览
 
 <p align="center">
-  <img src="docs/media/demo.gif" width="560" alt="小猫 Omo 沿着应用窗口的上边缘散步">
+  <img src="docs/media/demo.gif" width="560" alt="小猫 Omo 走路、乘火箭和喷气机、跳伞降落，再爬上去坐好">
 </p>
-<p align="center"><sub>🚶 Omo 沿着真实应用窗口的上边缘散步</sub></p>
+<p align="center"><sub>🚶 走路 → 🚀 火箭 → ✈️ 喷气机 → 🪂 降落伞 → 爬上去坐好（Omo 角色包精灵图）</sub></p>
 
 每个动作都是一张 APNG 精灵图（在这里就能直接播放）：
 

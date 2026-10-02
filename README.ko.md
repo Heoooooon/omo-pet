@@ -13,9 +13,9 @@ omo-pet은 [hermes-pet](https://github.com/Heoooooon/hermes-pet)의 포크로,
 ## 미리보기
 
 <p align="center">
-  <img src="docs/media/demo.gif" width="560" alt="앱 창의 윗변을 따라 걷는 고양이 오모">
+  <img src="docs/media/demo.gif" width="560" alt="고양이 오모가 걷고, 로켓과 제트를 타고, 낙하산으로 내려와 올라가 앉는 모습">
 </p>
-<p align="center"><sub>🚶 실제 앱 창의 윗변을 따라 걷는 오모</sub></p>
+<p align="center"><sub>🚶 걷기 → 🚀 로켓 → ✈️ 제트 → 🪂 낙하산 → 올라가 앉기 (오모 팩 스프라이트)</sub></p>
 
 모든 동작은 APNG 스프라이트입니다(여기서 바로 재생됩니다):
 
