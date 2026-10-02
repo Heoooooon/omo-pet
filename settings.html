@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="ko">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>펫 설정</title>
+    <title data-i18n="settingsTitle">Pet settings</title>
     <style>
       * {
         margin: 0;
@@ -57,6 +57,8 @@
       }
       main {
         flex: 1;
+        min-height: 0;
+        overflow-y: auto;
         padding: 2px 14px 10px;
         display: flex;
         flex-direction: column;
@@ -72,6 +74,16 @@
       .row output {
         color: #fff;
         font-variant-numeric: tabular-nums;
+      }
+      #language {
+        width: 100%;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 8px;
+        padding: 5px 8px;
+        font: inherit;
+        font-size: 12px;
+        background: #1b1b20;
+        color: #eee;
       }
       input[type="range"] {
         width: 100%;
@@ -158,42 +170,49 @@
   <body>
     <div id="card">
       <header id="drag">
-        <h1>🐾 펫 설정</h1>
-        <button id="close" title="닫기">✕</button>
+        <h1 data-i18n="settingsHeading">🐾 Pet settings</h1>
+        <button id="close" title="Close" aria-label="Close" data-i18n-title="close" data-i18n-aria-label="close">✕</button>
       </header>
       <main>
         <div class="row">
-          <label>캐릭터</label>
+          <label for="language" data-i18n="language">Language</label>
+          <select id="language">
+            <option value="en" lang="en">English</option>
+            <option value="ko" lang="ko">한국어</option>
+          </select>
+        </div>
+        <div class="row">
+          <label data-i18n="character">Character</label>
           <div id="packs" class="seg"></div>
         </div>
         <div class="row">
-          <label>크기 <output id="size-out"></output></label>
+          <label for="size"><span data-i18n="size">Size</span> <output id="size-out"></output></label>
           <input id="size" type="range" min="50" max="120" step="5" />
         </div>
         <div class="row">
-          <label>걷는 속도 <output id="speed-out"></output></label>
+          <label for="speed"><span data-i18n="speed">Walking speed</span> <output id="speed-out"></output></label>
           <input id="speed" type="range" min="50" max="200" step="10" />
         </div>
         <div class="row">
-          <label>활동성 (돌아다니는 빈도) <output id="activity-out"></output></label>
+          <label for="activity"><span data-i18n="activity">Activity (how often your pet moves)</span> <output id="activity-out"></output></label>
           <input id="activity" type="range" min="30" max="300" step="10" />
         </div>
         <div class="row">
-          <label>로켓·제트 묘기 빈도 <output id="stunts-out"></output></label>
+          <label for="stunts"><span data-i18n="stunts">Rocket &amp; jet frequency</span> <output id="stunts-out"></output></label>
           <input id="stunts" type="range" min="0" max="200" step="10" />
         </div>
         <hr />
         <label class="toggle">
-          모니터 사이 넘나들기
+          <span data-i18n="crossMonitors">Move between monitors</span>
           <input id="crossMonitors" type="checkbox" />
         </label>
         <label class="toggle">
-          iPad로 건너가기 (Lanbeam)
+          <span data-i18n="ipadHandoff">Hop over to iPad (Lanbeam)</span>
           <input id="ipadHandoff" type="checkbox" />
         </label>
       </main>
       <footer>
-        <button id="reset">기본값으로 되돌리기</button>
+        <button id="reset" data-i18n="reset">Reset pet settings</button>
       </footer>
     </div>
     <script type="module" src="/src/settings.ts"></script>

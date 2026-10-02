@@ -47,6 +47,7 @@ npm run tauri build   # build a release app
 ```
 
 - 操作：ドラッグで移動 · クリックで反応 · **右クリック**でメニュー（Friend+ / 設定 / 認識オーバーレイ / 終了）
+- UI 言語：**Settings（設定）→ Language（言語）**で英語・韓国語を切り替えると選択が保存されます。標準は英語で、システム言語が韓国語の場合は韓国語で起動します。
 - ウィンドウの検出には公開 API だけを使うので、追加の権限はいりません
   （macOS `CGWindowListCopyWindowInfo` / Windows `EnumWindows` + DWM）。
 - メインの対象は macOS です。Windows 版は実験段階です（ウィンドウ検出はコンパイルできますが、

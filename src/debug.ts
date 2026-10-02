@@ -4,6 +4,9 @@
 // that monitor's logical rect in the query string.
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
+import { initI18n, t } from "./i18n";
+
+initI18n();
 
 const win = getCurrentWindow();
 const canvas = document.getElementById("overlay") as HTMLCanvasElement;
@@ -79,9 +82,7 @@ async function draw() {
     ctx.stroke();
 
     // Label.
-    const label = walkable
-      ? `#${w.id} 발판 ${Math.round(w.width)}×${Math.round(w.height)}`
-      : `#${w.id} 제외 ${Math.round(w.width)}×${Math.round(w.height)}`;
+    const label = `#${w.id} ${t(walkable ? "platform" : "excluded")} ${Math.round(w.width)}×${Math.round(w.height)}`;
     ctx.font = "12px -apple-system, sans-serif";
     const pad = 4;
     const tw = ctx.measureText(label).width;
@@ -101,7 +102,7 @@ async function draw() {
   ctx.lineTo(window.innerWidth, monLogicalH - 1.5);
   ctx.stroke();
 
-  const legend = "🟩 걸을 수 있는 발판   🟥 인식됐지만 제외(좁음/높음)   🟦 바닥";
+  const legend = t("legend");
   ctx.font = "13px -apple-system, sans-serif";
   const lw = ctx.measureText(legend).width;
   const lx = (window.innerWidth - lw) / 2 - 10;

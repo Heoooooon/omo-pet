@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,13 +8,13 @@
   </head>
   <body data-state="idle">
     <div id="stage">
-      <img id="pet" src="/packs/omo-cat/idle.apng" alt="pet" draggable="false" />
+      <img id="pet" src="/packs/omo-cat/idle.apng" alt="Desktop pet" data-i18n-alt="pet" draggable="false" />
       <div id="effects"></div>
       <div id="menu" hidden>
-        <button id="friend">친구+</button>
-        <button id="settings-open">설정</button>
-        <button id="debug-toggle">인식 표시</button>
-        <button id="quit">종료</button>
+        <button id="friend" data-i18n="friend">Add friend</button>
+        <button id="settings-open" data-i18n="settings">Settings</button>
+        <button id="debug-toggle">Show platforms</button>
+        <button id="quit" data-i18n="quit">Quit</button>
       </div>
     </div>
     <script type="module" src="/src/main.ts"></script>

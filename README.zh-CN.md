@@ -46,6 +46,7 @@ npm run tauri build   # build a release app
 ```
 
 - 操作方式：拖动来移动 · 点击触发反应 · **右键**打开菜单（Friend+ / 设置 / 识别叠加层 / 退出）
+- 界面语言：在 **Settings（设置）→ Language（语言）** 中切换英语或韩语，选择会保存；默认使用英语，系统语言为韩语时使用韩语。
 - 窗口检测只用公开 API，不需要任何额外权限
   （macOS `CGWindowListCopyWindowInfo` / Windows `EnumWindows` + DWM）。
 - 主要支持 macOS。Windows 版本还处于实验阶段（窗口检测代码能编译，但还没在真机上测试过）。
