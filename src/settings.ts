@@ -1,5 +1,6 @@
 // Settings panel: edits PetSettings and broadcasts changes live.
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { getLanguage, initI18n, isLanguage, setLanguage, t } from "./i18n";
 import {
   DEFAULTS,
   loadSettings,
@@ -16,6 +17,15 @@ const $ = <T extends HTMLElement>(id: string) =>
 // Sliders hold percentages; settings hold multipliers.
 const SLIDERS = ["size", "speed", "activity", "stunts"] as const;
 const TOGGLES = ["crossMonitors", "ipadHandoff"] as const;
+
+const language = $<HTMLSelectElement>("language");
+initI18n(() => {
+  language.value = getLanguage();
+  void win.setTitle(t("settingsTitle"));
+});
+language.addEventListener("change", () => {
+  if (isLanguage(language.value)) setLanguage(language.value);
+});
 
 function render() {
   for (const key of SLIDERS) {

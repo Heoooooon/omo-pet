@@ -47,6 +47,7 @@ npm run tauri build   # build a release app
 ```
 
 - 조작: 드래그로 이동 · 클릭하면 반응 · **우클릭**으로 메뉴(Friend+ / 설정 / 인식 오버레이 / 종료)
+- UI 언어: **설정 → 언어**에서 영어·한국어를 선택하면 저장됩니다. 기본은 영어이며 시스템 언어가 한국어이면 한국어로 시작합니다.
 - 창 감지는 공개 API만 사용하므로 추가 권한이 필요 없습니다
   (macOS `CGWindowListCopyWindowInfo` / Windows `EnumWindows` + DWM).
 - 주 대상은 macOS입니다. Windows 빌드는 실험 단계예요(창 감지 코드는 컴파일되지만 실제 기기에서는

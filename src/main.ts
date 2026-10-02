@@ -10,6 +10,7 @@ import {
 import { invoke } from "@tauri-apps/api/core";
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { listen } from "@tauri-apps/api/event";
+import { initI18n, t } from "./i18n";
 import {
   DEFAULTS,
   loadSettings,
@@ -1009,9 +1010,9 @@ settingsBtn.addEventListener("click", async () => {
   }
   new WebviewWindow("settings", {
     url: "settings.html",
-    title: "펫 설정",
+    title: t("settingsTitle"),
     width: 320,
-    height: 420,
+    height: 540,
     resizable: false,
     transparent: true,
     decorations: false,
@@ -1026,6 +1027,12 @@ settingsBtn.addEventListener("click", async () => {
 
 const debugBtn = document.getElementById("debug-toggle")!;
 let debugShown = false;
+
+function renderDebugButton() {
+  debugBtn.textContent = t(debugShown ? "hideOverlay" : "showOverlay");
+}
+
+initI18n(renderDebugButton);
 
 // One overlay per monitor, spawned lazily on first toggle. Each gets its
 // monitor's logical rect in the query string and draws in local coords.
@@ -1061,7 +1068,7 @@ async function setDebugShown(shown: boolean) {
   } catch {
     // monitor enumeration failed — leave whatever overlays exist as-is
   }
-  debugBtn.textContent = debugShown ? "표시 끄기" : "인식 표시";
+  renderDebugButton();
 }
 
 debugBtn.addEventListener("click", async () => {

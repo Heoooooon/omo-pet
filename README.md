@@ -48,6 +48,7 @@ npm run tauri build   # build a release app
 ```
 
 - Controls: drag to move · click for a reaction · **right-click** for the menu (Friend+ / Settings / Recognition overlay / Quit)
+- UI language: **Settings → Language** switches between English and Korean and saves your choice; English is the default unless your system language is Korean.
 - Window detection uses public APIs only — no extra permissions needed
   (macOS `CGWindowListCopyWindowInfo` / Windows `EnumWindows` + DWM).
 - macOS is the primary target. The Windows build is experimental (window
