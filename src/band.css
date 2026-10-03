@@ -1,0 +1,169 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Members stand on the taskbar line: --floor is its distance from the
+   window bottom (the window also covers the taskbar so the pet can hop up). */
+#stage {
+  --deck: 0px;
+}
+
+#stage.lit {
+  --deck: 10px;
+}
+
+.member {
+  position: absolute;
+  bottom: calc(var(--floor) + var(--deck));
+  transform: translateX(-50%);
+  transition-property: left;
+  transition-timing-function: linear;
+  z-index: 2;
+}
+
+.member img {
+  display: block;
+  transform-origin: bottom center;
+  transform: scaleX(var(--flip, 1));
+}
+
+.member.hop-up {
+  animation: hop-up 0.5s ease-out both;
+}
+
+.member.hop-down {
+  animation: hop-down 0.45s ease-in both;
+}
+
+@keyframes hop-up {
+  0% {
+    transform: translateX(-50%) translateY(var(--drop));
+  }
+  55% {
+    transform: translateX(-50%) translateY(-28px);
+  }
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes hop-down {
+  0% {
+    transform: translateX(-50%) translateY(0);
+  }
+  40% {
+    transform: translateX(-50%) translateY(-22px);
+  }
+  100% {
+    transform: translateX(-50%) translateY(var(--drop));
+  }
+}
+
+.member.bow img {
+  animation: bow 1.5s ease-in-out both;
+}
+
+@keyframes bow {
+  0%,
+  100% {
+    transform: scaleX(var(--flip, 1)) rotate(0deg);
+  }
+  30%,
+  60% {
+    transform: scaleX(var(--flip, 1)) rotate(16deg) translateY(4px);
+  }
+}
+
+#riser {
+  position: absolute;
+  bottom: var(--floor);
+  height: 64px;
+  transform: scaleY(0);
+  transform-origin: bottom center;
+  opacity: 0;
+  transition:
+    transform 0.6s cubic-bezier(0.2, 1.4, 0.4, 1),
+    opacity 0.4s;
+  z-index: 1;
+  overflow: visible;
+}
+
+#stage.lit #riser {
+  transform: scaleY(1);
+  opacity: 1;
+}
+
+#lights {
+  position: absolute;
+  bottom: var(--floor);
+  height: 260px;
+  opacity: 0;
+  transition: opacity 0.8s;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 22% 100% at 30% 100%, rgba(255, 214, 120, 0.22), transparent 70%),
+    radial-gradient(ellipse 22% 100% at 70% 100%, rgba(140, 220, 255, 0.2), transparent 70%);
+}
+
+#stage.lit #lights {
+  opacity: 1;
+}
+
+#stage.playing #lights {
+  animation: sway 3s ease-in-out infinite;
+}
+
+@keyframes sway {
+  50% {
+    filter: hue-rotate(40deg) brightness(1.15);
+  }
+}
+
+#notes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.note {
+  position: absolute;
+  font: 700 22px/1 system-ui, sans-serif;
+  text-shadow:
+    0 0 2px #fff,
+    0 1px 3px rgba(0, 0, 0, 0.35);
+  animation: rise 2.2s ease-out forwards;
+}
+
+@keyframes rise {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.6) rotate(-10deg);
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), -110px) scale(1.1) rotate(12deg);
+  }
+}

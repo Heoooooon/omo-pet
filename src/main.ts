@@ -11,6 +11,14 @@ import { invoke } from "@tauri-apps/api/core";
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { listen } from "@tauri-apps/api/event";
 import { initI18n, t } from "./i18n";
+import { retimeApng } from "./apng";
+import { listPacks, packStride, spriteUrl, type PackInfo } from "./packs";
+import {
+  BAND_ENDED,
+  BAND_OPEN,
+  BAND_PET,
+  LAST_BAND_KEY,
+} from "./band-shared";
 import {
   DEFAULTS,
   loadSettings,
@@ -78,7 +86,9 @@ function easeMotion(progress: number): number {
 function walkSpeed(): number {
   // Six frames at 8 fps make one stride. Short-legged local packs take
   // smaller steps; zoom/personality scale the stride, not the cycle rate.
-  const stride = currentPack === DEFAULTS.pack ? 56 : 32;
+  const stride = currentPack === DEFAULTS.pack
+    ? 56
+    : packStride(packInfos.find((p) => p.id === currentPack));
   const rate = state === "walk"
     ? [...walkPlayback.values()].find(({ src }) => src === pet.src)?.speed ?? 1
     : cfg.speed;
@@ -113,9 +123,13 @@ const VARIANT_SUFFIXES = [2, 3, 4];
 const spriteVariants = new Map<string, string[]>();
 const walkPlayback = new Map<string, Readonly<{ speed: number; src: string }>>();
 let currentPack = "";
+let packInfos: PackInfo[] = [];
+void listPacks().then((p) => {
+  packInfos = p;
+});
 
 function packUrl(pack: string, key: string): string {
-  return `/packs/${pack}/${key}.apng`;
+  return spriteUrl(pack, `${key}.apng`);
 }
 
 function loadPack(pack: string) {
@@ -128,7 +142,7 @@ function loadPack(pack: string) {
     document.body.classList.remove(`has-${key}`);
     probeSprite(pack, key, packUrl(pack, key), true);
     for (const v of VARIANT_SUFFIXES) {
-      probeSprite(pack, key, `/packs/${pack}/${key}.${v}.apng`, false);
+      probeSprite(pack, key, spriteUrl(pack, `${key}.${v}.apng`), false);
     }
   }
   pet.src = packUrl(pack, "idle");
@@ -170,25 +184,7 @@ function spriteFor(target: string): string {
 async function timedWalk(url: string, speed: number): Promise<string> {
   const cached = walkPlayback.get(url);
   if (cached?.speed === speed) return cached.src;
-  const bytes = new Uint8Array(await (await fetch(url)).arrayBuffer());
-  const view = new DataView(bytes.buffer);
-  for (let offset = 8; offset < bytes.length;) {
-    const length = view.getUint32(offset);
-    if (view.getUint32(offset + 4) === 0x6663544c) { // fcTL
-      const delay = view.getUint16(offset + 28) / (view.getUint16(offset + 30) || 100);
-      view.setUint16(offset + 28, Math.max(1, Math.round(delay / speed * 10000)));
-      view.setUint16(offset + 30, 10000);
-      let crc = 0xffffffff;
-      for (let i = offset + 4; i < offset + 8 + length; i++) {
-        crc ^= bytes[i];
-        for (let bit = 0; bit < 8; bit++) {
-          crc = (crc >>> 1) ^ ((crc & 1) ? 0xedb88320 : 0);
-        }
-      }
-      view.setUint32(offset + 8 + length, (crc ^ 0xffffffff) >>> 0);
-    }
-    offset += length + 12;
-  }
+  const bytes = retimeApng(new Uint8Array(await (await fetch(url)).arrayBuffer()), speed);
   const src = URL.createObjectURL(new Blob([bytes], { type: "image/png" }));
   const image = new Image();
   image.src = src;
@@ -383,7 +379,8 @@ function scheduleNext() {
   if (walkTimer) clearTimeout(walkTimer);
   walkTimer = setTimeout(
     async () => {
-      if (state !== "idle") return scheduleNext();
+      if (state !== "idle" || bandActive) return scheduleNext();
+      if (bandDue() && Math.random() < 0.004) return void openBand();
       const roll = Math.random();
       const stunt = 0.12 * cfg.stunts;
       if (roll < stunt && spriteVariants.has("rocket")) {
@@ -941,7 +938,7 @@ async function hopOff(dir: -1 | 1) {
 // keeps the stale coordinates). If the pet is nowhere visible, drop her
 // back onto the primary monitor's floor.
 async function recoverIfStranded() {
-  if (state === "drag" || awayPoll) return; // hidden-on-iPad has its own flow
+  if (state === "drag" || awayPoll || bandActive) return; // hidden-on-iPad has its own flow
   try {
     const monitors = await availableMonitors();
     if (!monitors.length) return;
@@ -1126,8 +1123,12 @@ friendBtn.addEventListener("click", () => {
 
 const settingsBtn = document.getElementById("settings-open")!;
 
-settingsBtn.addEventListener("click", async () => {
+settingsBtn.addEventListener("click", () => {
   menu.hidden = true;
+  void openSettings();
+});
+
+async function openSettings() {
   const existing = await WebviewWindow.getByLabel("settings");
   if (existing) {
     await existing.show();
@@ -1137,8 +1138,8 @@ settingsBtn.addEventListener("click", async () => {
   new WebviewWindow("settings", {
     url: "settings.html",
     title: t("settingsTitle"),
-    width: 320,
-    height: 540,
+    width: 360,
+    height: 620,
     resizable: false,
     transparent: true,
     decorations: false,
@@ -1147,6 +1148,109 @@ settingsBtn.addEventListener("click", async () => {
     shadow: true,
     acceptFirstMouse: true,
   });
+}
+
+// ---------- band mode ----------
+//
+// The band plays in its own stage window on the pet's monitor. When the
+// pet's own pack is a band member, the pet hides and its stage double walks
+// out from the same spot, then hands back where it ends up.
+
+let bandActive = false;
+let bandOpenedAt = 0;
+let hiddenForBand = false;
+const appStartedAt = Date.now();
+
+function bandDue(): boolean {
+  if (!isMainPet || !cfg.bandRandom) return false;
+  const last = Number(localStorage.getItem(LAST_BAND_KEY) ?? 0);
+  return Date.now() - appStartedAt > 20 * 60e3 && Date.now() - last > 45 * 60e3;
+}
+
+async function openBand() {
+  if (!isMainPet || bandActive || awayPoll) return;
+  if (await WebviewWindow.getByLabel("band-stage")) return;
+  const monitor = await currentMonitor();
+  if (!monitor) return;
+  bandActive = true;
+  bandOpenedAt = Date.now();
+  localStorage.setItem(LAST_BAND_KEY, String(bandOpenedAt));
+  menu.hidden = true;
+  if (walkTimer) clearTimeout(walkTimer);
+  if (edgeTimer) clearTimeout(edgeTimer);
+  stopWalk();
+  stopFall();
+  stopRocket();
+  stopJet();
+  stopCross();
+  setState("idle");
+  await refreshMonitor();
+  const pos = await appWindow.outerPosition();
+  const params = new URLSearchParams({
+    petPack: cfg.pack,
+    petX: String(Math.round(pos.x + winW / 2)),
+    petOnFloor: standingOn?.id === "floor" ? "1" : "0",
+    mx: String(monitor.position.x),
+    my: String(monitor.position.y),
+    mw: String(monitor.size.width),
+    mh: String(monitor.size.height),
+    wy: String(monitor.workArea.position.y),
+    wh: String(monitor.workArea.size.height),
+    scale: String(monitor.scaleFactor),
+  });
+  new WebviewWindow("band-stage", {
+    url: `band.html?${params}`,
+    width: 400,
+    height: 300,
+    transparent: true,
+    decorations: false,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    shadow: false,
+    resizable: false,
+    focus: false,
+    visible: false,
+  });
+}
+
+async function endBand(x: number | null) {
+  if (!bandActive) return;
+  bandActive = false;
+  if (hiddenForBand) {
+    hiddenForBand = false;
+    await refreshMonitor();
+    if (x !== null) {
+      const px = Math.round(Math.min(Math.max(x - winW / 2, monX), monX + monW - winW));
+      await appWindow.setPosition(new PhysicalPosition(px, monY + monH - winH));
+      standingOn = floorPlatform();
+    }
+    await appWindow.show();
+  }
+  setState("idle");
+  scheduleNext();
+}
+
+if (isMainPet) {
+  void listen(BAND_OPEN, () => void openBand());
+  void listen("settings-open", () => void openSettings());
+  void listen<{ join: boolean }>(BAND_PET, async (e) => {
+    if (!bandActive || !e.payload.join) return;
+    hiddenForBand = true;
+    await appWindow.hide();
+  });
+  void listen<{ x: number | null }>(BAND_ENDED, (e) => void endBand(e.payload.x));
+  // The stage window can vanish without saying goodbye (crash, dev reload).
+  setInterval(async () => {
+    if (!bandActive || Date.now() - bandOpenedAt < 8000) return;
+    if (!(await WebviewWindow.getByLabel("band-stage"))) void endBand(null);
+  }, 3000);
+}
+
+const bandBtn = document.getElementById("band")!;
+bandBtn.hidden = !isMainPet;
+bandBtn.addEventListener("click", () => {
+  menu.hidden = true;
+  void openBand();
 });
 
 // ---------- debug overlay toggle ----------
@@ -1156,6 +1260,13 @@ let debugShown = false;
 
 function renderDebugButton() {
   debugBtn.textContent = t(debugShown ? "hideOverlay" : "showOverlay");
+  if (isMainPet) {
+    void invoke("set_tray_labels", {
+      band: t("band"),
+      settings: t("settings"),
+      quit: t("quit"),
+    }).catch(() => undefined);
+  }
 }
 
 initI18n(renderDebugButton);
@@ -1224,6 +1335,7 @@ void listen<PetSettings>(SETTINGS_EVENT, async (e) => {
   const sizeChanged = e.payload.size !== cfg.size;
   const packChanged = e.payload.pack !== cfg.pack;
   cfg = e.payload;
+  if (packChanged) packInfos = await listPacks();
   void pushSettingsToBridge();
   if (packChanged) loadPack(cfg.pack);
   if (sizeChanged) {

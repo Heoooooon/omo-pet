@@ -37,6 +37,11 @@ Every action is an APNG sprite (they play right here):
 - 🔍 **Recognition overlay** — a per-monitor overlay shows which windows count as platforms
 - ✋ **Drag / 💖 click reactions** — pick Omo up and they dangle; click and they send a heart
 
+### Band mode and your own characters
+
+- 🎸 **Band mode**: choose "Open band" in the tray or the right-click menu (it also happens now and then on its own). Omo (vocals) and four friends (Dalli on guitar, Bara on bass, Dochi on drums, Rupa on keys) walk in from the screen edges and gather on the taskbar line. They play a short original song on a small stage for about 20 s, then bow and walk off. The song is synthesized in the app. Sound starts off; turn it on with "Sound on" above the stage.
+- 🧑‍🎨 **My character**: in Settings › My character, choose one picture. The app makes idle, walk, parachute and instrument sprites on your computer with **your own Grok login** (Codex CLI can do stills too). The result stays on your computer. Use only art you drew or have the rights to. Packs can also be imported from a folder or zip ([pack format](docs/pack-format.md)).
+
 ## Getting started
 
 Requirements: [Node.js](https://nodejs.org) 18+ and the [Rust](https://rustup.rs) toolchain.

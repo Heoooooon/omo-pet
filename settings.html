@@ -165,6 +165,179 @@
         border: none;
         border-top: 1px solid rgba(255, 255, 255, 0.08);
       }
+      .seg {
+        flex-wrap: wrap;
+      }
+      .seg button {
+        flex: 1 1 30%;
+        padding: 6px 4px;
+      }
+      #tabs {
+        display: flex;
+        gap: 4px;
+        padding: 0 14px 8px;
+      }
+      #tabs button {
+        flex: 1;
+        border: none;
+        border-radius: 8px;
+        padding: 6px 0;
+        font: inherit;
+        font-size: 12.5px;
+        background: rgba(255, 255, 255, 0.06);
+        color: #bbb;
+        cursor: pointer;
+      }
+      #tabs button.active {
+        background: rgba(255, 138, 61, 0.18);
+        color: #ffb27d;
+        font-weight: 700;
+      }
+      .panel[hidden] {
+        display: none;
+      }
+      select.full,
+      input.full {
+        width: 100%;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 8px;
+        padding: 5px 8px;
+        font: inherit;
+        font-size: 12px;
+        background: #1b1b20;
+        color: #eee;
+      }
+      .roster {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 6px 8px;
+        align-items: center;
+        font-size: 12px;
+        color: #bbb;
+      }
+      .btn {
+        border: none;
+        border-radius: 8px;
+        padding: 7px 10px;
+        font: inherit;
+        font-size: 12px;
+        background: rgba(255, 255, 255, 0.1);
+        color: #ddd;
+        cursor: pointer;
+      }
+      .btn:hover {
+        background: rgba(255, 255, 255, 0.18);
+      }
+      .btn.primary {
+        background: #ff8a3d;
+        color: #1b1b20;
+        font-weight: 700;
+      }
+      .btn:disabled {
+        opacity: 0.45;
+        cursor: default;
+      }
+      .btn.wide {
+        width: 100%;
+      }
+      .hint {
+        font-size: 11px;
+        line-height: 1.45;
+        color: #9a9aa4;
+      }
+      .notice {
+        font-size: 11.5px;
+        line-height: 1.45;
+        color: #ffd6a8;
+        background: rgba(255, 138, 61, 0.12);
+        border: 1px solid rgba(255, 138, 61, 0.3);
+        border-radius: 8px;
+        padding: 7px 9px;
+      }
+      h2 {
+        font-size: 12.5px;
+        color: #eee;
+      }
+      #tools li,
+      #steps li {
+        list-style: none;
+        font-size: 11.5px;
+        line-height: 1.5;
+        color: #ccc;
+      }
+      #steps li[data-status="run"] {
+        color: #ffb27d;
+      }
+      #steps li[data-status="done"] {
+        color: #8bd96b;
+      }
+      #steps li[data-status="fail"] {
+        color: #ff8080;
+      }
+      #pick-row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      #pick-thumb {
+        width: 48px;
+        height: 48px;
+        object-fit: contain;
+        border-radius: 8px;
+        background: #fff;
+      }
+      #previews {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+      }
+      #previews figure {
+        border-radius: 8px;
+        background: repeating-conic-gradient(#d9d9de 0 25%, #f4f4f6 0 50%) 0 0 / 16px 16px;
+        padding: 4px;
+        text-align: center;
+      }
+      #previews.dark figure {
+        background: #1d1d22;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      #previews img {
+        height: 96px;
+        max-width: 100%;
+        object-fit: contain;
+      }
+      #previews figcaption {
+        font-size: 10.5px;
+        color: #555;
+      }
+      #previews.dark figcaption {
+        color: #aaa;
+      }
+      .actions {
+        display: flex;
+        gap: 6px;
+      }
+      .actions .btn {
+        flex: 1;
+      }
+      #mypacks li {
+        list-style: none;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        padding: 3px 0;
+      }
+      #mypacks li span {
+        flex: 1;
+      }
+      .msg {
+        font-size: 11.5px;
+        color: #8bd96b;
+      }
+      .msg.err {
+        color: #ff8080;
+      }
     </style>
   </head>
   <body>
@@ -173,7 +346,12 @@
         <h1 data-i18n="settingsHeading">🐾 Pet settings</h1>
         <button id="close" title="Close" aria-label="Close" data-i18n-title="close" data-i18n-aria-label="close">✕</button>
       </header>
-      <main>
+      <nav id="tabs">
+        <button type="button" data-tab="pet" class="active" data-i18n="tabPet">Pet</button>
+        <button type="button" data-tab="band" data-i18n="tabBand">Band</button>
+        <button type="button" data-tab="custom" data-i18n="tabCustom">My character</button>
+      </nav>
+      <main class="panel" id="panel-pet">
         <div class="row">
           <label for="language" data-i18n="language">Language</label>
           <select id="language">
@@ -211,7 +389,74 @@
           <input id="ipadHandoff" type="checkbox" />
         </label>
       </main>
-      <footer>
+      <main class="panel" id="panel-band" hidden>
+        <button id="band-now" class="btn primary wide" type="button" data-i18n="bandNow">Open the band now</button>
+        <p class="hint" data-i18n="bandHint"></p>
+        <h2 data-i18n="bandMembers">Members</h2>
+        <div id="roster" class="roster"></div>
+        <hr />
+        <label class="toggle">
+          <span data-i18n="bandSound">Band music sound</span>
+          <input id="bandSound" type="checkbox" />
+        </label>
+        <div class="row">
+          <label for="bandVolume"><span data-i18n="bandVolume">Band volume</span> <output id="bandVolume-out"></output></label>
+          <input id="bandVolume" type="range" min="0" max="100" step="5" />
+        </div>
+        <label class="toggle">
+          <span data-i18n="bandRandom">Sometimes gather on their own</span>
+          <input id="bandRandom" type="checkbox" />
+        </label>
+      </main>
+      <main class="panel" id="panel-custom" hidden>
+        <h2 data-i18n="customTitle">Make my character</h2>
+        <p class="notice" data-i18n="rightsNotice"></p>
+        <p class="hint" data-i18n="privacyNote"></p>
+        <div>
+          <p class="hint" data-i18n="toolsTitle"></p>
+          <ul id="tools"></ul>
+          <button id="recheck" class="btn" type="button" data-i18n="recheck">Check again</button>
+        </div>
+        <div id="pick-row">
+          <img id="pick-thumb" alt="" hidden />
+          <button id="pick" class="btn" type="button" data-i18n="pickImage">Choose picture</button>
+        </div>
+        <div class="row">
+          <label for="cname" data-i18n="charName">Name</label>
+          <input id="cname" class="full" maxlength="20" />
+        </div>
+        <div class="row">
+          <label for="cinst" data-i18n="charInstrument">Band instrument</label>
+          <select id="cinst" class="full"></select>
+        </div>
+        <button id="create" class="btn primary wide" type="button"></button>
+        <p id="still-note" class="hint" data-i18n="stillOnlyNote" hidden></p>
+        <p id="create-msg" class="msg" hidden></p>
+        <div id="progress" hidden>
+          <ul id="steps"></ul>
+          <p class="hint" data-i18n="working"></p>
+        </div>
+        <div id="result" hidden>
+          <h2 data-i18n="previewTitle">Preview</h2>
+          <div id="previews"></div>
+          <div class="actions">
+            <button id="bg-toggle" class="btn" type="button" data-i18n="bgToggle">◐ Background</button>
+            <button id="discard" class="btn" type="button" data-i18n="discard">Discard</button>
+            <button id="save" class="btn primary" type="button" data-i18n="save">Save</button>
+          </div>
+        </div>
+        <hr />
+        <h2 data-i18n="importTitle">Import a pack</h2>
+        <p class="hint" data-i18n="importHint"></p>
+        <div class="actions">
+          <button id="import-folder" class="btn" type="button" data-i18n="importFolder">From folder</button>
+          <button id="import-zip" class="btn" type="button" data-i18n="importZip">From zip</button>
+        </div>
+        <p id="import-msg" class="msg" hidden></p>
+        <h2 data-i18n="myPacks">My packs</h2>
+        <ul id="mypacks"></ul>
+      </main>
+      <footer id="footer">
         <button id="reset" data-i18n="reset">Reset pet settings</button>
       </footer>
     </div>

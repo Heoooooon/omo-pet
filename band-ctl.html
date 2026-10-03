@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>omo-pet band controls</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        overflow: hidden;
+        user-select: none;
+        -webkit-user-select: none;
+        font-family: -apple-system, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      }
+      #pill {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 6px;
+        border-radius: 999px;
+        background: rgba(22, 22, 28, 0.88);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+        white-space: nowrap;
+      }
+      button {
+        border: none;
+        border-radius: 999px;
+        padding: 6px 12px;
+        font: 600 12.5px/1 inherit;
+        font-family: inherit;
+        cursor: pointer;
+        color: #fff;
+        background: rgba(255, 255, 255, 0.12);
+      }
+      #sound.off {
+        background: #ff8a3d;
+        color: #1b1b20;
+      }
+      #sound.blocked {
+        background: #ffc93c;
+        color: #1b1b20;
+      }
+      #stop {
+        padding: 6px 10px;
+      }
+      button:hover {
+        filter: brightness(1.12);
+      }
+      #volume {
+        width: 84px;
+        accent-color: #ff8a3d;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="pill">
+      <button id="sound" type="button"></button>
+      <input id="volume" type="range" min="0" max="100" step="5" data-i18n-aria-label="bandVolume" />
+      <button id="stop" type="button" data-i18n="bandStop">Stop</button>
+    </div>
+    <script type="module" src="/src/band-ctl.ts"></script>
+  </body>
+</html>

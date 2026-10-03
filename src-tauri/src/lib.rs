@@ -1,4 +1,10 @@
 use serde::Serialize;
+use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
+use tauri::tray::TrayIconBuilder;
+use tauri::{Emitter, Manager, Wry};
+
+mod creator;
+mod packs;
 
 /// A normal (layer-0) on-screen window, in logical screen points with the
 /// origin at the top-left of the primary display — multiply by the monitor
@@ -289,15 +295,89 @@ async fn pet_bridge_settings(
     .map_err(|e| e.to_string())?
 }
 
+// ---------- tray ----------
+//
+// The pet can be hidden (iPad handoff, band show), so the tray is the one
+// place that always offers the band, the settings and quitting. Labels
+// follow the UI language the webviews pick (`set_tray_labels`).
+
+struct TrayItems {
+    band: MenuItem<Wry>,
+    settings: MenuItem<Wry>,
+    quit: MenuItem<Wry>,
+}
+
+#[tauri::command]
+fn set_tray_labels(
+    items: tauri::State<'_, TrayItems>,
+    band: String,
+    settings: String,
+    quit: String,
+) -> Result<(), String> {
+    items.band.set_text(band).map_err(|e| e.to_string())?;
+    items.settings.set_text(settings).map_err(|e| e.to_string())?;
+    items.quit.set_text(quit).map_err(|e| e.to_string())
+}
+
+fn setup_tray(app: &tauri::App) -> tauri::Result<()> {
+    let band = MenuItem::with_id(app, "band", "Open band", true, None::<&str>)?;
+    let settings = MenuItem::with_id(app, "settings", "Settings", true, None::<&str>)?;
+    let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
+    let separator = PredefinedMenuItem::separator(app)?;
+    let menu = Menu::with_items(app, &[&band, &settings, &separator, &quit])?;
+    let mut tray = TrayIconBuilder::with_id("main")
+        .tooltip("omo-pet")
+        .menu(&menu)
+        .show_menu_on_left_click(true)
+        .on_menu_event(|app, event| match event.id.as_ref() {
+            "band" => {
+                let _ = app.emit_to("main", "band-open", ());
+            }
+            "settings" => {
+                let _ = app.emit_to("main", "settings-open", ());
+            }
+            "quit" => app.exit(0),
+            _ => {}
+        });
+    if let Some(icon) = app.default_window_icon() {
+        tray = tray.icon(icon.clone());
+    }
+    tray.build(app)?;
+    app.manage(TrayItems { band, settings, quit });
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
+        .register_uri_scheme_protocol("userpack", |ctx, request| {
+            packs::serve(ctx.app_handle(), request.uri().path())
+        })
+        .setup(|app| {
+            setup_tray(app)?;
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             list_windows,
             pet_bridge_state,
             pet_bridge_handoff,
             pet_bridge_settings,
-            motion_tick
+            motion_tick,
+            set_tray_labels,
+            packs::list_user_packs,
+            packs::delete_user_pack,
+            packs::import_pack,
+            creator::creator_detect,
+            creator::creator_grok_refresh,
+            creator::creator_new_job,
+            creator::creator_write,
+            creator::creator_discard,
+            creator::creator_save,
+            creator::creator_grok_image,
+            creator::creator_video_start,
+            creator::creator_video_poll,
+            creator::creator_codex_image
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

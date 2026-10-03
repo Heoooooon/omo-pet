@@ -17,6 +17,8 @@ export default defineConfig({
         main: "index.html",
         debug: "debug.html",
         settings: "settings.html",
+        band: "band.html",
+        bandCtl: "band-ctl.html",
       },
     },
   },
