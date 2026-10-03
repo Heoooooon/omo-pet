@@ -1,0 +1,51 @@
+{
+  "dalli": {
+    "idle": {
+      "cycle": "set-dalli/side-idle/loop/cycle"
+    },
+    "walk": {
+      "cycle": "set-dalli/side-walk/loop/cycle"
+    },
+    "play": {
+      "cycle": "play/dalli/loop/cycle"
+    }
+  },
+  "bara": {
+    "idle": {
+      "cycle": "set-bara/side-idle/loop/cycle"
+    },
+    "walk": {
+      "cycle": "set-bara/side-walk/loop/cycle"
+    },
+    "play": {
+      "cycle": "play/bara/loop/cycle"
+    }
+  },
+  "dochi": {
+    "idle": {
+      "cycle": "set-dochi/side-idle/loop/cycle"
+    },
+    "walk": {
+      "cycle": "set-dochi/side-walk/loop/cycle"
+    },
+    "play": {
+      "cycle": "play/dochi/loop/cycle"
+    }
+  },
+  "rupa": {
+    "idle": {
+      "cycle": "set-rupa/side-idle/loop/cycle"
+    },
+    "walk": {
+      "cycle": "set-rupa/side-walk/loop/cycle"
+    },
+    "play": {
+      "cycle": "play/rupa/loop/cycle"
+    }
+  },
+  "omo-cat": {
+    "play": {
+      "cycle": "play/omo/loop/cycle"
+    }
+  }
+}

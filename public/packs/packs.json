@@ -2,6 +2,42 @@
   {
     "id": "omo-cat",
     "name": "Omo",
-    "emoji": "🐱"
+    "names": { "ko": "오모" },
+    "emoji": "🐱",
+    "instrument": "vocal",
+    "stride": 56,
+    "widths": { "walk": 220 }
+  },
+  {
+    "id": "dalli",
+    "name": "Dalli",
+    "names": { "ko": "달리" },
+    "emoji": "🦦",
+    "instrument": "guitar",
+    "stride": 70
+  },
+  {
+    "id": "bara",
+    "name": "Bara",
+    "names": { "ko": "바라" },
+    "emoji": "🦫",
+    "instrument": "bass",
+    "stride": 70
+  },
+  {
+    "id": "dochi",
+    "name": "Dochi",
+    "names": { "ko": "도치" },
+    "emoji": "🦔",
+    "instrument": "drums",
+    "stride": 70
+  },
+  {
+    "id": "rupa",
+    "name": "Rupa",
+    "names": { "ko": "루파" },
+    "emoji": "🩷",
+    "instrument": "keys",
+    "stride": 70
   }
 ]
