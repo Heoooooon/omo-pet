@@ -1,0 +1,92 @@
+{
+  "kind": "sprite-gen-video-loop-report",
+  "frames_dir": "D:\\omonyang-work\\omopet-quality\\gen\\custom\\fall-open\\frames\\keyed",
+  "out_dir": "D:\\omonyang-work\\omopet-quality\\gen\\custom\\fall-open\\loop",
+  "state": null,
+  "fps": 24.0,
+  "frames_total": 49,
+  "window": [
+    5,
+    22
+  ],
+  "profile": "generic in-place action",
+  "cycle_mode": "fixed",
+  "seam_max": 99.0,
+  "anchor": "none",
+  "seam_measurement": "source-frames",
+  "jump_repair": {
+    "applied": false,
+    "why": "not a gait state (None)"
+  },
+  "cycle": {
+    "kind": "fixed",
+    "start": 0,
+    "length": 49,
+    "seam": 0.07805594801902771,
+    "inner_mean_adjacent": 0.016073832288384438,
+    "ratio": 4.856088244458909,
+    "period_global": null,
+    "periodicity": null
+  },
+  "periodic_attempt": null,
+  "cycle_seconds": 2.0417,
+  "n_out": 49,
+  "gif_fps": 24.0,
+  "delay_ms": 42,
+  "status": "passed",
+  "resampled_seam": 0.07805594801902771,
+  "resampled_inner_mean_adjacent": 0.016073832288384438,
+  "resampled_seam_ratio": 4.8561,
+  "scrubbed_rgb_pixels": 0,
+  "specks_dropped": 1337,
+  "strip": {
+    "path": "D:\\omonyang-work\\omopet-quality\\gen\\custom\\fall-open\\loop\\fall-open.strip.png",
+    "frames": 49,
+    "w": 352,
+    "h": 520,
+    "kind": "fixed",
+    "loop": true,
+    "body_h": 442,
+    "body_src_h": 564,
+    "body_ref": "tallest-grounded",
+    "scale": 0.7831,
+    "delay_ms": 41.67,
+    "cycle_frames": 49,
+    "cycle_seconds": 2.0417,
+    "subsampled": false,
+    "cell_cap": 64,
+    "top_margin_px": 246,
+    "cell_height_cap": 520,
+    "body_height_target": null,
+    "foot_anchor": "none",
+    "drift_px": 0,
+    "foot_sway_px": 0,
+    "foot_x": null
+  },
+  "gif": {
+    "file": "fall-open.gif",
+    "format": "GIF",
+    "n_frames": 49,
+    "loop": 0,
+    "size": [
+      352,
+      520
+    ],
+    "corners_transparent": true,
+    "stale_rgb_under_alpha0": 0,
+    "bytes": 2311007
+  },
+  "webp": {
+    "file": "fall-open.webp",
+    "format": "WEBP",
+    "n_frames": 49,
+    "loop": 0,
+    "size": [
+      352,
+      520
+    ],
+    "corners_transparent": true,
+    "stale_rgb_under_alpha0": 0,
+    "bytes": 4634280
+  }
+}

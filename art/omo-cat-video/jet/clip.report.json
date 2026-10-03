@@ -1,0 +1,24 @@
+{
+  "kind": "sprite-gen-video-report",
+  "provider": "grok-imagine",
+  "auth_source": "grok-login",
+  "model": "grok-imagine-video-1.5",
+  "mode": "first-last",
+  "request_id": "9a0348e5-ec79-96ba-b41f-2513248c6285",
+  "image": "D:\\omonyang-work\\omopet-quality\\gen\\custom\\jet\\canvas.png",
+  "inputs": {
+    "image": "D:\\omonyang-work\\omopet-quality\\gen\\custom\\jet\\canvas.png",
+    "last_frame": "D:\\omonyang-work\\omopet-quality\\gen\\custom\\jet\\canvas-last.png"
+  },
+  "prompt": "2D game sprite animation. Omo the chibi gray kitten rides the small horizontal rocket flying to the right in place: the flame behind the rocket flickers and pulses quickly, the kitten's ears, scarf ends and tail stream and flutter backwards in the wind, and kitten and rocket bob gently up and down by a few pixels. The kitten keeps leaning forward holding the rocket nose, seen from the exact side, facing right. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image. The last frame returns to the exact pose of the first frame, so the animation loops seamlessly.",
+  "out": "D:\\omonyang-work\\omopet-quality\\gen\\custom\\jet\\clip.mp4",
+  "bytes": 1126011,
+  "host": "vidgen.x.ai",
+  "duration_requested": 3,
+  "duration_reported": 3,
+  "resolution": "720p",
+  "aspect_ratio": null,
+  "generate_audio": false,
+  "elapsed_seconds": 41.76,
+  "polls": 10
+}

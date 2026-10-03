@@ -1,0 +1,92 @@
+{
+  "kind": "sprite-gen-video-loop-report",
+  "frames_dir": "D:\\omonyang-work\\omopet-quality\\gen\\custom\\edge\\frames\\keyed",
+  "out_dir": "D:\\omonyang-work\\omopet-quality\\gen\\custom\\edge\\loop",
+  "state": null,
+  "fps": 24.0,
+  "frames_total": 73,
+  "window": [
+    7,
+    33
+  ],
+  "profile": "generic in-place action",
+  "cycle_mode": "fixed",
+  "seam_max": 99.0,
+  "anchor": "none",
+  "seam_measurement": "source-frames",
+  "jump_repair": {
+    "applied": false,
+    "why": "not a gait state (None)"
+  },
+  "cycle": {
+    "kind": "fixed",
+    "start": 0,
+    "length": 73,
+    "seam": 0.07858838140964508,
+    "inner_mean_adjacent": 0.00768086826428771,
+    "ratio": 10.231705414743631,
+    "period_global": null,
+    "periodicity": null
+  },
+  "periodic_attempt": null,
+  "cycle_seconds": 3.0417,
+  "n_out": 64,
+  "gif_fps": 24.0,
+  "delay_ms": 48,
+  "status": "passed",
+  "resampled_seam": 0.07858838140964508,
+  "resampled_inner_mean_adjacent": 0.008480559103190899,
+  "resampled_seam_ratio": 9.2669,
+  "scrubbed_rgb_pixels": 0,
+  "specks_dropped": 1175,
+  "strip": {
+    "path": "D:\\omonyang-work\\omopet-quality\\gen\\custom\\edge\\loop\\edge.strip.png",
+    "frames": 64,
+    "w": 289,
+    "h": 520,
+    "kind": "fixed",
+    "loop": true,
+    "body_h": 492,
+    "body_src_h": 634,
+    "body_ref": "tallest-grounded",
+    "scale": 0.7761,
+    "delay_ms": 47.53,
+    "cycle_frames": 73,
+    "cycle_seconds": 3.0417,
+    "subsampled": true,
+    "cell_cap": 64,
+    "top_margin_px": 28,
+    "cell_height_cap": 520,
+    "body_height_target": null,
+    "foot_anchor": "none",
+    "drift_px": 0,
+    "foot_sway_px": 0,
+    "foot_x": null
+  },
+  "gif": {
+    "file": "edge.gif",
+    "format": "GIF",
+    "n_frames": 64,
+    "loop": 0,
+    "size": [
+      289,
+      520
+    ],
+    "corners_transparent": true,
+    "stale_rgb_under_alpha0": 0,
+    "bytes": 3000596
+  },
+  "webp": {
+    "file": "edge.webp",
+    "format": "WEBP",
+    "n_frames": 64,
+    "loop": 0,
+    "size": [
+      289,
+      520
+    ],
+    "corners_transparent": true,
+    "stale_rgb_under_alpha0": 0,
+    "bytes": 5041034
+  }
+}
