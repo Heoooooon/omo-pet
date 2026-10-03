@@ -57,54 +57,14 @@ npm run tauri build   # build a release app
   [hermes-pet README](https://github.com/Heoooooon/hermes-pet#getting-started)를
   참고하세요. 여기서도 똑같습니다.
 
-## 팬메이드 치이카와 팩(내 컴퓨터에서 만들기)
-
-LINE 공식 치이카와 캐릭터들의 움직이는 스티커 미리보기를 로컬 캐릭터 팩으로 바꿀 수 있습니다.
-`--generate`를 주면 오모가 하는 모든 동작(걷기·로켓·제트·낙하산·모서리·착지 등)도 캐릭터별로 그립니다:
-
-```bash
-node scripts/make-chiikawa-pack.mjs                                # sticker-only packs (quick)
-node scripts/make-chiikawa-pack.mjs --generate                     # every action, all 7 characters
-node scripts/make-chiikawa-pack.mjs --chars usagi,momonga --generate
-node scripts/make-chiikawa-pack.mjs --chars usagi --generate --regen walk,jet  # redraw some actions
-node scripts/make-chiikawa-pack.mjs --remove                       # delete them again
-```
-
-| 팩(`--chars`) | 공식 스티커에서 | `--generate`로 그림 |
-|---|---|---|
-| `chiikawa`(치이카와) | idle, react | 나머지 전부 |
-| `hachiware`(하치와레) | — | 모든 동작 |
-| `usagi`(우사기) | idle(2), react, drag | 나머지 전부 |
-| `momonga`(모몽가) | idle, react, drag | 나머지 전부 |
-| `kurimanju`(밤만쥬) | — | 모든 동작 |
-| `yoroi`(갑옷 씨) | react | 나머지 전부 |
-| `yusangyun`(유산균, むちゃうマン) | — | 모든 동작 |
-
-스크립트는 LINE STORE에서 스티커 이미지를 내 컴퓨터로 내려받아 떠 있는 효과 글자를 지우고,
-모든 동작을 같은 몸 크기로 맞춰 `public/packs/<character>/`와 `public/packs/local.json`에 씀니다.
-그다음 설정에서 캐릭터를 고르면 됩니다. 캐릭터 혼자 전신이 나오는 스티커만 씁니다.
-`--generate` 없이 만들면 스티커가 없는 동작은 idle로 대신하고, 전신 스티커가 없는 캐릭터는 건너뜁니다.
-스크립트에는 `ffmpeg`가 필요합니다. `--generate`에는 [sprite-gen](https://github.com/aldegad/sprite-gen) 체크아웃
-(`SPRITE_GEN_DIR`, `.venv`까지 설치된 상태)과 로그인된 `codex` CLI도 필요합니다
-(ChatGPT 구독을 쓰기 때문에 API 키도, 호출당 요금도 없습니다). 그 캐릭터의 스티커와 공식 굿즈 사진을
-보고 그리며, 동작당 1분쯤 걸리고, 프레임은 `.cache/chiikawa/gen/`에 저장해 다시 씁니다.
-
-> **팬메이드 · 비공식 · 비상업 프로젝트입니다.** 이 프로젝트는 치이카와 권리자와 관계가 없으며
-> 승인을 받지도 않았습니다. **이 저장소에는 치이카와 그림이 전혀 들어 있지 않습니다.**
-> 이미지는 각 사용자가 자기 컴퓨터에 개인 용도로 내려받는 것이고, `public/packs/*`는 git에서 무시됩니다.
-> 생성된 팩은 커밋하거나 재배포하지 말아 주세요. Chiikawa © nagano / chiikawa committee.
-
 ## 나만의 캐릭터 넣기
 
 팩은 `public/packs/<pack>/<state>.apng` 형태로 스프라이트를 모아 둔 폴더입니다
 (idle / walk / drag / react / fall / edge / rocket / jet, 그리고 선택 사항인
 `fall-open` / `fall-glide` / `fall-land` 단계). 빠진 동작은 idle로 대신하고,
 변형(`<state>.2.apng` … `<state>.4.apng`)은 무작위로 골라 씁니다.
-`public/packs/local.json`에 팩을 적어 두면 설정에 나타납니다:
-
-```json
-[{ "id": "my-pack", "name": "My pack", "emoji": "🦊" }]
-```
+팩은 **설정 › 내 캐릭터 › 팩 가져오기**로 넣습니다(폴더나 zip, [팩 형식](docs/pack-format.md)).
+배포 빌드에는 오리지널 팩만 들어가며, 다른 팩이 섞이면 `scripts/check-bundle.mjs`가 빌드를 실패시킵니다.
 
 오모 팩은 [sprite-gen](https://github.com/aldegad/sprite-gen)으로 만들었습니다.
 정지 이미지 한 장(`art/omo-cat/base.png`) → 동작마다 sprite-gen 한 번 실행
@@ -117,10 +77,9 @@ node scripts/make-chiikawa-pack.mjs --remove                       # delete them
 src/main.ts              Behavior brain: state machine, window-platform physics,
                          multi-monitor crossing, Lanbeam handoff, pack loading
 src/style.css            Per-state CSS motion and per-pack sprite sizes
-src/settings.ts          Settings panel (packs from packs.json + local.json)
+src/settings.ts          Settings panel (packs, band pack license, My character)
 src-tauri/               Tauri shell: transparent window, window list, Lanbeam bridge client
 public/packs/omo-cat/    The bundled Omo pack (APNG per action)
-scripts/                 make-chiikawa-pack.mjs (local fan-made packs)
 art/                     Omo source still + sprite-gen run records
 ```
 
@@ -130,10 +89,8 @@ art/                     Omo source still + sprite-gen run records
   데스크톱 펫 엔진, 창 발판 물리, 멀티 모니터·iPad 기능
 - **스프라이트 생성**: [sprite-gen](https://github.com/aldegad/sprite-gen)(@aldegad)
 - **오모**는 CMORE의 오리지널 캐릭터입니다
-- Chiikawa © nagano / chiikawa committee(팬메이드 로컬 팩 전용, 저장소에 포함되지 않음)
 
 ## 라이선스
 
 [MIT](./LICENSE): 코드와 오모 아트워크(`art/`,
-`public/packs/omo-cat/`)에 적용됩니다. 치이카와 스크립트로 로컬에서 만든 캐릭터는
-각 권리자에게 속하며 이 라이선스의 대상이 아닙니다.
+`public/packs/omo-cat/`)에 적용됩니다.

@@ -1,7 +1,7 @@
-// Character packs: bundled ones under /packs (packs.json), locally built
-// fan packs (local.json, git-ignored) and the user's own packs from
-// "My character" / import, which live in the app data dir and are served
-// through the `userpack` URI scheme.
+// Character packs: bundled originals under /packs (packs.json) and the
+// user's own packs from "My character" / import, which live in the app data
+// dir and are served through the `userpack` URI scheme. Bundled packs with a
+// `pack` field belong to a paid pack and need a license (see license.rs).
 import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import type { Instrument } from "./settings-store";
 
@@ -17,7 +17,26 @@ export type PackInfo = {
   widths?: Partial<Record<string, number>>;
   user?: boolean;
   source?: string;
+  // Paid pack this character belongs to (e.g. "band"); absent = free.
+  pack?: string;
 };
+
+export type License = { packs: string[]; id: string | null };
+export const LICENSE_EVENT = "license-changed";
+
+export async function getLicense(): Promise<License> {
+  try {
+    return await invoke<License>("license_status");
+  } catch {
+    return { packs: [], id: null };
+  }
+}
+
+export const hasBand = (lic: License) => lic.packs.includes("band");
+
+export function isUnlocked(p: PackInfo, lic: License): boolean {
+  return !p.pack || lic.packs.includes(p.pack);
+}
 
 export const isUserPack = (id: string) => id.startsWith("user-");
 
@@ -41,17 +60,20 @@ async function fetchPacks(url: string): Promise<PackInfo[]> {
 }
 
 export async function listPacks(): Promise<PackInfo[]> {
-  const [bundled, local] = await Promise.all([
-    fetchPacks("/packs/packs.json"),
-    fetchPacks("/packs/local.json"),
-  ]);
+  const bundled = await fetchPacks("/packs/packs.json");
   let user: PackInfo[] = [];
   try {
     user = (await invoke<PackInfo[]>("list_user_packs")).map((p) => ({ ...p, user: true }));
   } catch {
     user = [];
   }
-  return [...bundled, ...local, ...user];
+  return [...bundled, ...user];
+}
+
+// Packs this computer may show, given its license.
+export async function listUsablePacks(): Promise<PackInfo[]> {
+  const [packs, lic] = await Promise.all([listPacks(), getLicense()]);
+  return packs.filter((p) => isUnlocked(p, lic));
 }
 
 export function packLabel(p: PackInfo, lang: string): string {

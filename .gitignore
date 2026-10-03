@@ -5,8 +5,8 @@ src-tauri/gen/
 .DS_Store
 .codegraph
 
-# Local character packs (e.g. fan-made packs from scripts/make-chiikawa-pack.mjs)
-# stay on your computer; only the bundled original packs are tracked.
+# Only the bundled original packs are tracked (scripts/check-bundle.mjs also
+# fails the build if anything else lands in dist/packs).
 public/packs/*
 !public/packs/omo-cat/
 !public/packs/dalli/

@@ -258,6 +258,7 @@ pub fn creator_save<R: Runtime>(app: AppHandle<R>, job: String, manifest: PackMa
     if !src.join("idle.apng").is_file() {
         return Err("the pack has no idle.apng yet".into());
     }
+    packs::ensure_free_slot(&app)?;
     let id = packs::new_pack_id(&app, &manifest.name)?;
     let mut m = packs::clean_manifest(manifest, &id);
     m.source = Some("custom".into());

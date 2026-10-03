@@ -15,9 +15,9 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run build # tsc + vite
-      - run: node --check scripts/make-chiikawa-pack.mjs
-      - name: Only the bundled original packs are tracked (fan-made packs stay local)
+      - run: npm run build # tsc + vite + scripts/check-bundle.mjs (originals-only guard)
+      - run: node --check scripts/license.mjs
+      - name: Only the bundled original packs are tracked
         run: |
           extra=$(git ls-files public/packs | grep -v -E '^public/packs/((omo-cat|dalli|bara|dochi|rupa)/[^/]+\.apng|packs\.json)$' || true)
           if [ -n "$extra" ]; then echo "Unexpected files in public/packs:"; echo "$extra"; exit 1; fi
@@ -32,4 +32,6 @@ jobs:
           workspaces: src-tauri
       - run: mkdir -p dist # tauri's generate_context! expects frontendDist to exist
       - run: cargo check --locked
+        working-directory: src-tauri
+      - run: cargo test --locked --lib
         working-directory: src-tauri
