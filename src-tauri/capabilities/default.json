@@ -2,7 +2,7 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Capabilities for the pet window",
-  "windows": ["main", "debug-*", "pet-*", "settings"],
+  "windows": ["main", "debug-*", "pet-*", "settings", "band-*"],
   "permissions": [
     "core:default",
     "core:webview:allow-create-webview-window",
@@ -18,6 +18,9 @@
     "core:window:allow-hide",
     "core:window:allow-is-visible",
     "core:window:allow-set-ignore-cursor-events",
-    "core:window:allow-set-focus"
+    "core:window:allow-set-focus",
+    "core:window:allow-set-always-on-top",
+    "core:window:allow-scale-factor",
+    "dialog:allow-open"
   ]
 }

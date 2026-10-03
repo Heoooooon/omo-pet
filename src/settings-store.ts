@@ -3,6 +3,8 @@
 // broadcast live over the Tauri event bus.
 import { emit } from "@tauri-apps/api/event";
 
+export type Instrument = "vocal" | "guitar" | "bass" | "drums" | "keys";
+
 export type PetSettings = {
   pack: string; // character pack directory under /packs/
   size: number; // pet scale, 1 = 100%
@@ -11,6 +13,18 @@ export type PetSettings = {
   stunts: number; // rocket/jet frequency multiplier
   crossMonitors: boolean; // roam across adjacent displays
   ipadHandoff: boolean; // hand off to the iPad via Lanbeam
+  bandRoster: Record<Instrument, string>; // pack id per band slot
+  bandMuted: boolean; // band music starts silent until "sound on"
+  bandVolume: number; // 0..1
+  bandRandom: boolean; // the band sometimes gathers on its own
+};
+
+export const DEFAULT_ROSTER: Record<Instrument, string> = {
+  vocal: "omo-cat",
+  guitar: "dalli",
+  bass: "bara",
+  drums: "dochi",
+  keys: "rupa",
 };
 
 export const DEFAULTS: PetSettings = {
@@ -21,6 +35,10 @@ export const DEFAULTS: PetSettings = {
   stunts: 1,
   crossMonitors: true,
   ipadHandoff: true,
+  bandRoster: { ...DEFAULT_ROSTER },
+  bandMuted: true,
+  bandVolume: 0.6,
+  bandRandom: true,
 };
 
 const KEY = "omo-pet-settings";
@@ -28,9 +46,14 @@ export const SETTINGS_EVENT = "settings-changed";
 
 export function loadSettings(): PetSettings {
   try {
-    return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY) ?? "{}") };
+    const saved = JSON.parse(localStorage.getItem(KEY) ?? "{}");
+    return {
+      ...DEFAULTS,
+      ...saved,
+      bandRoster: { ...DEFAULT_ROSTER, ...(saved.bandRoster ?? {}) },
+    };
   } catch {
-    return { ...DEFAULTS };
+    return { ...DEFAULTS, bandRoster: { ...DEFAULT_ROSTER } };
   }
 }
 

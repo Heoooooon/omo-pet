@@ -6,9 +6,13 @@ src-tauri/gen/
 .codegraph
 
 # Local character packs (e.g. fan-made packs from scripts/make-chiikawa-pack.mjs)
-# stay on your computer; only the bundled omo-cat pack is tracked.
+# stay on your computer; only the bundled original packs are tracked.
 public/packs/*
 !public/packs/omo-cat/
+!public/packs/dalli/
+!public/packs/bara/
+!public/packs/dochi/
+!public/packs/rupa/
 !public/packs/packs.json
 .cache/
 
@@ -16,3 +20,6 @@ public/packs/*
 art/sprites/*/reports/
 art/sprites/*/gen-set.log
 art/sprites/*/raw/*.raw.png
+
+# Python bytecode from running the art scripts
+__pycache__/

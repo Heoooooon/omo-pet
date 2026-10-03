@@ -17,9 +17,9 @@ jobs:
       - run: npm ci
       - run: npm run build # tsc + vite
       - run: node --check scripts/make-chiikawa-pack.mjs
-      - name: Only the bundled pack is tracked (fan-made packs stay local)
+      - name: Only the bundled original packs are tracked (fan-made packs stay local)
         run: |
-          extra=$(git ls-files public/packs | grep -v -E '^public/packs/(omo-cat/[^/]+\.apng|packs\.json)$' || true)
+          extra=$(git ls-files public/packs | grep -v -E '^public/packs/((omo-cat|dalli|bara|dochi|rupa)/[^/]+\.apng|packs\.json)$' || true)
           if [ -n "$extra" ]; then echo "Unexpected files in public/packs:"; echo "$extra"; exit 1; fi
 
   tauri:
