@@ -9,10 +9,18 @@ import {
 } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
-import { listen } from "@tauri-apps/api/event";
+import { emit, listen } from "@tauri-apps/api/event";
 import { initI18n, t } from "./i18n";
 import { retimeApng } from "./apng";
-import { listPacks, packStride, spriteUrl, type PackInfo } from "./packs";
+import {
+  getLicense,
+  hasBand,
+  LICENSE_EVENT,
+  listUsablePacks,
+  packStride,
+  spriteUrl,
+  type PackInfo,
+} from "./packs";
 import {
   BAND_ENDED,
   BAND_OPEN,
@@ -123,10 +131,19 @@ const VARIANT_SUFFIXES = [2, 3, 4];
 const spriteVariants = new Map<string, string[]>();
 const walkPlayback = new Map<string, Readonly<{ speed: number; src: string }>>();
 let currentPack = "";
-let packInfos: PackInfo[] = [];
-void listPacks().then((p) => {
-  packInfos = p;
-});
+let packInfos: PackInfo[] = []; // only the packs this computer may use
+let bandOwned = false;
+
+async function refreshEntitlements() {
+  const [packs, lic] = await Promise.all([listUsablePacks(), getLicense()]);
+  packInfos = packs;
+  bandOwned = hasBand(lic);
+}
+
+// A saved choice that is no longer usable (paid pack without a license,
+// deleted pack) falls back to the free default.
+const allowedPack = (id: string) =>
+  packInfos.some((p) => p.id === id) ? id : DEFAULTS.pack;
 
 function packUrl(pack: string, key: string): string {
   return spriteUrl(pack, `${key}.apng`);
@@ -1128,15 +1145,16 @@ settingsBtn.addEventListener("click", () => {
   void openSettings();
 });
 
-async function openSettings() {
+async function openSettings(tab?: string) {
   const existing = await WebviewWindow.getByLabel("settings");
   if (existing) {
+    if (tab) await emit("settings-tab", tab);
     await existing.show();
     await existing.setFocus();
     return;
   }
   new WebviewWindow("settings", {
-    url: "settings.html",
+    url: tab ? `settings.html?tab=${tab}` : "settings.html",
     title: t("settingsTitle"),
     width: 360,
     height: 620,
@@ -1162,13 +1180,14 @@ let hiddenForBand = false;
 const appStartedAt = Date.now();
 
 function bandDue(): boolean {
-  if (!isMainPet || !cfg.bandRandom) return false;
+  if (!isMainPet || !bandOwned || !cfg.bandRandom) return false;
   const last = Number(localStorage.getItem(LAST_BAND_KEY) ?? 0);
   return Date.now() - appStartedAt > 20 * 60e3 && Date.now() - last > 45 * 60e3;
 }
 
 async function openBand() {
   if (!isMainPet || bandActive || awayPoll) return;
+  if (!bandOwned) return void openSettings("band"); // shows what the band pack unlocks
   if (await WebviewWindow.getByLabel("band-stage")) return;
   const monitor = await currentMonitor();
   if (!monitor) return;
@@ -1335,9 +1354,9 @@ void listen<PetSettings>(SETTINGS_EVENT, async (e) => {
   const sizeChanged = e.payload.size !== cfg.size;
   const packChanged = e.payload.pack !== cfg.pack;
   cfg = e.payload;
-  if (packChanged) packInfos = await listPacks();
+  if (packChanged) await refreshEntitlements();
   void pushSettingsToBridge();
-  if (packChanged) loadPack(cfg.pack);
+  if (packChanged) loadPack(allowedPack(cfg.pack));
   if (sizeChanged) {
     await applyPetSize();
     await refreshMonitor();
@@ -1361,8 +1380,15 @@ async function pushSettingsToBridge() {
   }
 }
 
+void listen(LICENSE_EVENT, async () => {
+  await refreshEntitlements();
+  const pack = allowedPack(cfg.pack);
+  if (pack !== currentPack) loadPack(pack);
+});
+
 async function init() {
-  loadPack(cfg.pack);
+  await refreshEntitlements();
+  loadPack(allowedPack(cfg.pack));
   await applyPetSize();
   await refreshMonitor();
   await refreshPlatforms();

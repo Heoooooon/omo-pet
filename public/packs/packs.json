@@ -10,6 +10,7 @@
   },
   {
     "id": "dalli",
+    "pack": "band",
     "name": "Dalli",
     "names": { "ko": "달리" },
     "emoji": "🦦",
@@ -18,6 +19,7 @@
   },
   {
     "id": "bara",
+    "pack": "band",
     "name": "Bara",
     "names": { "ko": "바라" },
     "emoji": "🦫",
@@ -26,6 +28,7 @@
   },
   {
     "id": "dochi",
+    "pack": "band",
     "name": "Dochi",
     "names": { "ko": "도치" },
     "emoji": "🦔",
@@ -34,6 +37,7 @@
   },
   {
     "id": "rupa",
+    "pack": "band",
     "name": "Rupa",
     "names": { "ko": "루파" },
     "emoji": "🩷",

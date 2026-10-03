@@ -10,7 +10,7 @@ import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { emit, listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 import { retimeApng, type Bytes } from "./apng";
-import { listPacks, packStride, spriteUrl, type PackInfo } from "./packs";
+import { listUsablePacks, packStride, spriteUrl, type PackInfo } from "./packs";
 import { DEFAULT_ROSTER, loadSettings, type Instrument } from "./settings-store";
 import {
   BAND_ENDED,
@@ -88,7 +88,7 @@ async function loadMember(inst: Instrument, pack: PackInfo): Promise<Omit<Member
 }
 
 async function resolveMembers(): Promise<Omit<Member, "el" | "img" | "x" | "slotX" | "isPet">[]> {
-  const packs = await listPacks();
+  const packs = await listUsablePacks();
   const roster = loadSettings().bandRoster;
   const out = [];
   for (const inst of STAGE_ORDER) {

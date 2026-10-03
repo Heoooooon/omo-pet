@@ -338,6 +338,37 @@
       .msg.err {
         color: #ff8080;
       }
+      h3 {
+        margin: 10px 0 2px;
+        font-size: 12px;
+      }
+      ul.list {
+        margin: 2px 0 6px;
+        padding-left: 18px;
+        font-size: 12px;
+        line-height: 1.6;
+      }
+      #license-entry {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      #license-entry[hidden] {
+        display: none;
+      }
+      #license-key {
+        font: 11px ui-monospace, monospace;
+        background: rgba(255, 255, 255, 0.08);
+        color: inherit;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 6px;
+        padding: 6px;
+        resize: none;
+        word-break: break-all;
+      }
+      #packs button.locked {
+        opacity: 0.55;
+      }
     </style>
   </head>
   <body>
@@ -390,6 +421,23 @@
         </label>
       </main>
       <main class="panel" id="panel-band" hidden>
+        <section id="store" hidden>
+          <h2 data-i18n="storeTitle">Band pack</h2>
+          <p class="hint" data-i18n="storeLead"></p>
+          <h3 data-i18n="storeUnlocks">What buying unlocks</h3>
+          <ul class="list">
+            <li data-i18n="storeItemFriends"></li>
+            <li data-i18n="storeItemBand"></li>
+            <li data-i18n="storeItemSlots"></li>
+          </ul>
+          <h3 data-i18n="storeFree">Free forever</h3>
+          <ul class="list">
+            <li data-i18n="storeFreeOmo"></li>
+            <li data-i18n="storeFreeSlot"></li>
+          </ul>
+          <p class="hint" data-i18n="storeWhere"></p>
+        </section>
+        <div id="band-controls">
         <button id="band-now" class="btn primary wide" type="button" data-i18n="bandNow">Open the band now</button>
         <p class="hint" data-i18n="bandHint"></p>
         <h2 data-i18n="bandMembers">Members</h2>
@@ -407,6 +455,19 @@
           <span data-i18n="bandRandom">Sometimes gather on their own</span>
           <input id="bandRandom" type="checkbox" />
         </label>
+        </div>
+        <hr />
+        <section id="license">
+          <h2 data-i18n="licenseTitle">License</h2>
+          <p id="license-state" class="hint"></p>
+          <div id="license-entry">
+            <button id="license-file" class="btn primary wide" type="button" data-i18n="licenseImport">Import license file</button>
+            <textarea id="license-key" rows="3" spellcheck="false"></textarea>
+            <button id="license-apply" class="btn wide" type="button" data-i18n="licenseApply">Unlock with key</button>
+          </div>
+          <p id="license-msg" class="msg" hidden></p>
+          <button id="license-remove" class="btn" type="button" data-i18n="licenseRemove" hidden>Remove license from this computer</button>
+        </section>
       </main>
       <main class="panel" id="panel-custom" hidden>
         <h2 data-i18n="customTitle">Make my character</h2>
@@ -454,6 +515,7 @@
         </div>
         <p id="import-msg" class="msg" hidden></p>
         <h2 data-i18n="myPacks">My packs</h2>
+        <p id="slot-note" class="hint" hidden></p>
         <ul id="mypacks"></ul>
       </main>
       <footer id="footer">

@@ -4,6 +4,7 @@ use tauri::tray::TrayIconBuilder;
 use tauri::{Emitter, Manager, Wry};
 
 mod creator;
+mod license;
 mod packs;
 
 /// A normal (layer-0) on-screen window, in logical screen points with the
@@ -368,6 +369,10 @@ pub fn run() {
             packs::list_user_packs,
             packs::delete_user_pack,
             packs::import_pack,
+            license::license_status,
+            license::license_activate,
+            license::license_import,
+            license::license_remove,
             creator::creator_detect,
             creator::creator_grok_refresh,
             creator::creator_new_job,
