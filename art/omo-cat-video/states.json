@@ -1,0 +1,58 @@
+{
+  "idle": {
+    "cycle": "set1/side-idle/loop/cycle",
+    "seconds": 3.0,
+    "fps": 24,
+    "plays": 0
+  },
+  "walk": {
+    "cycle": "set1/side-walk/loop/cycle",
+    "seconds": 1.15,
+    "fps": 21,
+    "plays": 0
+  },
+  "rocket": {
+    "cycle": "custom/rocket/loop-periodic/cycle",
+    "seconds": 0.9167,
+    "fps": 24,
+    "plays": 0
+  },
+  "jet": {
+    "cycle": "custom/jet/loop/cycle",
+    "seconds": 3.0,
+    "fps": 24,
+    "plays": 0
+  },
+  "fall-glide": {
+    "cycle": "custom/fall-glide/loop/cycle",
+    "seconds": 3.0,
+    "fps": 24,
+    "plays": 0
+  },
+  "fall-open": {
+    "cycle": "custom/fall-open/loop/cycle",
+    "seconds": 0.55,
+    "fps": 24,
+    "plays": 1,
+    "end_on": "fall-glide"
+  },
+  "fall": {
+    "cycle": "custom/fall-open/loop/cycle",
+    "seconds": 0.75,
+    "fps": 24,
+    "plays": 1,
+    "end_on": "fall-glide"
+  },
+  "fall-land": {
+    "cycle": "custom/fall-land/loop/cycle",
+    "seconds": 0.45,
+    "fps": 24,
+    "plays": 1
+  },
+  "edge": {
+    "cycle": "custom/edge/loop/cycle",
+    "seconds": 2.0,
+    "fps": 24,
+    "plays": 1
+  }
+}

@@ -83,6 +83,19 @@ ffmpeg -framerate 50/3 -start_number 1 -i clean_%02d.png -c:v apng -plays <0|1> 
 
 원본 GIF는 `art/<state>-original.gif`로 보관한다.
 
+## 모드 C: Grok 영상 → APNG (기본 omo-cat 팩, sprite-gen ≥ 2.18)
+
+기본 omo-cat 팩의 9개 상태는 이 경로로 만들었다. 프레임마다 다시 그리는 모드 A보다 정체성이 흔들리지 않고 24fps로 부드럽다.
+소스·프롬프트·클립·리포트는 `art/omo-cat-video/<state>/`에 있다. 상세 절차와 상태별 길이는 `art/omo-cat-video/README.md`.
+
+1. 스틸: 마젠타 배경 상태 포즈를 `sprite-gen gen --provider grok --ref art/omo-cat/base.png`로 그린다(측면은 `--facing right`).
+2. 클립: idle·walk는 `sprite-gen video-set`(walk는 `--anchor motion-auto`), 나머지는 `video-canvas` → `video --image <시작> --last-frame <끝>` 고정(pinned) 클립.
+3. 프레임·루프: `video-frames --key magenta --decontam palette` → `video-loop`(루프는 `--cycle pinned|periodic`, 원샷은 `--cycle fixed --start 0`).
+4. APNG: `python art/omo-cat-video/build_apng.py` — 이전 팩의 셀 크기·캐릭터 박스에 맞춰 CSS와 이동 코드를 그대로 쓴다. 공유 팔레트 양자화로 파일을 줄인다.
+
+⚠️ Windows: `sprite-gen.exe` 런처가 앱 제어에 막히면 `.venv\Scripts\python.exe -m sprite_gen.cli`, cp949 콘솔 오류는 `PYTHONUTF8=1`, `video-loop`은 `img2webp`(libwebp)가 PATH에 있어야 한다.
+⚠️ 타이밍 계약: walk 루프 길이는 보폭 56px/0.75s(`walkSpeed`)에 맞춘다. fall-open은 550ms 뒤 glide로, fall-land는 450ms 뒤 idle로 넘어가므로 그 길이에 맞춘다.
+
 ## 앱 연결 (양 모드 공통)
 
 1. `src/main.ts`의 `SPRITES` 맵에 `<state>: "/<state>.apng"` 추가.

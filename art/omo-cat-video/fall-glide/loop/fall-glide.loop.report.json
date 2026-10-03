@@ -1,0 +1,94 @@
+{
+  "kind": "sprite-gen-video-loop-report",
+  "frames_dir": "D:\\omonyang-work\\omopet-quality\\gen\\custom\\fall-glide\\frames\\keyed",
+  "out_dir": "D:\\omonyang-work\\omopet-quality\\gen\\custom\\fall-glide\\loop",
+  "state": null,
+  "fps": 24.0,
+  "frames_total": 73,
+  "window": [
+    7,
+    33
+  ],
+  "profile": "generic in-place action",
+  "cycle_mode": "pinned",
+  "seam_max": 2.0,
+  "anchor": "none",
+  "seam_measurement": "source-frames",
+  "jump_repair": {
+    "applied": false,
+    "why": "not a gait state (None)"
+  },
+  "cycle": {
+    "kind": "pinned",
+    "start": 0,
+    "length": 72,
+    "seam": 0.006176966708153486,
+    "inner_mean_adjacent": 0.0064880684949457645,
+    "ratio": 0.9520501691628829,
+    "pin_error": 0.0029278791043907404,
+    "pin_tolerance": 0.012976136989891529,
+    "period_global": null,
+    "periodicity": null
+  },
+  "periodic_attempt": null,
+  "cycle_seconds": 3.0,
+  "n_out": 64,
+  "gif_fps": 24.0,
+  "delay_ms": 47,
+  "status": "passed",
+  "resampled_seam": 0.006176966708153486,
+  "resampled_inner_mean_adjacent": 0.007258900441229343,
+  "resampled_seam_ratio": 0.851,
+  "scrubbed_rgb_pixels": 0,
+  "specks_dropped": 2135,
+  "strip": {
+    "path": "D:\\omonyang-work\\omopet-quality\\gen\\custom\\fall-glide\\loop\\fall-glide.strip.png",
+    "frames": 64,
+    "w": 332,
+    "h": 520,
+    "kind": "pinned",
+    "loop": true,
+    "body_h": 484,
+    "body_src_h": 575,
+    "body_ref": "tallest-grounded",
+    "scale": 0.8414,
+    "delay_ms": 46.88,
+    "cycle_frames": 72,
+    "cycle_seconds": 3.0,
+    "subsampled": true,
+    "cell_cap": 64,
+    "top_margin_px": 290,
+    "cell_height_cap": 520,
+    "body_height_target": null,
+    "foot_anchor": "none",
+    "drift_px": 0,
+    "foot_sway_px": 0,
+    "foot_x": null
+  },
+  "gif": {
+    "file": "fall-glide.gif",
+    "format": "GIF",
+    "n_frames": 64,
+    "loop": 0,
+    "size": [
+      332,
+      520
+    ],
+    "corners_transparent": true,
+    "stale_rgb_under_alpha0": 0,
+    "bytes": 3774719
+  },
+  "webp": {
+    "file": "fall-glide.webp",
+    "format": "WEBP",
+    "n_frames": 64,
+    "loop": 0,
+    "size": [
+      332,
+      520
+    ],
+    "corners_transparent": true,
+    "stale_rgb_under_alpha0": 0,
+    "bytes": 7389112
+  }
+}

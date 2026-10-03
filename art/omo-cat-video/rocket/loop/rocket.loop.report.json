@@ -1,0 +1,94 @@
+{
+  "kind": "sprite-gen-video-loop-report",
+  "frames_dir": "D:\\omonyang-work\\omopet-quality\\gen\\custom\\rocket\\frames\\keyed",
+  "out_dir": "D:\\omonyang-work\\omopet-quality\\gen\\custom\\rocket\\loop",
+  "state": null,
+  "fps": 24.0,
+  "frames_total": 73,
+  "window": [
+    7,
+    33
+  ],
+  "profile": "generic in-place action",
+  "cycle_mode": "pinned",
+  "seam_max": 2.0,
+  "anchor": "none",
+  "seam_measurement": "source-frames",
+  "jump_repair": {
+    "applied": false,
+    "why": "not a gait state (None)"
+  },
+  "cycle": {
+    "kind": "pinned",
+    "start": 0,
+    "length": 72,
+    "seam": 0.003453402081504464,
+    "inner_mean_adjacent": 0.019445067271590233,
+    "ratio": 0.1775978469639947,
+    "pin_error": 0.0017037306679412723,
+    "pin_tolerance": 0.038890134543180466,
+    "period_global": null,
+    "periodicity": null
+  },
+  "periodic_attempt": null,
+  "cycle_seconds": 3.0,
+  "n_out": 64,
+  "gif_fps": 24.0,
+  "delay_ms": 47,
+  "status": "passed",
+  "resampled_seam": 0.003453402081504464,
+  "resampled_inner_mean_adjacent": 0.021024346351623535,
+  "resampled_seam_ratio": 0.1643,
+  "scrubbed_rgb_pixels": 0,
+  "specks_dropped": 1914,
+  "strip": {
+    "path": "D:\\omonyang-work\\omopet-quality\\gen\\custom\\rocket\\loop\\rocket.strip.png",
+    "frames": 64,
+    "w": 268,
+    "h": 520,
+    "kind": "pinned",
+    "loop": true,
+    "body_h": 419,
+    "body_src_h": 556,
+    "body_ref": "tallest-grounded",
+    "scale": 0.7536,
+    "delay_ms": 46.88,
+    "cycle_frames": 72,
+    "cycle_seconds": 3.0,
+    "subsampled": true,
+    "cell_cap": 64,
+    "top_margin_px": 254,
+    "cell_height_cap": 520,
+    "body_height_target": null,
+    "foot_anchor": "none",
+    "drift_px": 0,
+    "foot_sway_px": 0,
+    "foot_x": null
+  },
+  "gif": {
+    "file": "rocket.gif",
+    "format": "GIF",
+    "n_frames": 64,
+    "loop": 0,
+    "size": [
+      268,
+      520
+    ],
+    "corners_transparent": true,
+    "stale_rgb_under_alpha0": 0,
+    "bytes": 2687523
+  },
+  "webp": {
+    "file": "rocket.webp",
+    "format": "WEBP",
+    "n_frames": 64,
+    "loop": 0,
+    "size": [
+      268,
+      520
+    ],
+    "corners_transparent": true,
+    "stale_rgb_under_alpha0": 0,
+    "bytes": 5803420
+  }
+}

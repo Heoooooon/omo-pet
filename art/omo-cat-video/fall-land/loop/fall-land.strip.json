@@ -1,0 +1,23 @@
+{
+  "frames": 49,
+  "w": 412,
+  "h": 520,
+  "kind": "fixed",
+  "loop": true,
+  "body_h": 514,
+  "body_src_h": 635,
+  "body_ref": "tallest-grounded",
+  "scale": 0.8087,
+  "delay_ms": 41.67,
+  "cycle_frames": 49,
+  "cycle_seconds": 2.0417,
+  "subsampled": false,
+  "cell_cap": 64,
+  "top_margin_px": 33,
+  "cell_height_cap": 520,
+  "body_height_target": null,
+  "foot_anchor": "none",
+  "drift_px": 0,
+  "foot_sway_px": 0,
+  "foot_x": null
+}
