@@ -1,0 +1,24 @@
+{
+  "kind": "sprite-gen-video-report",
+  "provider": "grok-imagine",
+  "auth_source": "grok-login",
+  "model": "grok-imagine-video-1.5",
+  "mode": "first-last",
+  "request_id": "87e19fcc-2fdd-94c9-b3ad-6ca64357337d",
+  "image": "D:\\omonyang-work\\omopet-jabdori\\gen\\custom\\edge\\canvas.png",
+  "inputs": {
+    "image": "D:\\omonyang-work\\omopet-jabdori\\gen\\custom\\edge\\canvas.png",
+    "last_frame": "D:\\omonyang-work\\omopet-jabdori\\gen\\custom\\edge\\canvas-last.png"
+  },
+  "prompt": "2D game sprite animation. Jabdori the chibi white puppy with big floppy dark-gray ears hangs from an invisible ledge with both paws gripping above its head, then pulls itself straight up with its arms, hooks one leg up over the invisible edge, climbs on and settles sitting relaxed on the invisible ledge corner with legs dangling, ending exactly as the final image. The body stays upright the whole time: no flip, no somersault, no spin, never upside down. Seen from the exact side, facing right. Draw no ledge. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image. Smooth, natural, evenly timed motion with no motion blur; the clip ends exactly on the pose of the final image.",
+  "out": "D:\\omonyang-work\\omopet-jabdori\\gen\\custom\\edge\\clip.mp4",
+  "bytes": 667230,
+  "host": "vidgen.x.ai",
+  "duration_requested": 3,
+  "duration_reported": 3,
+  "resolution": "720p",
+  "aspect_ratio": null,
+  "generate_audio": false,
+  "elapsed_seconds": 32.722,
+  "polls": 8
+}

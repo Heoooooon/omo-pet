@@ -1,0 +1,24 @@
+{
+  "kind": "sprite-gen-video-report",
+  "provider": "grok-imagine",
+  "auth_source": "grok-login",
+  "model": "grok-imagine-video-1.5",
+  "mode": "first-last",
+  "request_id": "c1c00801-2075-9307-a4db-f1642037e72c",
+  "image": "D:\\omonyang-work\\omopet-jabdori\\gen\\custom\\fall-land\\canvas.png",
+  "inputs": {
+    "image": "D:\\omonyang-work\\omopet-jabdori\\gen\\custom\\fall-land\\canvas.png",
+    "last_frame": "D:\\omonyang-work\\omopet-jabdori\\gen\\custom\\fall-land\\canvas-last.png"
+  },
+  "prompt": "2D game sprite animation. Jabdori the chibi white puppy with big floppy dark-gray ears has just landed on its feet in a crouch with arms out for balance: it bends its knees a little deeper to absorb the impact, then rises back up, lowers its arms to its sides and stands upright and cheerful, ending exactly as the final image. Its feet stay planted on the same spot the whole time. Seen from the front. No parachute. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image. Smooth, natural, evenly timed motion with no motion blur; the clip ends exactly on the pose of the final image.",
+  "out": "D:\\omonyang-work\\omopet-jabdori\\gen\\custom\\fall-land\\clip.mp4",
+  "bytes": 489488,
+  "host": "vidgen.x.ai",
+  "duration_requested": 2,
+  "duration_reported": 2,
+  "resolution": "720p",
+  "aspect_ratio": null,
+  "generate_audio": false,
+  "elapsed_seconds": 33.091,
+  "polls": 8
+}

@@ -1,0 +1,24 @@
+{
+  "kind": "sprite-gen-video-report",
+  "provider": "grok-imagine",
+  "auth_source": "grok-login",
+  "model": "grok-imagine-video-1.5",
+  "mode": "first-last",
+  "request_id": "7f714e18-b71a-91af-acaf-d6dcfe53b25b",
+  "image": "D:\\omonyang-work\\omopet-jabdori\\gen\\custom\\rocket\\canvas.png",
+  "inputs": {
+    "image": "D:\\omonyang-work\\omopet-jabdori\\gen\\custom\\rocket\\canvas.png",
+    "last_frame": "D:\\omonyang-work\\omopet-jabdori\\gen\\custom\\rocket\\canvas-last.png"
+  },
+  "prompt": "2D game sprite animation. Jabdori the chibi white puppy with big floppy dark-gray ears rides the small rocket upward in place: the rocket's flame flickers and pulses quickly, the puppy's floppy ears and tail flutter in the rushing air, and the puppy and the rocket bob gently up and down by a few pixels with a slight rumble. The puppy keeps its grip on the rocket and its excited smile the whole time. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image. The last frame returns to the exact pose of the first frame, so the animation loops seamlessly.",
+  "out": "D:\\omonyang-work\\omopet-jabdori\\gen\\custom\\rocket\\clip.mp4",
+  "bytes": 790488,
+  "host": "vidgen.x.ai",
+  "duration_requested": 3,
+  "duration_reported": 3,
+  "resolution": "720p",
+  "aspect_ratio": null,
+  "generate_audio": false,
+  "elapsed_seconds": 46.098,
+  "polls": 11
+}

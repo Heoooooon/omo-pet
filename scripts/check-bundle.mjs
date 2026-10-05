@@ -1,13 +1,20 @@
 #!/usr/bin/env node
 // Release guard: the built frontend (what Tauri bundles into the app) may
-// carry only our original character packs. Vite copies everything under
-// public/ into dist/, so a git-ignored local pack would otherwise ship.
+// carry only our original character packs and the characters we have a
+// license for. Vite copies everything under public/ into dist/, so a
+// git-ignored local pack would otherwise ship.
 //
 //   node scripts/check-bundle.mjs [distDir]   (default: dist)
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
-const ALLOWED_PACKS = ["omo-cat", "dalli", "bara", "dochi", "rupa"];
+const ORIGINAL_PACKS = ["omo-cat", "dalli", "bara", "dochi", "rupa"];
+// Third-party characters shipped with the owner's permission. Each entry must
+// say whose character it is and on what terms; anything else stays blocked.
+const LICENSED_PACKS = {
+  jabdori: "잡도리 © Sisyphus Labs (OmO Native), 허락 받아 사용 (permission from 김연규, 2026-10-05)",
+};
+const ALLOWED_PACKS = [...ORIGINAL_PACKS, ...Object.keys(LICENSED_PACKS)];
 const ALLOWED_STATES = /^(idle|walk|fall|fall-open|fall-glide|fall-land|edge|rocket|jet|play)(\.[234])?\.apng$/;
 
 const dist = process.argv[2] ?? "dist";
@@ -38,8 +45,9 @@ else {
 }
 
 if (problems.length) {
-  console.error("Bundle check FAILED - only original packs may ship:");
+  console.error("Bundle check FAILED - only original or licensed packs may ship:");
   for (const p of problems) console.error(`  - ${p}`);
   process.exit(1);
 }
-console.log(`Bundle check OK: ${ALLOWED_PACKS.join(", ")}`);
+console.log(`Bundle check OK: ${ORIGINAL_PACKS.join(", ")}`);
+for (const [id, note] of Object.entries(LICENSED_PACKS)) console.log(`  licensed: ${id} - ${note}`);

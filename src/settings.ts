@@ -73,8 +73,10 @@ function render() {
   }
   for (const key of TOGGLES) $<HTMLInputElement>(key).checked = s[key];
   $<HTMLInputElement>("bandSound").checked = !s.bandMuted;
-  for (const btn of $("packs").querySelectorAll("button")) {
-    btn.classList.toggle("active", btn.dataset.pack === s.pack);
+  for (const btn of $("packs").querySelectorAll<HTMLButtonElement>("button")) {
+    const on = btn.dataset.pack === s.pack || s.companions.includes(btn.dataset.pack!);
+    btn.classList.toggle("active", on);
+    btn.setAttribute("aria-pressed", String(on));
   }
   for (const sel of $("roster").querySelectorAll("select")) {
     sel.value = s.bandRoster[sel.dataset.inst as Instrument];
@@ -113,13 +115,22 @@ $("packs").addEventListener("click", (e) => {
   const pack = btn?.dataset.pack;
   if (!pack) return;
   if (btn.classList.contains("locked")) return showTab("band");
-  s = { ...s, pack };
+  // Each character is shown or hidden on its own; one always stays out.
+  if (pack === s.pack) {
+    const [next, ...rest] = s.companions;
+    if (!next) return;
+    s = { ...s, pack: next, companions: rest };
+  } else if (s.companions.includes(pack)) {
+    s = { ...s, companions: s.companions.filter((id) => id !== pack) };
+  } else {
+    s = { ...s, companions: [...s.companions, pack] };
+  }
   render();
   queueSave();
 });
 
 $("reset").addEventListener("click", () => {
-  s = { ...DEFAULTS, bandRoster: { ...DEFAULTS.bandRoster } };
+  s = { ...DEFAULTS, companions: [...DEFAULTS.companions], bandRoster: { ...DEFAULTS.bandRoster } };
   render();
   queueSave();
 });
@@ -473,7 +484,7 @@ function renderMyPacks() {
       use.className = "btn";
       use.textContent = t("usePet");
       use.addEventListener("click", () => {
-        s = { ...s, pack: p.id };
+        s = { ...s, pack: p.id, companions: s.companions.filter((id) => id !== p.id) };
         render();
         queueSave();
       });
@@ -482,7 +493,11 @@ function renderMyPacks() {
       del.textContent = t("remove");
       del.addEventListener("click", async () => {
         await invoke("delete_user_pack", { id: p.id });
-        if (s.pack === p.id) s = { ...s, pack: DEFAULTS.pack };
+        s = { ...s, companions: s.companions.filter((id) => id !== p.id) };
+        if (s.pack === p.id) {
+          const [next = DEFAULTS.pack, ...rest] = s.companions;
+          s = { ...s, pack: next, companions: rest };
+        }
         for (const inst of INSTRUMENTS) {
           if (s.bandRoster[inst] === p.id) s = { ...s, bandRoster: { ...s.bandRoster, [inst]: DEFAULTS.bandRoster[inst] } };
         }

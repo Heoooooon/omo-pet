@@ -17,9 +17,11 @@ jobs:
       - run: npm ci
       - run: npm run build # tsc + vite + scripts/check-bundle.mjs (originals-only guard)
       - run: node --check scripts/license.mjs
-      - name: Only the bundled original packs are tracked
+      - run: npm test # bundle guard + default roster behavior
+      - name: Only the bundled original and licensed packs are tracked
+        # jabdori: licensed from Sisyphus Labs (OmO Native), see scripts/check-bundle.mjs
         run: |
-          extra=$(git ls-files public/packs | grep -v -E '^public/packs/((omo-cat|dalli|bara|dochi|rupa)/[^/]+\.apng|packs\.json)$' || true)
+          extra=$(git ls-files public/packs | grep -v -E '^public/packs/((omo-cat|jabdori|dalli|bara|dochi|rupa)/[^/]+\.apng|packs\.json)$' || true)
           if [ -n "$extra" ]; then echo "Unexpected files in public/packs:"; echo "$extra"; exit 1; fi
 
   tauri:

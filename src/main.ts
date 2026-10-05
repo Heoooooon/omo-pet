@@ -39,7 +39,13 @@ const appWindow = getCurrentWindow();
 // The original pet ("main") owns the iPad handoff; spawned friends are
 // local-only and get a slightly different size and stride for personality.
 const isMainPet = appWindow.label === "main";
-const personality = isMainPet ? 1 : 0.72 + Math.random() * 0.36;
+// Companions (Settings > Character, e.g. Jabdori next to Omo) are full-size
+// pets in their own window; the main pet opens them and each closes itself
+// once it is switched off. Companions and friends carry their pack in the URL.
+const BUDDY_PREFIX = "pet-buddy-";
+const isBuddy = appWindow.label.startsWith(BUDDY_PREFIX);
+const urlPack = new URLSearchParams(location.search).get("pack");
+const personality = isMainPet || isBuddy ? 1 : 0.72 + Math.random() * 0.36;
 
 // User-tunable knobs from the settings panel, applied live.
 let cfg: PetSettings = loadSettings();
@@ -1123,7 +1129,7 @@ friendBtn.addEventListener("click", () => {
   friendsSpawned += 1;
   const label = `pet-${Date.now().toString(36)}-${friendsSpawned}`;
   new WebviewWindow(label, {
-    url: "index.html",
+    url: `index.html?pack=${encodeURIComponent(currentPack)}`,
     width: 240,
     height: 320,
     transparent: true,
@@ -1350,13 +1356,48 @@ async function applyPetSize() {
   );
 }
 
+// ---------- companions ----------
+
+const ownPack = () => urlPack ?? cfg.pack;
+
+async function syncCompanions() {
+  if (!isMainPet) return;
+  const wanted = new Set(cfg.companions.filter((id) => id !== currentPack && packInfos.some((p) => p.id === id)));
+  for (const id of wanted) {
+    const label = BUDDY_PREFIX + id;
+    if (await WebviewWindow.getByLabel(label)) continue;
+    new WebviewWindow(label, {
+      url: `index.html?pack=${encodeURIComponent(id)}`,
+      width: 240,
+      height: 320,
+      transparent: true,
+      decorations: false,
+      alwaysOnTop: true,
+      skipTaskbar: true,
+      shadow: false,
+      resizable: false,
+      acceptFirstMouse: true,
+    });
+  }
+}
+
+// A companion that was switched off, became the main pet, or is no longer
+// usable closes its own window.
+function companionUnwanted(): boolean {
+  return isBuddy && (urlPack === null || urlPack === cfg.pack || !cfg.companions.includes(urlPack)
+    || !packInfos.some((p) => p.id === urlPack));
+}
+
 void listen<PetSettings>(SETTINGS_EVENT, async (e) => {
   const sizeChanged = e.payload.size !== cfg.size;
-  const packChanged = e.payload.pack !== cfg.pack;
+  const packChanged = urlPack === null && e.payload.pack !== cfg.pack;
+  const rosterChanged = e.payload.pack !== cfg.pack || e.payload.companions.join() !== cfg.companions.join();
   cfg = e.payload;
-  if (packChanged) await refreshEntitlements();
+  if (rosterChanged) await refreshEntitlements();
+  if (companionUnwanted()) return void appWindow.close();
   void pushSettingsToBridge();
-  if (packChanged) loadPack(allowedPack(cfg.pack));
+  if (packChanged) loadPack(allowedPack(ownPack()));
+  void syncCompanions();
   if (sizeChanged) {
     await applyPetSize();
     await refreshMonitor();
@@ -1382,13 +1423,16 @@ async function pushSettingsToBridge() {
 
 void listen(LICENSE_EVENT, async () => {
   await refreshEntitlements();
-  const pack = allowedPack(cfg.pack);
+  if (companionUnwanted()) return void appWindow.close();
+  const pack = allowedPack(ownPack());
   if (pack !== currentPack) loadPack(pack);
+  void syncCompanions();
 });
 
 async function init() {
   await refreshEntitlements();
-  loadPack(allowedPack(cfg.pack));
+  if (companionUnwanted()) return void appWindow.close();
+  loadPack(allowedPack(ownPack()));
   await applyPetSize();
   await refreshMonitor();
   await refreshPlatforms();
@@ -1403,6 +1447,7 @@ async function init() {
   setInterval(refreshPlatforms, 500);
   scheduleNext();
   void syncBridgeAtStartup();
+  void syncCompanions();
 }
 
 init();
