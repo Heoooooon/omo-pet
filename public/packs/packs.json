@@ -9,6 +9,13 @@
     "widths": { "walk": 220 }
   },
   {
+    "id": "jabdori",
+    "name": "Jabdori",
+    "names": { "ko": "잡도리" },
+    "emoji": "🐶",
+    "stride": 56
+  },
+  {
     "id": "dalli",
     "pack": "band",
     "name": "Dalli",

@@ -89,8 +89,10 @@ art/                     Omo source still + sprite-gen run records
   데스크톱 펫 엔진, 창 발판 물리, 멀티 모니터·iPad 기능
 - **스프라이트 생성**: [sprite-gen](https://github.com/aldegad/sprite-gen)(@aldegad)
 - **오모**는 CMORE의 오리지널 캐릭터입니다
+- **잡도리** © Sisyphus Labs (OmO Native), 허락 받아 사용
 
 ## 라이선스
 
 [MIT](./LICENSE): 코드와 오모 아트워크(`art/`,
-`public/packs/omo-cat/`)에 적용됩니다.
+`public/packs/omo-cat/`)에 적용됩니다. 잡도리(`art/jabdori/`, `public/packs/jabdori/`)는
+MIT가 아니며 Sisyphus Labs의 허락을 받아 넣었습니다. 다른 곳에 쓰려면 Sisyphus Labs에 따로 허락을 받으세요.
