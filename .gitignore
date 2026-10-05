@@ -5,10 +5,11 @@ src-tauri/gen/
 .DS_Store
 .codegraph
 
-# Only the bundled original packs are tracked (scripts/check-bundle.mjs also
-# fails the build if anything else lands in dist/packs).
+# Only the bundled original packs and the licensed Jabdori pack are tracked
+# (scripts/check-bundle.mjs also fails the build if anything else lands in dist/packs).
 public/packs/*
 !public/packs/omo-cat/
+!public/packs/jabdori/
 !public/packs/dalli/
 !public/packs/bara/
 !public/packs/dochi/

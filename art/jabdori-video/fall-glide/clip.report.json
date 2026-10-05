@@ -1,0 +1,24 @@
+{
+  "kind": "sprite-gen-video-report",
+  "provider": "grok-imagine",
+  "auth_source": "grok-login",
+  "model": "grok-imagine-video-1.5",
+  "mode": "first-last",
+  "request_id": "b3ff9199-5330-9f6e-a408-686578ad71dc",
+  "image": "D:\\omonyang-work\\omopet-jabdori\\gen\\custom\\fall-glide\\canvas.png",
+  "inputs": {
+    "image": "D:\\omonyang-work\\omopet-jabdori\\gen\\custom\\fall-glide\\canvas.png",
+    "last_frame": "D:\\omonyang-work\\omopet-jabdori\\gen\\custom\\fall-glide\\canvas-last.png"
+  },
+  "prompt": "2D game sprite animation. Jabdori the chibi white puppy with big floppy dark-gray ears glides down under its open round tan parachute, held in place in the frame: the puppy and canopy sway together in a slow, gentle left-right pendulum, the puppy's legs, floppy ears and tail flutter softly, and the canopy fabric ripples slightly while staying fully open. The puppy keeps holding the straps with a calm happy face. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image. The last frame returns to the exact pose of the first frame, so the animation loops seamlessly.",
+  "out": "D:\\omonyang-work\\omopet-jabdori\\gen\\custom\\fall-glide\\clip.mp4",
+  "bytes": 901081,
+  "host": "vidgen.x.ai",
+  "duration_requested": 3,
+  "duration_reported": 3,
+  "resolution": "720p",
+  "aspect_ratio": null,
+  "generate_audio": false,
+  "elapsed_seconds": 41.697,
+  "polls": 10
+}

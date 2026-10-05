@@ -1,0 +1,50 @@
+{
+ "rocket": {
+  "img": "rocket",
+  "last": "rocket",
+  "shape": "tall",
+  "dur": 3,
+  "cycle": "pinned",
+  "prompt": "2D game sprite animation. Jabdori the chibi white puppy with big floppy dark-gray ears rides the small rocket upward in place: the rocket's flame flickers and pulses quickly, the puppy's floppy ears and tail flutter in the rushing air, and the puppy and the rocket bob gently up and down by a few pixels with a slight rumble. The puppy keeps its grip on the rocket and its excited smile the whole time. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image. The last frame returns to the exact pose of the first frame, so the animation loops seamlessly."
+ },
+ "jet": {
+  "img": "jet",
+  "last": "jet",
+  "shape": "wide",
+  "dur": 3,
+  "cycle": "pinned",
+  "prompt": "2D game sprite animation. Jabdori the chibi white puppy with big floppy dark-gray ears rides the small horizontal rocket flying to the right in place: the flame behind the rocket flickers and pulses quickly, the puppy's floppy ears and tail stream and flutter backwards in the wind, and puppy and rocket bob gently up and down by a few pixels. The puppy keeps leaning forward holding the rocket nose, seen from the exact side, facing right. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image. The last frame returns to the exact pose of the first frame, so the animation loops seamlessly."
+ },
+ "fall-glide": {
+  "img": "glide",
+  "last": "glide",
+  "shape": "tall",
+  "dur": 3,
+  "cycle": "pinned",
+  "prompt": "2D game sprite animation. Jabdori the chibi white puppy with big floppy dark-gray ears glides down under its open round tan parachute, held in place in the frame: the puppy and canopy sway together in a slow, gentle left-right pendulum, the puppy's legs, floppy ears and tail flutter softly, and the canopy fabric ripples slightly while staying fully open. The puppy keeps holding the straps with a calm happy face. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image. The last frame returns to the exact pose of the first frame, so the animation loops seamlessly."
+ },
+ "fall-open": {
+  "img": "freefall",
+  "last": "glide",
+  "shape": "tall",
+  "dur": 2,
+  "cycle": "oneshot",
+  "prompt": "2D game sprite animation. Jabdori the chibi white puppy with big floppy dark-gray ears falls with both arms up, then the small tan backpack on its back pops open and a compact round tan parachute unfolds and inflates directly above its head on short lines; the puppy settles hanging calmly on the straps, ending exactly as the final image. The canopy never rises higher above the puppy than in the final image and the lines never stretch longer; the puppy stays at the same height in the frame the whole time. Seen from the front. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image. Smooth, natural, evenly timed motion with no motion blur; the clip ends exactly on the pose of the final image."
+ },
+ "fall-land": {
+  "img": "land",
+  "last": "stand",
+  "shape": "square",
+  "dur": 2,
+  "cycle": "oneshot",
+  "prompt": "2D game sprite animation. Jabdori the chibi white puppy with big floppy dark-gray ears has just landed on its feet in a crouch with arms out for balance: it bends its knees a little deeper to absorb the impact, then rises back up, lowers its arms to its sides and stands upright and cheerful, ending exactly as the final image. Its feet stay planted on the same spot the whole time. Seen from the front. No parachute. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image. Smooth, natural, evenly timed motion with no motion blur; the clip ends exactly on the pose of the final image."
+ },
+ "edge": {
+  "img": "hang",
+  "last": "sit",
+  "shape": "square",
+  "dur": 3,
+  "cycle": "oneshot",
+  "prompt": "2D game sprite animation. Jabdori the chibi white puppy with big floppy dark-gray ears hangs from an invisible ledge with both paws gripping above its head, then pulls itself straight up with its arms, hooks one leg up over the invisible edge, climbs on and settles sitting relaxed on the invisible ledge corner with legs dangling, ending exactly as the final image. The body stays upright the whole time: no flip, no somersault, no spin, never upside down. Seen from the exact side, facing right. Draw no ledge. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image. Smooth, natural, evenly timed motion with no motion blur; the clip ends exactly on the pose of the final image."
+ }
+}

@@ -1,0 +1,23 @@
+{
+  "kind": "sprite-gen-video-report",
+  "provider": "grok-imagine",
+  "auth_source": "grok-login",
+  "model": "grok-imagine-video-1.5",
+  "mode": "image-to-video",
+  "request_id": "caa40767-8354-94d6-bc2a-6f990921f87b",
+  "image": "D:\\omonyang-work\\omopet-jabdori\\gen\\set1\\side-walk\\canvas.png",
+  "inputs": {
+    "image": "D:\\omonyang-work\\omopet-jabdori\\gen\\set1\\side-walk\\canvas.png"
+  },
+  "prompt": "2D game sprite animation. Jabdori, the chibi white puppy with big floppy dark-gray ears walks naturally in place, as if on a treadmill, without moving across the screen. The character is seen from the exact side, facing right. Stays centered in the frame and does not move across the screen; the body and hair always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image. Consistent, evenly paced motion so the animation loops.",
+  "out": "D:\\omonyang-work\\omopet-jabdori\\gen\\set1\\side-walk\\clip.mp4",
+  "bytes": 1616072,
+  "host": "vidgen.x.ai",
+  "duration_requested": 3,
+  "duration_reported": 3,
+  "resolution": "720p",
+  "aspect_ratio": null,
+  "generate_audio": false,
+  "elapsed_seconds": 24.265,
+  "polls": 6
+}
