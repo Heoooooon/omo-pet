@@ -21,8 +21,8 @@ function check(packs, ids = packs) {
   }
 }
 
-test("ships the originals together with the licensed Jabdori pack", () => {
-  assert.equal(check(["omo-cat", "jabdori", "dalli", "bara", "dochi", "rupa"]), 0);
+test("ships the originals together with the licensed OmO and Jabdori packs", () => {
+  assert.equal(check(["omo", "omo-cat", "jabdori", "dalli", "bara", "dochi", "rupa"]), 0);
 });
 
 test("blocks a third-party pack folder next to Jabdori", () => {
