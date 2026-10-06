@@ -457,8 +457,9 @@ async function jetDash() {
   const version = stateVersion;
 
   // Climb to cruise height over the first part of the dash, then level off.
-  // A pack with a jet-climb loop shows it while the climb is steep.
-  const climbShare = 0.45;
+  // A pack with a jet-climb loop shows it while the climb is steep. 0.3 keeps
+  // the climb short enough to read as a climb on a wide (2560px) display.
+  const climbShare = 0.3;
   let climbing = showJetPhase(
     jetSpriteFor((targetX - pos.x) * easeMotion(climbShare), cruiseY - pos.y, hasSprite),
   );
