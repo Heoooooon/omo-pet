@@ -16,15 +16,25 @@ const bundled: { id: string; pack?: string }[] = JSON.parse(
 );
 const shownOnLaunch = (s: { pack: string; companions: string[] }) => [s.pack, ...s.companions];
 
-test("first launch shows Omo and Jabdori, both free", () => {
+test("first launch shows the official OmO and Jabdori, both free", () => {
   store.clear();
   const shown = shownOnLaunch(loadSettings());
-  assert.deepEqual(shown, ["omo-cat", "jabdori"]);
+  assert.deepEqual(shown, ["omo", "jabdori"]);
   for (const id of shown) {
     const info = bundled.find((p) => p.id === id);
     assert.ok(info, `${id} is bundled`);
     assert.equal(info.pack, undefined, `${id} needs no paid pack`);
   }
+});
+
+test("the original Omo kitten is off by default but still free and the band vocal", () => {
+  store.clear();
+  const s = loadSettings();
+  assert.ok(!shownOnLaunch(s).includes("omo-cat"));
+  const info = bundled.find((p) => p.id === "omo-cat");
+  assert.ok(info, "omo-cat is still bundled, so Settings > Character can switch it on");
+  assert.equal(info.pack, undefined);
+  assert.equal(s.bandRoster.vocal, "omo-cat");
 });
 
 test("settings saved before Jabdori existed still bring Jabdori along", () => {

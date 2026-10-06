@@ -30,7 +30,7 @@ omo-pet은 [hermes-pet](https://github.com/Heoooooon/hermes-pet)의 포크로,
 - 🚀 **로켓 & 제트**: 수직으로 솟구치는 로켓 발사, 옆으로 내달리는 제트 대시
 - 🖥️ **멀티 모니터**: 배율이 다른 모니터(레티나 + 외장) 사이를 넘나듦. 좌우 배치도, 위아래로 쌓은 배치도 지원
 - 📱 **iPad 핸드오프**: Lanbeam 에이전트(별도 프로젝트)가 실행 중이면 화면 끝에서 iPad로 건너감(선택 기능, 없어도 모든 기능이 동작)
-- 🎛️ **설정 GUI**: 우클릭 → 설정에서 캐릭터를 바꾸고 크기·속도·활동성·묘기 빈도를 실시간으로 조절
+- 🎛️ **설정 GUI**: 우클릭 → 설정에서 캐릭터를 하나씩 켜고 끄고(처음엔 OmO와 잡도리, 고양이 오모는 꺼져 있음) 크기·속도·활동성·묘기 빈도를 실시간으로 조절
 - 🎭 **캐릭터 팩**: `public/packs/<name>/`에 동작별 APNG를 넣으면 새 캐릭터가 됩니다
 - 🐾 **친구 소환**: 성격(크기·걸음걸이)이 조금씩 다른 친구를 최대 3마리까지 추가
 - 🔍 **인식 오버레이**: 어떤 창을 발판으로 보는지 모니터별 오버레이로 표시
@@ -89,10 +89,11 @@ art/                     Omo source still + sprite-gen run records
   데스크톱 펫 엔진, 창 발판 물리, 멀티 모니터·iPad 기능
 - **스프라이트 생성**: [sprite-gen](https://github.com/aldegad/sprite-gen)(@aldegad)
 - **오모**는 CMORE의 오리지널 캐릭터입니다
+- **OmO** © Sisyphus Labs (OmO Native), 허락 받아 사용
 - **잡도리** © Sisyphus Labs (OmO Native), 허락 받아 사용
 
 ## 라이선스
 
 [MIT](./LICENSE): 코드와 오모 아트워크(`art/`,
-`public/packs/omo-cat/`)에 적용됩니다. 잡도리(`art/jabdori/`, `public/packs/jabdori/`)는
-MIT가 아니며 Sisyphus Labs의 허락을 받아 넣었습니다. 다른 곳에 쓰려면 Sisyphus Labs에 따로 허락을 받으세요.
+`public/packs/omo-cat/`)에 적용됩니다. OmO(`art/omo-official-video/`, `public/packs/omo/`)와
+잡도리(`art/jabdori-video/`, `public/packs/jabdori/`)는 MIT가 아니며 Sisyphus Labs의 허락을 받아 넣었습니다. 다른 곳에 쓰려면 Sisyphus Labs에 따로 허락을 받으세요.

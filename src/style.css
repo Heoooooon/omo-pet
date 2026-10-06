@@ -78,31 +78,37 @@ body[data-state="jet"].has-jet #pet {
   width: 216px;
 }
 
-/* Omo cat and Jabdori packs (Jabdori's cells are fitted to Omo's): states whose cell is shared with a prop (parachute, rocket)
+/* Omo cat, OmO and Jabdori packs (OmO's and Jabdori's cells are fitted to Omo's): states whose cell is shared with a prop (parachute, rocket)
    or drawn in a shorter cell get a wider display so the body reads the same
    size as idle (measured: idle body ~205px tall at 176px wide). */
 body[data-pack="omo-cat"][data-state="walk"].has-walk #pet,
-body[data-pack="jabdori"][data-state="walk"].has-walk #pet {
+body[data-pack="jabdori"][data-state="walk"].has-walk #pet,
+body[data-pack="omo"][data-state="walk"].has-walk #pet {
   width: 220px;
 }
 body[data-pack="omo-cat"][data-state="fall"].has-fall #pet,
-body[data-pack="jabdori"][data-state="fall"].has-fall #pet {
+body[data-pack="jabdori"][data-state="fall"].has-fall #pet,
+body[data-pack="omo"][data-state="fall"].has-fall #pet {
   width: 238px;
 }
 body[data-pack="omo-cat"][data-state="fall"][data-fall-phase="land"] #pet,
-body[data-pack="jabdori"][data-state="fall"][data-fall-phase="land"] #pet {
+body[data-pack="jabdori"][data-state="fall"][data-fall-phase="land"] #pet,
+body[data-pack="omo"][data-state="fall"][data-fall-phase="land"] #pet {
   width: 190px;
 }
 body[data-pack="omo-cat"][data-state="rocket"].has-rocket #pet,
-body[data-pack="jabdori"][data-state="rocket"].has-rocket #pet {
+body[data-pack="jabdori"][data-state="rocket"].has-rocket #pet,
+body[data-pack="omo"][data-state="rocket"].has-rocket #pet {
   width: 160px;
 }
 body[data-pack="omo-cat"][data-state="edge"].has-edge #pet,
-body[data-pack="jabdori"][data-state="edge"].has-edge #pet {
+body[data-pack="jabdori"][data-state="edge"].has-edge #pet,
+body[data-pack="omo"][data-state="edge"].has-edge #pet {
   width: 208px;
 }
 body[data-pack="omo-cat"][data-state="jet"].has-jet #pet,
-body[data-pack="jabdori"][data-state="jet"].has-jet #pet {
+body[data-pack="jabdori"][data-state="jet"].has-jet #pet,
+body[data-pack="omo"][data-state="jet"].has-jet #pet {
   width: 238px;
 }
 

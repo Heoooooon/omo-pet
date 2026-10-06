@@ -12,6 +12,7 @@ const ORIGINAL_PACKS = ["omo-cat", "dalli", "bara", "dochi", "rupa"];
 // Third-party characters shipped with the owner's permission. Each entry must
 // say whose character it is and on what terms; anything else stays blocked.
 const LICENSED_PACKS = {
+  omo: "OmO © Sisyphus Labs (OmO Native), 허락 받아 사용 (permission from 김연규, 2026-10-06)",
   jabdori: "잡도리 © Sisyphus Labs (OmO Native), 허락 받아 사용 (permission from 김연규, 2026-10-05)",
 };
 const ALLOWED_PACKS = [...ORIGINAL_PACKS, ...Object.keys(LICENSED_PACKS)];

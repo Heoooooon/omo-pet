@@ -1,5 +1,13 @@
 [
   {
+    "id": "omo",
+    "name": "OmO",
+    "names": { "ko": "OmO" },
+    "emoji": "🐈‍⬛",
+    "stride": 56,
+    "widths": { "walk": 220 }
+  },
+  {
     "id": "omo-cat",
     "name": "Omo",
     "names": { "ko": "오모" },

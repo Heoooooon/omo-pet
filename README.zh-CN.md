@@ -85,10 +85,11 @@ art/                     Omo source still + sprite-gen run records
   桌面宠物引擎、窗口平台物理，以及多显示器和 iPad 功能
 - **精灵图生成**：[sprite-gen](https://github.com/aldegad/sprite-gen)（@aldegad）
 - **Omo** 是 CMORE 的原创角色
+- **OmO** © Sisyphus Labs (OmO Native)，经许可使用
 - **Jabdori（잡도리）** © Sisyphus Labs (OmO Native)，经许可使用
 
 ## 许可证
 
 [MIT](./LICENSE)：适用于代码和 Omo 的美术素材（`art/`、
-`public/packs/omo-cat/`）。Jabdori（`art/jabdori/`、`public/packs/jabdori/`）不适用 MIT，
+`public/packs/omo-cat/`）。OmO（`art/omo-official-video/`、`public/packs/omo/`）和 Jabdori（`art/jabdori-video/`、`public/packs/jabdori/`）不适用 MIT，
 经 Sisyphus Labs 许可随附。

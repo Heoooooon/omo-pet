@@ -1,0 +1,24 @@
+{
+  "kind": "sprite-gen-video-report",
+  "provider": "grok-imagine",
+  "auth_source": "grok-login",
+  "model": "grok-imagine-video-1.5",
+  "mode": "first-last",
+  "request_id": "c9859a75-0eb0-907b-910f-6ed74dde5643",
+  "image": "D:\\omonyang-work\\omopet-official\\gen\\set1\\side-idle\\canvas.png",
+  "inputs": {
+    "image": "D:\\omonyang-work\\omopet-official\\gen\\set1\\side-idle\\canvas.png",
+    "last_frame": "D:\\omonyang-work\\omopet-official\\gen\\set1\\side-idle\\canvas.png"
+  },
+  "prompt": "2D game sprite animation. OmO, the chibi black hooded cat with small cat ears on the hood and a glowing lime-green OmO face stands still in a relaxed idle pose with both feet planted flat on the ground for the whole clip: slow, gentle breathing that softly rises and falls in the chest and shoulders, a slight settle of the arms, hair and loose cloth, and one natural blink if the face has eyes. The feet never lift, step, shuffle or slide — no walking, no marching in place, no turning. The character is seen from the exact side, facing right. Stays centered in the frame and does not move across the screen; the body and hair always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image. The last frame returns to the exact pose of the first frame, so the animation loops seamlessly.",
+  "out": "D:\\omonyang-work\\omopet-official\\gen\\set1\\side-idle\\clip.mp4",
+  "bytes": 566791,
+  "host": "vidgen.x.ai",
+  "duration_requested": 3,
+  "duration_reported": 3,
+  "resolution": "720p",
+  "aspect_ratio": null,
+  "generate_audio": false,
+  "elapsed_seconds": 32.773,
+  "polls": 8
+}
