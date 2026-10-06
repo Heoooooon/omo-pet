@@ -2,7 +2,7 @@
 
 **English** · [简体中文](README.zh-CN.md) · [日本語](README.ja.md) · [한국어](README.ko.md)
 
-**Omo the cat and Jabdori the puppy live on your monitors.** An open-source desktop pet that uses
+**OmO, Jabdori the puppy and Omo the cat live on your monitors.** An open-source desktop pet that uses
 your app windows as platforms — Omo walks on them, rockets off to other
 monitors, floats back down on a parachute, and can even hop over to your iPad.
 
@@ -31,7 +31,7 @@ Every action is an APNG sprite (they play right here):
 - 🚀 **Rocket & jet** — vertical rocket launches and sideways jet dashes
 - 🖥️ **Multi-monitor** — crosses between monitors with different scale factors (Retina + external), side by side or stacked vertically
 - 📱 **iPad handoff** — if the Lanbeam agent (a separate project) is running, Omo hops over to your iPad at the screen edge (optional; everything works without it)
-- 🎛️ **Settings GUI** — right-click → Settings: show or hide each character (Omo and Jabdori both come out on first launch) and tune size, speed, activity, and trick frequency live
+- 🎛️ **Settings GUI** — right-click → Settings: show or hide each character (OmO and Jabdori come out on first launch; the Omo kitten is one click away) and tune size, speed, activity, and trick frequency live
 - 🎭 **Character packs** — drop action APNGs into `public/packs/<name>/` to make a new character
 - 🐾 **Summon friends** — add up to 3 friends, each with a slightly different personality (size, gait)
 - 🔍 **Recognition overlay** — a per-monitor overlay shows which windows count as platforms
@@ -94,11 +94,12 @@ art/                     Omo source still + sprite-gen run records
   desktop-pet engine, window-platform physics, and multi-monitor/iPad features
 - **Sprite generation** — [sprite-gen](https://github.com/aldegad/sprite-gen) (@aldegad)
 - **Omo** is an original character by CMORE
+- **OmO** © Sisyphus Labs (OmO Native), used with permission (OmO © Sisyphus Labs (OmO Native), 허락 받아 사용)
 - **Jabdori (잡도리)** © Sisyphus Labs (OmO Native), used with permission (잡도리 © Sisyphus Labs (OmO Native), 허락 받아 사용)
 
 ## License
 
 [MIT](./LICENSE) — covers the code and the Omo artwork (`art/`,
-`public/packs/omo-cat/`). Jabdori (`art/jabdori/`, `public/packs/jabdori/`) is not
-MIT: it belongs to Sisyphus Labs and ships here with their permission, so do not reuse it
+`public/packs/omo-cat/`). OmO (`art/omo-official-video/`, `public/packs/omo/`) and
+Jabdori (`art/jabdori-video/`, `public/packs/jabdori/`) are not they belong to Sisyphus Labs and ship here with their permission, so do not reuse them
 without asking them.

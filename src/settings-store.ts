@@ -29,9 +29,11 @@ export const DEFAULT_ROSTER: Record<Instrument, string> = {
 };
 
 export const DEFAULTS: PetSettings = {
-  pack: "omo-cat",
-  // Omo and Jabdori are the two free main characters and both show up on
-  // first launch; either can be hidden from Settings > Character.
+  pack: "omo",
+  // The official OmO and Jabdori (Sisyphus Labs, OmO Native) are the free
+  // main characters and both show up on first launch; either can be hidden
+  // from Settings > Character. The original Omo kitten (omo-cat) stays
+  // available there, off by default, and still sings in the band.
   companions: ["jabdori"],
   size: 1,
   speed: 1,

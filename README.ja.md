@@ -87,10 +87,11 @@ art/                     Omo source still + sprite-gen run records
   デスクトップペットのエンジン、ウィンドウ足場の物理、マルチモニターと iPad の機能はここから来ています
 - **スプライト生成**：[sprite-gen](https://github.com/aldegad/sprite-gen)（@aldegad）
 - **オモ**は CMORE のオリジナルキャラクターです
+- **OmO** © Sisyphus Labs (OmO Native)、許可を得て使用しています
 - **ジャブドリ（잡도리）** © Sisyphus Labs (OmO Native)、許可を得て使用しています
 
 ## ライセンス
 
 [MIT](./LICENSE)：コードとオモのアートワーク（`art/`、
-`public/packs/omo-cat/`）が対象です。ジャブドリ（`art/jabdori/`、`public/packs/jabdori/`）は MIT ではなく、
+`public/packs/omo-cat/`）が対象です。OmO（`art/omo-official-video/`、`public/packs/omo/`）とジャブドリ（`art/jabdori-video/`、`public/packs/jabdori/`）は MIT ではなく、
 Sisyphus Labs の許可を得て同梱しています。
