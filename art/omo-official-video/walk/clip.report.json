@@ -1,0 +1,23 @@
+{
+  "kind": "sprite-gen-video-report",
+  "provider": "grok-imagine",
+  "auth_source": "grok-login",
+  "model": "grok-imagine-video-1.5",
+  "mode": "image-to-video",
+  "request_id": "9d608685-641f-9e05-a72e-51237e36df1a",
+  "image": "D:\\omonyang-work\\omopet-official\\gen\\set1\\side-walk\\canvas.png",
+  "inputs": {
+    "image": "D:\\omonyang-work\\omopet-official\\gen\\set1\\side-walk\\canvas.png"
+  },
+  "prompt": "2D game sprite animation. OmO, the chibi black hooded cat with small cat ears on the hood and a glowing lime-green OmO face walks naturally in place, as if on a treadmill, without moving across the screen. The character is seen from the exact side, facing right. Stays centered in the frame and does not move across the screen; the body and hair always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image. Consistent, evenly paced motion so the animation loops.",
+  "out": "D:\\omonyang-work\\omopet-official\\gen\\set1\\side-walk\\clip.mp4",
+  "bytes": 1471854,
+  "host": "vidgen.x.ai",
+  "duration_requested": 3,
+  "duration_reported": 3,
+  "resolution": "720p",
+  "aspect_ratio": null,
+  "generate_audio": false,
+  "elapsed_seconds": 19.418,
+  "polls": 5
+}

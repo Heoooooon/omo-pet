@@ -1,0 +1,79 @@
+{
+  "kind": "sprite-gen-video-canvas-report",
+  "still": [
+    992,
+    1040
+  ],
+  "out": "D:\\omonyang-work\\omopet-official\\gen\\set1\\side-idle\\canvas.png",
+  "state": "idle",
+  "fit": "state",
+  "shape": "square",
+  "ratio": 1.0,
+  "canvas": [
+    1040,
+    1040
+  ],
+  "offset": [
+    24,
+    0
+  ],
+  "headroom": 0.0,
+  "lead": 0.0,
+  "trail": 0.0,
+  "facing": "right",
+  "key_rgb": [
+    255,
+    0,
+    255
+  ],
+  "corner_rgb": [
+    234,
+    4,
+    142
+  ],
+  "key": "magenta",
+  "key_painted": [
+    228,
+    4,
+    136
+  ],
+  "normalized_px": 740277,
+  "normalized_pct": 71.75,
+  "why": "in-place motion fits the still's own frame",
+  "facing_check": {
+    "model": "grok-4.6",
+    "usage": {
+      "input_tokens": 1108,
+      "input_tokens_details": {
+        "cached_tokens": 640
+      },
+      "output_tokens": 6226,
+      "output_tokens_details": {
+        "reasoning_tokens": 6212
+      },
+      "total_tokens": 7334,
+      "num_sources_used": 0,
+      "num_server_side_tools_used": 0,
+      "cost_in_usd_ticks": 131280800,
+      "context_details": {
+        "input_tokens": 1108,
+        "output_tokens": 6233
+      }
+    },
+    "response_status": "completed",
+    "auth_source": "grok-login",
+    "transport": "xai-api",
+    "direction": "right",
+    "confidence": 0.86,
+    "confidence_source": "model-self-report",
+    "requested": "right",
+    "fix": "none",
+    "action": "none",
+    "source": "D:\\omonyang-work\\omopet-official\\gen\\stills\\base-side.png",
+    "source_sha256": "9c163d9c5fe776b5ac6fc9c6d176f39d0254e91c886ff37a75d9a3f1782d8757",
+    "out": "D:\\omonyang-work\\omopet-official\\gen\\set1\\side.facing.png",
+    "final_direction": "right",
+    "final_direction_source": "observation",
+    "output_sha256": "9c163d9c5fe776b5ac6fc9c6d176f39d0254e91c886ff37a75d9a3f1782d8757"
+  }
+}
