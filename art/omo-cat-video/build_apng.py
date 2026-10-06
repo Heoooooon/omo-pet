@@ -111,7 +111,8 @@ def main() -> None:
         src = [Image.open(p).convert("RGBA") for p in cycle]
         src = sample(src, max(2, round(item["seconds"] * item["fps"])))
         end_on = read_frames(args.out / f"{item['end_on']}.apng")[0] if "end_on" in item else None
-        cells = fit_cells(src, read_frames(args.reference_pack / f"{state}.apng"), end_on, item.get("fit", "box"))
+        reference = read_frames(args.reference_pack / f"{item.get('ref', state)}.apng")  # ref: cell borrowed from another state
+        cells = fit_cells(src, reference, end_on, item.get("fit", "box"))
         if item.get("defringe"):
             cells = defringe(cells)
         save_apng(cells, args.out / f"{state}.apng", item["seconds"], item["plays"])

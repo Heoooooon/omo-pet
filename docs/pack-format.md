@@ -12,6 +12,7 @@ are stored in the app data folder (`%APPDATA%\dev.omopet.app\packs` on Windows,
 | `fall.apng` | no | Parachute loop (otherwise idle) |
 | `fall-open.apng`, `fall-glide.apng`, `fall-land.apng` | no | Three-phase parachute, like omo-cat |
 | `edge.apng`, `rocket.apng`, `jet.apng` | no | Climb-and-sit, rocket and jet stunts |
+| `jet-climb.apng` | no | Diagonal climb shown while a jet ride climbs steeply (otherwise `jet.apng` plays for the whole ride); drawn in the rocket's tall cell |
 | `play.apng` | for the band | Instrument loop; 3 s (or 1.5 s, 1 s) keeps it on the song's beat grid |
 | `<state>.2.apng` … `.4.apng` | no | Variants picked at random |
 | `pack.json` | no | Name and band role |
