@@ -4,7 +4,7 @@
     "name": "OmO",
     "names": { "ko": "OmO" },
     "emoji": "🐈‍⬛",
-    "stride": 56,
+    "stride": 43,
     "widths": { "walk": 220 }
   },
   {
@@ -13,7 +13,7 @@
     "names": { "ko": "오모" },
     "emoji": "🐱",
     "instrument": "vocal",
-    "stride": 56,
+    "stride": 36,
     "widths": { "walk": 220 }
   },
   {

@@ -78,33 +78,73 @@ body[data-state="jet"].has-jet #pet {
   width: 216px;
 }
 
-/* Omo cat and OmO packs (OmO's cells are fitted to Omo's): states whose cell is shared with a prop (parachute, rocket)
-   or drawn in a shorter cell get a wider display so the body reads the same
-   size as idle (measured: idle body ~205px tall at 176px wide). */
-body[data-pack="omo-cat"][data-state="walk"].has-walk #pet,
-body[data-pack="omo"][data-state="walk"].has-walk #pet {
-  width: 220px;
+/* Omo (omo-cat) and OmO keep one character size in every state, like Jabdori
+   below: each width puts the head at the rocket and jet rides' size (Omo:
+   head width, ~59px; OmO: the glowing "O" eye height, ~15px). margin-bottom
+   keeps the feet where they stood before the shrink. The fall width fits the
+   end of the parachute opening, which zooms out into the glide. */
+body[data-pack="omo-cat"] #pet {
+  width: 100px;
+  margin-bottom: 6.3px;
 }
-body[data-pack="omo-cat"][data-state="fall"].has-fall #pet,
-body[data-pack="omo"][data-state="fall"].has-fall #pet {
+body[data-pack="omo-cat"][data-state="drag"] #pet {
+  width: 97px;
+}
+body[data-pack="omo-cat"][data-state="walk"].has-walk #pet {
+  width: 140px;
+  margin-bottom: 6px;
+}
+body[data-pack="omo-cat"][data-state="edge"].has-edge #pet {
+  width: 131px;
+  margin-bottom: 8.8px;
+}
+body[data-pack="omo-cat"][data-state="fall"].has-fall #pet {
+  width: 170px;
+  margin-bottom: 0;
+}
+body[data-pack="omo-cat"][data-state="fall"][data-fall-phase="land"] #pet {
+  width: 119px;
+  margin-bottom: 5.9px;
+}
+body[data-pack="omo-cat"][data-state="rocket"].has-rocket #pet {
+  width: 160px;
+  margin-bottom: 0;
+}
+body[data-pack="omo-cat"][data-state="jet"].has-jet #pet {
   width: 238px;
+  margin-bottom: 0;
 }
-body[data-pack="omo-cat"][data-state="fall"][data-fall-phase="land"] #pet,
+
+body[data-pack="omo"] #pet {
+  width: 120px;
+  margin-bottom: 4.7px;
+}
+body[data-pack="omo"][data-state="drag"] #pet {
+  width: 116px;
+}
+body[data-pack="omo"][data-state="walk"].has-walk #pet {
+  width: 169px;
+  margin-bottom: 4px;
+}
+body[data-pack="omo"][data-state="edge"].has-edge #pet {
+  width: 158px;
+  margin-bottom: 5.2px;
+}
+body[data-pack="omo"][data-state="fall"].has-fall #pet {
+  width: 205px;
+  margin-bottom: 0;
+}
 body[data-pack="omo"][data-state="fall"][data-fall-phase="land"] #pet {
-  width: 190px;
+  width: 137px;
+  margin-bottom: 4.4px;
 }
-body[data-pack="omo-cat"][data-state="rocket"].has-rocket #pet,
 body[data-pack="omo"][data-state="rocket"].has-rocket #pet {
   width: 160px;
+  margin-bottom: 0;
 }
-body[data-pack="omo-cat"][data-state="edge"].has-edge #pet,
-body[data-pack="omo"][data-state="edge"].has-edge #pet {
-  width: 208px;
-}
-body[data-pack="omo-cat"][data-state="jet"].has-jet #pet,
-body[data-pack="jabdori"][data-state="jet"].has-jet #pet,
 body[data-pack="omo"][data-state="jet"].has-jet #pet {
   width: 238px;
+  margin-bottom: 0;
 }
 
 /* Diagonal climb loop (packs that ship jet-climb): drawn in the rocket's tall cell. */

@@ -14,6 +14,13 @@ import { initI18n, t } from "./i18n";
 import { retimeApng } from "./apng";
 import { jetSpriteFor, type JetSprite } from "./jet-sprite";
 import {
+  apngAlphaMask,
+  hitsMask,
+  insideRect,
+  spritePoint,
+  type AlphaMask,
+} from "./hit-mask";
+import {
   getLicense,
   hasBand,
   LICENSE_EVENT,
@@ -102,7 +109,7 @@ function walkSpeed(): number {
   // Six frames at 8 fps make one stride. Short-legged local packs take
   // smaller steps; zoom/personality scale the stride, not the cycle rate.
   const stride = currentPack === DEFAULTS.pack
-    ? 56
+    ? 43 // OmO's packs.json stride, also before the pack list has loaded
     : packStride(packInfos.find((p) => p.id === currentPack));
   const rate = state === "walk"
     ? [...walkPlayback.values()].find(({ src }) => src === pet.src)?.speed ?? 1
@@ -1110,6 +1117,74 @@ appWindow.onMoved(() => {
     if (state === "drag") void settle();
   }, 250);
 });
+
+// ---------- click-through ----------
+//
+// Only the drawn character takes the mouse; clicks on the transparent rest of
+// the window fall through to whatever is behind it. Rust reports the cursor
+// while it is over this window (the webview gets no mouse events once the
+// window ignores them) and each report re-decides from the sprite's pixels.
+
+const HIT_MARGIN = 6; // CSS px of slack around the outline
+const spriteMasks = new Map<string, Promise<AlphaMask | null>>();
+let passThrough = false;
+
+function maskFor(src: string): Promise<AlphaMask | null> {
+  const key = src.split("?")[0]; // one-shot cache-busters share a mask
+  let mask = spriteMasks.get(key);
+  if (!mask) {
+    mask = fetch(key)
+      .then((r) => r.arrayBuffer())
+      .then((b) => apngAlphaMask(new Uint8Array(b)))
+      .catch((e) => {
+        console.warn("sprite mask unavailable, using its box:", key, e);
+        return null;
+      });
+    spriteMasks.set(key, mask);
+  }
+  return mask;
+}
+
+async function takesCursor(x: number, y: number): Promise<boolean> {
+  if (pressed || dragging || state === "drag") return true;
+  if (!menu.hidden && insideRect(x, y, menu.getBoundingClientRect(), HIT_MARGIN)) return true;
+  const src = pet.currentSrc || pet.src;
+  const mask = await maskFor(src);
+  const rect = pet.getBoundingClientRect();
+  if (!mask || !rect.width || !rect.height) return insideRect(x, y, rect, HIT_MARGIN);
+  const flipped = pet.style.getPropertyValue("--flip").trim() === "-1";
+  const p = spritePoint(x, y, rect, mask, flipped);
+  return hitsMask(mask, p.x, p.y, HIT_MARGIN * p.perCss);
+}
+
+async function setPassThrough(next: boolean) {
+  if (next === passThrough) return;
+  passThrough = next;
+  await appWindow.setIgnoreCursorEvents(next).catch((e) => {
+    passThrough = !next;
+    console.warn("setIgnoreCursorEvents failed:", e);
+  });
+}
+
+type PetCursor = { x: number; y: number; inside: boolean };
+let cursorSeq = 0;
+let lastCursor: PetCursor | null = null;
+
+async function recheckCursor() {
+  const c = lastCursor;
+  if (!c?.inside) return; // elsewhere the window's mode does not matter
+  const seq = ++cursorSeq;
+  const hit = await takesCursor(c.x, c.y);
+  if (seq === cursorSeq) await setPassThrough(!hit); // a newer point wins
+}
+
+void appWindow.listen<PetCursor>("pet-cursor", ({ payload }) => {
+  lastCursor = payload;
+  void recheckCursor();
+});
+// A new sprite (state change, landing, rocket ignition) can move the drawn
+// pixels under a cursor that stays put.
+pet.addEventListener("load", () => void recheckCursor());
 
 // ---------- click reaction ----------
 
