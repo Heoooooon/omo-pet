@@ -27,6 +27,15 @@
     "fit": "height",
     "defringe": true
   },
+  "jet-climb": {
+    "cycle": "custom/jet-climb/loop/cycle",
+    "seconds": 3,
+    "fps": 24,
+    "plays": 0,
+    "ref": "rocket",
+    "fit": "height",
+    "defringe": true
+  },
   "fall-glide": {
     "cycle": "custom/fall-glide/loop/cycle",
     "seconds": 3,

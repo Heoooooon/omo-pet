@@ -112,6 +112,24 @@ body[data-pack="omo"][data-state="jet"].has-jet #pet {
   width: 238px;
 }
 
+/* Diagonal climb loop (packs that ship jet-climb): drawn in the rocket's tall cell. */
+body[data-state="jet"][data-jet-phase="climb"] #pet {
+  width: 176px;
+}
+/* Sized so the head matches the level jet's (measured: 72px head at 238px jet width). */
+body[data-pack="omo-cat"][data-state="jet"][data-jet-phase="climb"] #pet,
+body[data-pack="jabdori"][data-state="jet"][data-jet-phase="climb"] #pet,
+body[data-pack="omo"][data-state="jet"][data-jet-phase="climb"] #pet {
+  width: 140px;
+}
+/* Jabdori's rocket loops (sprite-gen 2.38): the climb and level jet are sized so the
+   rocket and the puppy keep one size when the dash switches from climb to level
+   (measured on the portholes and goggles: 14.8px scale at 221px for both). */
+body[data-pack="jabdori"][data-state="jet"].has-jet #pet,
+body[data-pack="jabdori"][data-state="jet"][data-jet-phase="climb"] #pet {
+  width: 221px;
+}
+
 body.ignite #pet {
   animation: shake 0.09s linear infinite !important;
 }

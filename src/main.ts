@@ -12,6 +12,7 @@ import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { emit, listen } from "@tauri-apps/api/event";
 import { initI18n, t } from "./i18n";
 import { retimeApng } from "./apng";
+import { jetSpriteFor, type JetSprite } from "./jet-sprite";
 import {
   getLicense,
   hasBand,
@@ -128,7 +129,7 @@ const ONE_SHOT: ReadonlySet<State> = new Set(["fall", "edge"]);
 
 // Optional multi-phase variants a pack may ship (fall gets three phases:
 // deploy one-shot → glide loop → landing one-shot).
-const EXTRA_SPRITES = ["fall-open", "fall-glide", "fall-land"] as const;
+const EXTRA_SPRITES = ["fall-open", "fall-glide", "fall-land", "jet-climb"] as const;
 
 // Each state can ship variants: <key>.apng (base) plus <key>.2.apng …
 // <key>.4.apng. Entering a state picks one at random, so the same action
@@ -230,6 +231,7 @@ function setState(next: State) {
   state = next;
   document.body.dataset.state = next;
   delete document.body.dataset.fallPhase; // fall() re-tags its own phases
+  delete document.body.dataset.jetPhase; // jet rides re-tag their climb
   if (!changed && !ONE_SHOT.has(next)) return; // keep the current variant
   const src = spriteFor(next);
   if (ONE_SHOT.has(next) && spriteVariants.has(next)) {
@@ -454,6 +456,14 @@ async function jetDash() {
   setState("jet");
   const version = stateVersion;
 
+  // Climb to cruise height over the first part of the dash, then level off.
+  // A pack with a jet-climb loop shows it while the climb is steep. 0.3 keeps
+  // the climb short enough to read as a climb on a wide (2560px) display.
+  const climbShare = 0.3;
+  let climbing = showJetPhase(
+    jetSpriteFor((targetX - pos.x) * easeMotion(climbShare), cruiseY - pos.y, hasSprite),
+  );
+
   const duration = Math.max(1.1, Math.abs(targetX - pos.x) / (700 * scale) * 1.5);
   let y = pos.y;
   let t = 0;
@@ -464,8 +474,9 @@ async function jetDash() {
     const progress = Math.min(1, t / duration);
     const eased = easeMotion(progress);
     const x = pos.x + (targetX - pos.x) * eased;
-    y = pos.y + (cruiseY - pos.y) * eased
+    y = pos.y + (cruiseY - pos.y) * easeMotion(Math.min(1, progress / climbShare))
       + Math.sin(t * 5.5) * 7 * scale * Math.sin(Math.PI * progress) ** 2;
+    if (climbing && progress >= climbShare) climbing = showJetPhase("jet");
     const arrived = progress === 1;
     if (arrived) {
       stopJet();
@@ -485,6 +496,19 @@ async function jetDash() {
 function stopJet() {
   jetFrame?.();
   jetFrame = null;
+}
+
+const hasSprite = (key: string) => spriteVariants.has(key);
+
+// Swap the jet ride's sprite between the level loop and the diagonal climb
+// (when the pack ships one). Returns whether the climb loop is showing.
+function showJetPhase(sprite: JetSprite): boolean {
+  const climb = sprite === "jet-climb";
+  if (climb) document.body.dataset.jetPhase = "climb";
+  else delete document.body.dataset.jetPhase;
+  const src = spriteFor(sprite);
+  if (!pet.src.endsWith(src)) pet.src = src;
+  return climb;
 }
 
 // ---------- rocket: blast off, cut the engine, parachute down ----------
@@ -872,6 +896,9 @@ async function crossTo(m: Monitor, dir: -1 | 1) {
   setFlip(dir);
   setState(climbing ? "jet" : "walk");
   const version = stateVersion;
+  // The climb is straight up, so a pack with a jet-climb loop shows it
+  // until she levels off into the cruise.
+  let steep = climbing && showJetPhase(jetSpriteFor(0, cruiseY - y, hasSprite));
 
   let vx = 0;
   let t = 0;
@@ -884,6 +911,7 @@ async function crossTo(m: Monitor, dir: -1 | 1) {
       // area, then cruise sideways over the boundary.
       y += (cruiseY - y) * (1 - Math.exp(-3.9 * dt));
       if (y - cruiseY < 40) {
+        if (steep) steep = showJetPhase("jet");
         const desired = Math.min(1300, Math.sqrt(5200 * Math.abs(endX - x)));
         vx += Math.max(-2600 * dt, Math.min(2600 * dt, desired - vx));
         x += dir * vx * dt;

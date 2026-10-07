@@ -4,21 +4,21 @@
   "auth_source": "grok-login",
   "model": "grok-imagine-video-1.5",
   "mode": "first-last",
-  "request_id": "a16ca4da-6d78-9572-ac4a-ebe50234651b",
-  "image": "D:\\omonyang-work\\omopet-jabdori\\gen\\custom\\jet\\canvas.png",
+  "request_id": "4989e574-bf3c-9bd7-9f8f-42d5c0968d62",
+  "image": "/Users/gwon-yeheon/.omonyang/omopet-rocket-sprites/v238/custom/jet/canvas.png",
   "inputs": {
-    "image": "D:\\omonyang-work\\omopet-jabdori\\gen\\custom\\jet\\canvas.png",
-    "last_frame": "D:\\omonyang-work\\omopet-jabdori\\gen\\custom\\jet\\canvas-last.png"
+    "image": "/Users/gwon-yeheon/.omonyang/omopet-rocket-sprites/v238/custom/jet/canvas.png",
+    "last_frame": "/Users/gwon-yeheon/.omonyang/omopet-rocket-sprites/v238/custom/jet/canvas-last.png"
   },
-  "prompt": "2D game sprite animation. Jabdori the chibi white puppy with big floppy dark-gray ears rides the small horizontal rocket flying to the right in place: the flame behind the rocket flickers and pulses quickly, the puppy's floppy ears and tail stream and flutter backwards in the wind, and puppy and rocket bob gently up and down by a few pixels. The puppy keeps leaning forward holding the rocket nose, seen from the exact side, facing right. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image. The last frame returns to the exact pose of the first frame, so the animation loops seamlessly.",
-  "out": "D:\\omonyang-work\\omopet-jabdori\\gen\\custom\\jet\\clip.mp4",
-  "bytes": 1024121,
+  "prompt": "2D game sprite animation. Jabdori the chibi white puppy with big floppy dark-gray ears, aviator goggles pushed up on its forehead and a short red scarf, rides on top of a retro silver-and-red rocket flying horizontally to the right in place, seen from the exact side: the big multi-layer exhaust flame behind the rocket (white-hot core, orange, violet edge) flickers and pulses quickly with its long trailing streak to the left, the small star sparkles twinkle, the small light-gray smoke puff stays attached right at the nozzle and only churns in place (no detached smoke rings, no drifting clouds, no puffs breaking off), the flame always keeps its white-hot core, orange body and a clearly visible bright violet-purple outer edge along its whole length, the puppy's floppy ears, tail and the two scarf tails stream and flutter backwards in the wind, and the puppy and the rocket bob gently up and down by a few pixels. The puppy keeps leaning forward gripping the fuselage with its determined small smile the whole time, facing right. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure bright green (#00FF00) chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image: the retro silver rocket with its red nose cone, red stripe, two blue portholes and red fins, the puppy's goggles on the forehead and red scarf all stay exactly as drawn. The last frame returns to the exact pose of the first frame, so the animation loops seamlessly.",
+  "out": "/Users/gwon-yeheon/.omonyang/omopet-rocket-sprites/v238/custom/jet/clip.mp4",
+  "bytes": 836329,
   "host": "vidgen.x.ai",
   "duration_requested": 3,
   "duration_reported": 3,
   "resolution": "720p",
   "aspect_ratio": null,
   "generate_audio": false,
-  "elapsed_seconds": 41.737,
+  "elapsed_seconds": 44.046,
   "polls": 10
 }
