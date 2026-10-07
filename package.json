@@ -7,8 +7,9 @@
     "dev": "vite",
     "build": "tsc && vite build && node scripts/check-bundle.mjs dist",
     "preview": "vite preview",
-    "test": "node --test --experimental-strip-types scripts/check-bundle.test.mjs src/settings-store.test.ts src/jet-sprite.test.ts src/hit-mask.test.ts",
-    "tauri": "tauri"
+    "test": "node --test --experimental-strip-types scripts/check-bundle.test.mjs src/settings-store.test.ts src/jet-sprite.test.ts src/hit-mask.test.ts src/web-handoff.test.ts",
+    "tauri": "tauri",
+    "build:overlay": "node scripts/build-overlay.mjs"
   },
   "dependencies": {
     "@tauri-apps/api": "^2",

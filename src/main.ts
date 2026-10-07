@@ -13,6 +13,7 @@ import { emit, listen } from "@tauri-apps/api/event";
 import { initI18n, t } from "./i18n";
 import { retimeApng } from "./apng";
 import { jetSpriteFor, type JetSprite } from "./jet-sprite";
+import { arrivalSpot, entersView, insideView, type ScreenRect } from "./web-handoff";
 import {
   apngAlphaMask,
   hitsMask,
@@ -625,6 +626,7 @@ async function walk() {
   let velocity = 0;
   walkFrame = motionLoop(async (dt) => {
     if (state !== "walk") return stopWalk();
+    const before = x;
     const previous = velocity;
     const desired = Math.min(speed, Math.sqrt(2 * acceleration * Math.abs(targetX - x)));
     velocity += Math.max(-acceleration * dt, Math.min(acceleration * dt, desired - velocity));
@@ -633,6 +635,11 @@ async function walk() {
     if (arrived) x = targetX;
     await appWindow.setPosition(new PhysicalPosition(Math.round(x), p.y - winH));
     if (stateVersion !== version) return;
+    const into = webEntryEdge(before, x, p.y - winH);
+    if (into && webView) {
+      const { feet } = petPoint(x, p.y - winH);
+      if (await handBackToWeb(into === "left" ? webView.left : webView.right, feet, dir, "walk")) return;
+    }
     if (!arrived) return;
     walkFrame?.();
     walkFrame = null;
@@ -694,6 +701,7 @@ async function goAway() {
   if (edgeTimer) clearTimeout(edgeTimer);
   setState("idle");
   await appWindow.hide();
+  void setWebReady(false);
   let failures = 0;
   awayPoll = setInterval(async () => {
     try {
@@ -728,8 +736,129 @@ async function comeBack(edge: "left" | "right") {
   await appWindow.setPosition(new PhysicalPosition(x, monY + monH - winH));
   setFlip(edge === "left" ? 1 : -1); // face into the screen
   await appWindow.show();
+  void setWebReady(true);
   setState("idle");
   scheduleNext();
+}
+
+// ---------- web overlay handoff: the pet walks between a browser tab and the desktop ----------
+//
+// A tab running the web overlay posts to the local listener (web_handoff.rs)
+// when she walks off the page; the main pet then appears at that screen spot
+// and carries on. Walking or being dropped back into that page hands her back.
+
+type WebArrival = {
+  tab: string;
+  pack: string;
+  state: "walk" | "jet";
+  dir: -1 | 1;
+  x: number;
+  feetY: number;
+  view: ScreenRect;
+};
+
+let webView: ScreenRect | null = null;
+let webCooldownUntil = 0;
+let webAway: ReturnType<typeof setInterval> | null = null;
+
+const setWebReady = (ready: boolean) =>
+  invoke("web_handoff_ready", { ready }).catch(() => undefined);
+
+async function arriveFromWeb(a: WebArrival) {
+  if (!isMainPet || bandActive || awayPoll || pressed) return;
+  stopWebAway();
+  if (walkTimer) clearTimeout(walkTimer);
+  if (edgeTimer) clearTimeout(edgeTimer);
+  walkFrame?.();
+  walkFrame = null;
+  stopFall();
+  stopRocket();
+  stopJet();
+  stopCross();
+  if (a.pack !== currentPack && packInfos.some((p) => p.id === a.pack)) loadPack(a.pack);
+
+  const k = await appWindow.scaleFactor();
+  const size = await appWindow.outerSize();
+  const monitors = (await availableMonitors()).map(logicalRect);
+  const run = a.state === "jet" ? 360 : 140;
+  const spot = arrivalSpot(monitors, a, { w: size.width / k, h: size.height / k }, run);
+  if (!spot) return;
+  await appWindow.setPosition(new LogicalPosition(spot.x, spot.y));
+  setFlip(a.dir);
+  const moving: State = a.state === "jet" && spriteVariants.has("jet") ? "jet" : "walk";
+  setState(moving);
+  await appWindow.show();
+  await refreshMonitor();
+  await refreshPlatforms();
+  standingOn = null;
+  webView = a.view;
+  webCooldownUntil = Date.now() + 8000;
+
+  // Same direction, same move for a moment, then land wherever that is.
+  const version = stateVersion;
+  const speed = moving === "jet" ? 700 : walkSpeed() / scale;
+  let x = spot.x;
+  crossFrame = motionLoop(async (dt) => {
+    if (state !== moving) return stopCross();
+    x += speed * dt * a.dir;
+    const done = a.dir === 1 ? x >= spot.endX : x <= spot.endX;
+    if (done) x = spot.endX;
+    await appWindow.setPosition(new LogicalPosition(x, spot.y));
+    if (stateVersion !== version || !done) return;
+    stopCross();
+    void settle();
+  });
+}
+
+// Offer her back to the tab at screen point (x, feetY); hidden until the tab
+// collects her, back on the desktop if it never does.
+async function handBackToWeb(x: number, feetY: number, dir: -1 | 1, how: "walk" | "fall"): Promise<boolean> {
+  const ok = await invoke<boolean>("web_handback", {
+    entry: { x, feetY, dir, state: how },
+  }).catch(() => false);
+  if (!ok) return false;
+  if (walkTimer) clearTimeout(walkTimer);
+  if (edgeTimer) clearTimeout(edgeTimer);
+  walkFrame?.();
+  walkFrame = null;
+  stopCross();
+  setState("idle");
+  await appWindow.hide();
+  const since = Date.now();
+  webAway = setInterval(async () => {
+    const st = await invoke<{ pending: boolean; alive: boolean }>("web_status").catch(() => null);
+    if (st?.pending && Date.now() - since < 5000) return;
+    if (st?.pending && !(await invoke<boolean>("web_handback_cancel"))) return;
+    if (st && !st.pending && st.alive) return; // living in the tab
+    stopWebAway();
+    await appWindow.show();
+    void settle();
+  }, 1000);
+  return true;
+}
+
+function stopWebAway() {
+  if (webAway) clearInterval(webAway);
+  webAway = null;
+}
+
+// The pet's center and feet line in screen points.
+function petPoint(posX: number, posY: number) {
+  return { cx: (posX + winW / 2) / scale, feet: (posY + winH) / scale };
+}
+
+function webEntryEdge(prevX: number, x: number, posY: number): "left" | "right" | null {
+  if (!webView || Date.now() < webCooldownUntil) return null;
+  const a = petPoint(prevX, posY);
+  const b = petPoint(x, posY);
+  return entersView(webView, a.cx, b.cx, b.feet);
+}
+
+if (isMainPet) {
+  void listen<WebArrival>("web-arrive", (e) => void arriveFromWeb(e.payload));
+  setInterval(async () => {
+    webView = await invoke<ScreenRect | null>("web_view").catch(() => null);
+  }, 1000);
 }
 
 // If the app starts while the pet is already on the iPad, stay hidden.
@@ -996,7 +1125,7 @@ async function hopOff(dir: -1 | 1) {
 // keeps the stale coordinates). If the pet is nowhere visible, drop her
 // back onto the primary monitor's floor.
 async function recoverIfStranded() {
-  if (state === "drag" || awayPoll || bandActive) return; // hidden-on-iPad has its own flow
+  if (state === "drag" || awayPoll || webAway || bandActive) return; // hidden-on-iPad has its own flow
   try {
     const monitors = await availableMonitors();
     if (!monitors.length) return;
@@ -1114,7 +1243,15 @@ appWindow.onMoved(() => {
   dragEndTimer = setTimeout(() => {
     pressed = false;
     dragging = false;
-    if (state === "drag") void settle();
+    if (state !== "drag") return;
+    void (async () => {
+      // Dropped inside the browser page she came from: the tab takes her.
+      const pos = await appWindow.outerPosition();
+      const { cx, feet } = petPoint(pos.x, pos.y);
+      const flip = pet.style.getPropertyValue("--flip").trim() === "-1" ? -1 : 1;
+      if (webView && insideView(webView, cx, feet) && (await handBackToWeb(cx, feet, flip, "fall"))) return;
+      void settle();
+    })();
   }, 250);
 });
 
@@ -1353,6 +1490,7 @@ async function endBand(x: number | null) {
       standingOn = floorPlatform();
     }
     await appWindow.show();
+    void setWebReady(true);
   }
   setState("idle");
   scheduleNext();
@@ -1365,6 +1503,7 @@ if (isMainPet) {
     if (!bandActive || !e.payload.join) return;
     hiddenForBand = true;
     await appWindow.hide();
+    void setWebReady(false);
   });
   void listen<{ x: number | null }>(BAND_ENDED, (e) => void endBand(e.payload.x));
   // The stage window can vanish without saying goodbye (crash, dev reload).
@@ -1549,6 +1688,7 @@ async function init() {
   await appWindow.show();
   setInterval(refreshPlatforms, 500);
   scheduleNext();
+  if (isMainPet) void setWebReady(true);
   void syncBridgeAtStartup();
   void syncCompanions();
 }
