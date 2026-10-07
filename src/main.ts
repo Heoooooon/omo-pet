@@ -15,6 +15,7 @@ import { retimeApng } from "./apng";
 import { jetSpriteFor, type JetSprite } from "./jet-sprite";
 import {
   apngAlphaMask,
+  drawnColumns,
   hitsMask,
   insideRect,
   spritePoint,
@@ -71,7 +72,11 @@ type State =
   | "fall"
   | "edge"
   | "rocket"
-  | "jet";
+  | "jet"
+  | "sleep"
+  | "stretch"
+  | "climb"
+  | "typing";
 let state: State = "idle";
 let stateVersion = 0;
 let walkTimer: ReturnType<typeof setTimeout> | null = null;
@@ -80,6 +85,7 @@ let fallFrame: (() => void) | null = null;
 let edgeTimer: ReturnType<typeof setTimeout> | null = null;
 let rocketFrame: (() => void) | null = null;
 let jetFrame: (() => void) | null = null;
+let climbFrame: (() => void) | null = null;
 
 // Await each native move and tick: WebKit can throttle background timers
 // to 1 Hz, so neither setInterval nor requestAnimationFrame is a motion clock.
@@ -129,14 +135,26 @@ const ALL_STATES: readonly State[] = [
   "edge",
   "rocket",
   "jet",
+  "sleep",
+  "stretch",
+  "climb",
+  "typing",
 ];
 
 // One-shot APNGs (plays=1) need a cache-buster to replay on re-entry.
-const ONE_SHOT: ReadonlySet<State> = new Set(["fall", "edge"]);
+const ONE_SHOT: ReadonlySet<State> = new Set(["fall", "edge", "stretch"]);
 
 // Optional multi-phase variants a pack may ship (fall gets three phases:
-// deploy one-shot → glide loop → landing one-shot).
-const EXTRA_SPRITES = ["fall-open", "fall-glide", "fall-land", "jet-climb"] as const;
+// deploy one-shot → glide loop → landing one-shot; sleep ends in a startled
+// wake; a wall climb ends sliding back down).
+const EXTRA_SPRITES = [
+  "fall-open",
+  "fall-glide",
+  "fall-land",
+  "jet-climb",
+  "wake",
+  "climb-slide",
+] as const;
 
 // Each state can ship variants: <key>.apng (base) plus <key>.2.apng …
 // <key>.4.apng. Entering a state picks one at random, so the same action
@@ -234,11 +252,16 @@ function setState(next: State) {
     rocketFrame?.();
     jetFrame?.();
     crossFrame?.();
+    climbFrame?.();
+    if (next === "sleep") startZzz();
+    else stopZzz();
   }
   state = next;
   document.body.dataset.state = next;
   delete document.body.dataset.fallPhase; // fall() re-tags its own phases
   delete document.body.dataset.jetPhase; // jet rides re-tag their climb
+  delete document.body.dataset.sleepPhase; // wakeUp() tags the startled hop
+  delete document.body.dataset.climbPhase; // climbWall() tags the slide down
   if (!changed && !ONE_SHOT.has(next)) return; // keep the current variant
   const src = spriteFor(next);
   if (ONE_SHOT.has(next) && spriteVariants.has(next)) {
@@ -431,6 +454,8 @@ function scheduleNext() {
         else walk();
       } else if (roll < 0.8) {
         walk();
+      } else if (roll < 0.88 && hasSprite("stretch")) {
+        stretch();
       } else {
         scheduleNext();
       }
@@ -655,8 +680,187 @@ async function arriveAtEnd(dir: -1 | 1) {
       if (next) return crossTo(next, dir);
     }
     if (cfg.ipadHandoff && (await tryCrossToIPad(dir))) return;
+    // The side of the screen is a wall: a stunt-loving pet climbs it.
+    if (hasSprite("climb") && Math.random() < Math.min(0.8, 0.3 * cfg.stunts)) {
+      return void climbWall(dir);
+    }
   }
   enterEdge(dir);
+}
+
+// ---------- climb: up the side of the screen, then slip back down ----------
+
+async function climbWall(dir: -1 | 1) {
+  standingOn = null;
+  setFlip(dir);
+  setState("climb");
+  const version = stateVersion;
+  const mask = await maskFor(spriteFor("climb"));
+  const pos = await appWindow.outerPosition();
+  if (stateVersion !== version) return;
+
+  // Put the drawn hands and feet against the screen edge: the sprite faces
+  // the wall, so its far drawn column (mirrored when flipped) touches it.
+  const reach = mask && drawnColumns(mask);
+  const rect = pet.getBoundingClientRect();
+  let wallX = pos.x;
+  if (mask && reach && rect.width) {
+    const fromSide = ((reach.right + 1) / mask.width) * rect.width;
+    wallX = dir === 1
+      ? Math.round(monX + monW - (rect.left + fromSide) * scale)
+      : Math.round(monX - (rect.right - fromSide) * scale);
+  }
+  const floorY = floorPlatform().y - winH;
+  const topY = Math.max(
+    monY + Math.round(40 * scale),
+    floorY - Math.round(monH * (0.2 + Math.random() * 0.3)),
+  );
+  const climbSpeed = 70 * scale * cfg.speed; // physical px/s
+  let y = pos.y;
+  let vy = 0;
+  let t = 0;
+  let held = 0;
+
+  climbFrame = motionLoop(async (dt) => {
+    if (state !== "climb") return stopClimb();
+    t += dt;
+    const x = pos.x + (wallX - pos.x) * easeMotion(Math.min(1, t / 0.3));
+    const sliding = document.body.dataset.climbPhase === "slide";
+    if (!sliding && y > topY) {
+      y = Math.max(topY, y - climbSpeed * dt);
+    } else if (!sliding) {
+      held += dt; // a moment of hanging on before the grip gives way
+      if (held > 0.35) {
+        document.body.dataset.climbPhase = "slide";
+        const src = spriteFor(hasSprite("climb-slide") ? "climb-slide" : "climb");
+        if (!pet.src.endsWith(src)) pet.src = src;
+      }
+    } else {
+      vy = Math.min(vy + 900 * scale * dt, 520 * scale);
+      y = Math.min(floorY, y + vy * dt);
+    }
+    await appWindow.setPosition(new PhysicalPosition(Math.round(x), Math.round(y)));
+    if (stateVersion !== version) return;
+    if (sliding && y >= floorY) {
+      stopClimb();
+      standingOn = floorPlatform();
+      setState("idle");
+      scheduleNext();
+    }
+  });
+}
+
+function stopClimb() {
+  climbFrame?.();
+  climbFrame = null;
+}
+
+// ---------- quiet moves: stretch, typing along, sleeping ----------
+
+// stretch.apng and wake.apng play once; these are their lengths.
+const STRETCH_MS = 3000;
+const WAKE_MS = 1000;
+
+function stretch() {
+  if (state !== "idle") return scheduleNext();
+  setState("stretch");
+  const version = stateVersion;
+  void invoke("motion_tick", { durationMs: STRETCH_MS }).then(() => {
+    if (stateVersion !== version) return;
+    setState("idle");
+    scheduleNext();
+  });
+}
+
+// Seconds since any input and since the last key press, from the OS idle
+// counters (no keystroke contents and no permission prompt; see input_idle).
+type InputIdle = { any: number; key: number | null };
+let inputIdleWorks = true;
+let keyPolls = 0;
+
+// Fall asleep once the user has been away this long; a busier pet stays up
+// longer (activity 1 = 90 s, the slider spans 27 s to 4.5 min).
+const sleepAfterSeconds = () => 90 * cfg.activity;
+
+async function pollInput() {
+  if (!inputIdleWorks || pressed || bandActive || awayPoll) return;
+  if (state !== "idle" && state !== "typing" && state !== "sleep") return;
+  let idle: InputIdle | null = null;
+  try {
+    idle = await invoke<InputIdle | null>("input_idle");
+  } catch {
+    idle = null;
+  }
+  if (!idle) {
+    inputIdleWorks = false; // no idle counters on this OS: no typing or naps
+    return;
+  }
+  const typing = idle.key !== null && idle.key < 1.2;
+  keyPolls = typing ? keyPolls + 1 : 0;
+  if (state === "typing") {
+    if (!typing && (idle.key === null || idle.key > 4)) {
+      setState("idle");
+      scheduleNext();
+    }
+  } else if (state === "sleep") {
+    // Typing wakes her gently; a click wakes her with a start (react).
+    if (typing && !document.body.dataset.sleepPhase) wakeUp(false);
+  } else if (standingOn) {
+    // Two polls in a row filter out a single stray key.
+    if (keyPolls >= 2 && hasSprite("typing")) setState("typing");
+    else if (idle.any >= sleepAfterSeconds() && hasSprite("sleep")) setState("sleep");
+  }
+}
+setInterval(() => void pollInput(), 1000);
+
+function wakeUp(startled: boolean) {
+  stopZzz();
+  if (startled) spawnEffect("❗", 1);
+  const gentle = !startled && hasSprite("stretch");
+  if (!gentle && !hasSprite("wake")) {
+    setState("idle");
+    scheduleNext();
+    return;
+  }
+  if (gentle) {
+    setState("idle");
+    stretch();
+    return;
+  }
+  const version = stateVersion;
+  document.body.dataset.sleepPhase = "wake";
+  pet.src = `${spriteFor("wake")}?t=${Date.now()}`;
+  void invoke("motion_tick", { durationMs: WAKE_MS }).then(() => {
+    if (stateVersion !== version) return;
+    setState("idle");
+    scheduleNext();
+  });
+}
+
+let zzzTimer: ReturnType<typeof setInterval> | null = null;
+
+function startZzz() {
+  stopZzz();
+  spawnZ();
+  zzzTimer = setInterval(spawnZ, 1600);
+}
+
+function stopZzz() {
+  if (zzzTimer) clearInterval(zzzTimer);
+  zzzTimer = null;
+  for (const z of effects.querySelectorAll(".zzz")) z.remove();
+}
+
+function spawnZ() {
+  if (document.body.dataset.sleepPhase) return;
+  const z = document.createElement("span");
+  z.className = "zzz";
+  z.textContent = Math.random() < 0.5 ? "z" : "Z";
+  // Rise above the head, which faces the way the sprite does.
+  const facingLeft = pet.style.getPropertyValue("--flip").trim() === "-1";
+  z.style.left = `${(facingLeft ? 34 : 56) + Math.random() * 8}%`;
+  effects.appendChild(z);
+  setTimeout(() => z.remove(), 2600);
 }
 
 // ---------- Lanbeam handoff: the pet can move to the paired iPad ----------
@@ -1057,7 +1261,8 @@ setInterval(async () => {
   standingOn.x2 = fresh.x2;
   standingOn.y = fresh.y;
   const restY = fresh.y - winH;
-  if ((state === "idle" || state === "edge") && Math.abs(pos.y - restY) > 2) {
+  const resting = ["idle", "edge", "sleep", "stretch", "typing"].includes(state);
+  if (resting && Math.abs(pos.y - restY) > 2) {
     await appWindow.setPosition(new PhysicalPosition(pos.x, restY));
   }
 }, 400);
@@ -1076,10 +1281,11 @@ stage.addEventListener("mousedown", (e) => {
   // mousedown would remove the target before its click event fires.
   if (menu.contains(e.target as Node)) return;
   menu.hidden = true;
-  if (state === "fall" || state === "rocket" || state === "jet") {
+  if (state === "fall" || state === "rocket" || state === "jet" || state === "climb") {
     stateVersion += 1; // cancel pending ignition/touchdown, even before dragging
     stopCross();
   }
+  if (state === "climb") stopClimb(); // pulled off the wall
   if (state === "fall") stopFall(); // caught mid-air
   if (state === "rocket") stopRocket(); // plucked off the rocket
   if (state === "jet") stopJet();
@@ -1189,6 +1395,10 @@ pet.addEventListener("load", () => void recheckCursor());
 // ---------- click reaction ----------
 
 function react() {
+  if (state === "sleep") {
+    if (!document.body.dataset.sleepPhase) wakeUp(true); // startled awake
+    return;
+  }
   if (state === "walk" && walkFrame) stopWalk();
   setState("react");
   for (let i = 0; i < 3; i++) spawnHeart();
@@ -1202,12 +1412,16 @@ function react() {
 }
 
 function spawnHeart() {
+  spawnEffect(["💖", "✨", "🌸"][Math.floor(Math.random() * 3)], 0.25);
+}
+
+function spawnEffect(text: string, maxDelay: number) {
   const heart = document.createElement("span");
   heart.className = "heart";
-  heart.textContent = ["💖", "✨", "🌸"][Math.floor(Math.random() * 3)];
+  heart.textContent = text;
   heart.style.left = `${30 + Math.random() * 40}%`;
   heart.style.bottom = `${45 + Math.random() * 25}%`;
-  heart.style.animationDelay = `${Math.random() * 0.25}s`;
+  heart.style.animationDelay = `${Math.random() * maxDelay}s`;
   effects.appendChild(heart);
   setTimeout(() => heart.remove(), 1600);
 }
