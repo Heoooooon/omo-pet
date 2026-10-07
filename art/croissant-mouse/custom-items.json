@@ -1,0 +1,65 @@
+{
+ "rocket": {
+  "img": "rocket",
+  "last": "rocket",
+  "shape": "tall",
+  "dur": 3,
+  "cycle": "pinned",
+  "prompt": "2D game sprite animation. Croissant Mouse, the chubby white mouse with big round pink-lined ears and a gold monocle, sits astride the top of a giant golden-brown croissant rocket that launches straight upward in place: the big multi-layer exhaust flame under the nozzle (white-hot core, bright yellow, warm orange edge) flickers and pulses quickly with its trailing streak, the small star sparkles twinkle, the small light-gray smoke puff stays attached right at the nozzle and only churns in place (no detached smoke rings, no drifting clouds, no puffs breaking off), the flame always keeps its white-hot core, bright yellow body and a warm orange outer edge along its whole length, the mouse's round ears and long pink tail flutter in the rushing air, while the rocket body and the mouse hold perfectly still in the frame with only a faint one-pixel rumble. The mouse keeps hugging the nose cone and its excited open-mouth smile the whole time, facing the viewer. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom in, no zoom out, no pan, no reframing: the rocket and the mouse keep exactly the same size and the same position in the frame from the first frame to the last, never growing, shrinking or drifting. The background stays a perfectly flat, pure bright green (#00FF00) chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image: the giant golden-brown flaky croissant with its short chrome nozzle, and the white mouse with its pink ears, gold monocle and long pink tail all stay exactly as drawn. The last frame returns to the exact pose of the first frame, so the animation loops seamlessly.",
+  "shapeArgs": "--shape tall --headroom 0.18"
+ },
+ "jet": {
+  "img": "jet",
+  "last": "jet",
+  "shape": "wide",
+  "dur": 3,
+  "cycle": "pinned",
+  "prompt": "2D game sprite animation. Croissant Mouse, the chubby white mouse with big round pink-lined ears and a gold monocle, rides on top of a giant golden-brown croissant rocket flying horizontally to the right in place, seen from the exact side: the big multi-layer exhaust flame behind the rocket (white-hot core, bright yellow, warm orange edge) flickers and pulses quickly with its long trailing streak to the left, the small star sparkles twinkle, the small light-gray smoke puff stays attached right at the nozzle and only churns in place (no detached smoke rings, no drifting clouds, no puffs breaking off), the flame always keeps its white-hot core, bright yellow body and a warm orange outer edge along its whole length, the mouse's round ears and long pink tail stream and flutter backwards in the wind, and the mouse and the rocket bob gently up and down by a few pixels. The mouse keeps leaning forward gripping the fuselage with its determined small smile the whole time, facing right. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure bright green (#00FF00) chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image: the giant golden-brown flaky croissant with its short chrome nozzle, and the white mouse with its pink ears, gold monocle and long pink tail all stay exactly as drawn. The last frame returns to the exact pose of the first frame, so the animation loops seamlessly.",
+  "shapeArgs": "--shape wide"
+ },
+ "jet-climb": {
+  "img": "jet-climb",
+  "last": "jet-climb",
+  "shape": "square",
+  "dur": 3,
+  "cycle": "pinned",
+  "prompt": "2D game sprite animation. Croissant Mouse, the chubby white mouse with big round pink-lined ears and a gold monocle, rides astride a giant golden-brown croissant rocket that flies diagonally up toward the upper right in place, seen from a three-quarter front view: the big multi-layer exhaust flame behind the rocket (white-hot core, bright yellow, warm orange edge) flickers and pulses quickly with its long trailing streak toward the lower left, the small star sparkles twinkle, the small light-gray smoke puff stays attached right at the nozzle and only churns in place (no detached smoke rings, no drifting clouds), the flame always keeps its white-hot core, bright yellow body and a warm orange outer edge along its whole length, the mouse's round ears and long pink tail stream and flutter back toward the lower left, and the mouse and the rocket bob gently along the flight direction by a few pixels. The mouse keeps gripping the chrome handlebar with its confident grin the whole time, head turned slightly toward the viewer, and the rocket keeps its 45-degree climbing angle. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure bright green (#00FF00) chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image: the giant golden-brown flaky croissant with its short chrome nozzle, and the white mouse with its pink ears, gold monocle and long pink tail all stay exactly as drawn. The last frame returns to the exact pose of the first frame, so the animation loops seamlessly.",
+  "shapeArgs": "--shape square"
+ },
+ "fall-glide": {
+  "img": "glide",
+  "last": "glide",
+  "shape": "tall",
+  "dur": 3,
+  "cycle": "pinned",
+  "prompt": "2D game sprite animation. Croissant Mouse, the chubby white mouse with big round pink-lined ears and a gold monocle, glides down under its open round cream-and-golden-brown striped parachute, held in place in the frame: the mouse and canopy sway together in a slow, gentle left-right pendulum, the mouse's legs, round ears and tail flutter softly, and the canopy fabric ripples slightly while staying fully open. The mouse keeps holding the straps with a calm happy face. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image. The last frame returns to the exact pose of the first frame, so the animation loops seamlessly.",
+  "shapeArgs": "--shape tall"
+ },
+ "fall-open": {
+  "img": "freefall",
+  "last": "glide",
+  "shape": "tall",
+  "dur": 2,
+  "cycle": "oneshot",
+  "prompt": "2D game sprite animation. Croissant Mouse, the chubby white mouse with big round pink-lined ears and a gold monocle, falls with both arms up, then the small croissant-brown backpack on its back pops open and a compact round cream-and-golden-brown striped parachute unfolds and inflates directly above its head on short lines; the mouse settles hanging calmly on the straps, ending exactly as the final image. The canopy never rises higher above the mouse than in the final image and the lines never stretch longer; the mouse stays at the same height in the frame the whole time. Seen from the front. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image. Smooth, natural, evenly timed motion with no motion blur; the clip ends exactly on the pose of the final image.",
+  "shapeArgs": "--shape tall"
+ },
+ "fall-land": {
+  "img": "land",
+  "last": "stand",
+  "shape": "square",
+  "dur": 2,
+  "cycle": "oneshot",
+  "prompt": "2D game sprite animation. Croissant Mouse, the chubby white mouse with big round pink-lined ears and a gold monocle, has just landed on its feet in a crouch with arms out for balance: it bends its knees a little deeper to absorb the impact, then rises back up, lowers its arms to its sides and stands upright and cheerful, ending exactly as the final image. Its feet stay planted on the same spot the whole time. Seen from the front. No parachute. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image. Smooth, natural, evenly timed motion with no motion blur; the clip ends exactly on the pose of the final image.",
+  "shapeArgs": "--shape square"
+ },
+ "edge": {
+  "img": "hang",
+  "last": "sit",
+  "shape": "square",
+  "dur": 3,
+  "cycle": "oneshot",
+  "prompt": "2D game sprite animation. Croissant Mouse, the chubby white mouse with big round pink-lined ears and a gold monocle, hangs from an invisible ledge with both paws gripping above its head, then pulls itself straight up with its arms, hooks one leg up over the invisible edge, climbs on and settles sitting relaxed on the invisible ledge corner with legs dangling, ending exactly as the final image. The body stays upright the whole time: no flip, no somersault, no spin, never upside down. Seen from the exact side, facing right. Draw no ledge. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image. Smooth, natural, evenly timed motion with no motion blur; the clip ends exactly on the pose of the final image.",
+  "shapeArgs": "--shape square"
+ }
+}
