@@ -12,6 +12,11 @@ are stored in the app data folder (`%APPDATA%\dev.omopet.app\packs` on Windows,
 | `fall.apng` | no | Parachute loop (otherwise idle) |
 | `fall-open.apng`, `fall-glide.apng`, `fall-land.apng` | no | Three-phase parachute, like omo-cat |
 | `edge.apng`, `rocket.apng`, `jet.apng` | no | Climb-and-sit, rocket and jet stunts |
+| `jet-climb.apng` | no | Diagonal climb shown while a jet ride climbs steeply (otherwise `jet.apng` plays for the whole ride); drawn in the rocket's tall cell |
+| `sleep.apng`, `wake.apng` | no | Curled-up sleeping loop (shown after the user has been away a while) and a one-shot startled hop back to standing, 1 s (clicking a sleeper). Without them the pet never naps |
+| `stretch.apng` | no | One-shot stretch and yawn, 3 s, played now and then while idle and when typing wakes a sleeper |
+| `climb.apng`, `climb-slide.apng` | no | Climbing a wall in place, facing right with hands and feet against the right edge of the drawing, and sliding back down. Used to scale the side of the screen; without them she sits on the corner instead |
+| `typing.apng` | no | Tapping on a small laptop while the user types (key timing only, no key contents) |
 | `play.apng` | for the band | Instrument loop; 3 s (or 1.5 s, 1 s) keeps it on the song's beat grid |
 | `<state>.2.apng` … `.4.apng` | no | Variants picked at random |
 | `pack.json` | no | Name and band role |

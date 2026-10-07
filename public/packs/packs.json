@@ -1,15 +1,31 @@
 [
   {
+    "id": "omo",
+    "name": "OmO",
+    "names": { "ko": "OmO" },
+    "emoji": "🐈‍⬛",
+    "stride": 43,
+    "widths": { "walk": 220 }
+  },
+  {
     "id": "omo-cat",
     "name": "Omo",
     "names": { "ko": "오모" },
     "emoji": "🐱",
     "instrument": "vocal",
-    "stride": 56,
+    "stride": 36,
     "widths": { "walk": 220 }
   },
   {
+    "id": "jabdori",
+    "name": "Jabdori",
+    "names": { "ko": "잡도리" },
+    "emoji": "🐶",
+    "stride": 34
+  },
+  {
     "id": "dalli",
+    "pack": "band",
     "name": "Dalli",
     "names": { "ko": "달리" },
     "emoji": "🦦",
@@ -18,6 +34,7 @@
   },
   {
     "id": "bara",
+    "pack": "band",
     "name": "Bara",
     "names": { "ko": "바라" },
     "emoji": "🦫",
@@ -26,6 +43,7 @@
   },
   {
     "id": "dochi",
+    "pack": "band",
     "name": "Dochi",
     "names": { "ko": "도치" },
     "emoji": "🦔",
@@ -34,6 +52,7 @@
   },
   {
     "id": "rupa",
+    "pack": "band",
     "name": "Rupa",
     "names": { "ko": "루파" },
     "emoji": "🩷",

@@ -1,0 +1,79 @@
+{
+ "pack": "omo",
+ "target_head_css": 15.470377604166668,
+ "ride_heads_css": [
+  15.833333333333334,
+  15.107421875
+ ],
+ "ref_cellpx": 24.752604166666668,
+ "idle_feet_px": 16,
+ "arc_ratio": 0.8880597014925373,
+ "states": {
+  "wake": {
+   "src_head": 60.0,
+   "found": "8/24",
+   "scale": 0.4125434027777778,
+   "cell": [
+    234,
+    308
+   ],
+   "css_width": 146.2,
+   "frames": 24
+  },
+  "sleep": {
+   "src_head": 64.10409193165927,
+   "found": "from wake/72",
+   "scale": 0.3861314218919936,
+   "cell": [
+    234,
+    175
+   ],
+   "css_width": 146.2,
+   "frames": 72
+  },
+  "stretch": {
+   "src_head": 67.0,
+   "found": "72/72",
+   "scale": 0.3694418532338309,
+   "cell": [
+    216,
+    289
+   ],
+   "css_width": 135.0,
+   "frames": 72
+  },
+  "climb": {
+   "src_head": 62.0,
+   "found": "48/48",
+   "scale": 0.3992355510752688,
+   "cell": [
+    168,
+    327
+   ],
+   "css_width": 105.0,
+   "frames": 48
+  },
+  "climb-slide": {
+   "src_head": 55.0,
+   "found": "48/48",
+   "scale": 0.4500473484848485,
+   "cell": [
+    156,
+    394
+   ],
+   "css_width": 97.5,
+   "frames": 48
+  },
+  "typing": {
+   "src_head": 65.0,
+   "found": "48/48",
+   "scale": 0.3808092948717949,
+   "cell": [
+    190,
+    237
+   ],
+   "css_width": 118.8,
+   "frames": 48
+  }
+ }
+}

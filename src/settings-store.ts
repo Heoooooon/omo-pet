@@ -6,7 +6,8 @@ import { emit } from "@tauri-apps/api/event";
 export type Instrument = "vocal" | "guitar" | "bass" | "drums" | "keys";
 
 export type PetSettings = {
-  pack: string; // character pack directory under /packs/
+  pack: string; // main pet's character pack directory under /packs/
+  companions: string[]; // more characters on screen, each in its own pet window
   size: number; // pet scale, 1 = 100%
   speed: number; // walk speed multiplier
   activity: number; // how often the pet does something (higher = busier)
@@ -28,7 +29,12 @@ export const DEFAULT_ROSTER: Record<Instrument, string> = {
 };
 
 export const DEFAULTS: PetSettings = {
-  pack: "omo-cat",
+  pack: "omo",
+  // The official OmO and Jabdori (Sisyphus Labs, OmO Native) are the free
+  // main characters and both show up on first launch; either can be hidden
+  // from Settings > Character. The original Omo kitten (omo-cat) stays
+  // available there, off by default, and still sings in the band.
+  companions: ["jabdori"],
   size: 1,
   speed: 1,
   activity: 1,
@@ -50,10 +56,11 @@ export function loadSettings(): PetSettings {
     return {
       ...DEFAULTS,
       ...saved,
+      companions: Array.isArray(saved.companions) ? saved.companions : [...DEFAULTS.companions],
       bandRoster: { ...DEFAULT_ROSTER, ...(saved.bandRoster ?? {}) },
     };
   } catch {
-    return { ...DEFAULTS, bandRoster: { ...DEFAULT_ROSTER } };
+    return { ...DEFAULTS, companions: [...DEFAULTS.companions], bandRoster: { ...DEFAULT_ROSTER } };
   }
 }
 

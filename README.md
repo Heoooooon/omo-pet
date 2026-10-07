@@ -2,7 +2,7 @@
 
 **English** · [简体中文](README.zh-CN.md) · [日本語](README.ja.md) · [한국어](README.ko.md)
 
-**Omo the cat lives on your monitors.** An open-source desktop pet that uses
+**OmO, Jabdori the puppy and Omo the cat live on your monitors.** An open-source desktop pet that uses
 your app windows as platforms — Omo walks on them, rockets off to other
 monitors, floats back down on a parachute, and can even hop over to your iPad.
 
@@ -31,7 +31,7 @@ Every action is an APNG sprite (they play right here):
 - 🚀 **Rocket & jet** — vertical rocket launches and sideways jet dashes
 - 🖥️ **Multi-monitor** — crosses between monitors with different scale factors (Retina + external), side by side or stacked vertically
 - 📱 **iPad handoff** — if the Lanbeam agent (a separate project) is running, Omo hops over to your iPad at the screen edge (optional; everything works without it)
-- 🎛️ **Settings GUI** — right-click → Settings: switch characters and tune size, speed, activity, and trick frequency live
+- 🎛️ **Settings GUI** — right-click → Settings: show or hide each character (OmO and Jabdori come out on first launch; the Omo kitten is one click away) and tune size, speed, activity, and trick frequency live
 - 🎭 **Character packs** — drop action APNGs into `public/packs/<name>/` to make a new character
 - 🐾 **Summon friends** — add up to 3 friends, each with a slightly different personality (size, gait)
 - 🔍 **Recognition overlay** — a per-monitor overlay shows which windows count as platforms
@@ -61,60 +61,15 @@ npm run tauri build   # build a release app
   [hermes-pet README](https://github.com/Heoooooon/hermes-pet#getting-started)
   for Windows build steps — they are the same here.
 
-## Fan-made Chiikawa packs (built on your computer)
-
-You can turn the official LINE animated-sticker previews of the Chiikawa cast
-into local character packs. With `--generate`, every action Omo has (walk,
-rocket, jet, parachute, ledge, landing, …) is drawn for each character too:
-
-```bash
-node scripts/make-chiikawa-pack.mjs                                # sticker-only packs (quick)
-node scripts/make-chiikawa-pack.mjs --generate                     # every action, all 7 characters
-node scripts/make-chiikawa-pack.mjs --chars usagi,momonga --generate
-node scripts/make-chiikawa-pack.mjs --chars usagi --generate --regen walk,jet  # redraw some actions
-node scripts/make-chiikawa-pack.mjs --remove                       # delete them again
-```
-
-| Pack (`--chars`) | From the official stickers | Drawn with `--generate` |
-|---|---|---|
-| `chiikawa` | idle, react | everything else |
-| `hachiware` | — | all actions |
-| `usagi` | idle (2), react, drag | everything else |
-| `momonga` | idle, react, drag | everything else |
-| `kurimanju` | — | all actions |
-| `yoroi` (Yoroi-san) | react | everything else |
-| `yusangyun` (Muchauman) | — | all actions |
-
-The script downloads the sticker images from LINE STORE to your computer,
-erases the floating effect text, scales every action to the same body size,
-and writes `public/packs/<character>/` plus `public/packs/local.json`. Then
-pick the character in Settings. Only stickers that show the character alone
-and in full body are used; without `--generate`, actions without a sticker
-fall back to the idle sprite, and characters without a full-body sticker are
-skipped. The script needs `ffmpeg`. `--generate` also needs a
-[sprite-gen](https://github.com/aldegad/sprite-gen) checkout
-(`SPRITE_GEN_DIR`, with its `.venv` installed) and a logged-in `codex` CLI
-(it uses your ChatGPT subscription — no API key, no per-call charge). It draws
-from the character's own stickers and official goods photos, takes about a
-minute per action, and caches the frames in `.cache/chiikawa/gen/`.
-
-> **Fan-made, unofficial, non-commercial.** This project is not affiliated with
-> or endorsed by the Chiikawa rights holders. **No Chiikawa artwork is included
-> in this repository** — the images are downloaded on each user's own computer
-> for personal use, and `public/packs/*` is git-ignored. Please don't commit or
-> redistribute the generated packs. Chiikawa © nagano / chiikawa committee.
-
 ## Bring your own character
 
 A pack is a folder of sprites at `public/packs/<pack>/<state>.apng`
 (idle / walk / drag / react / fall / edge / rocket / jet, plus optional
 `fall-open` / `fall-glide` / `fall-land` phases). Any missing action falls back
 to idle, and variants (`<state>.2.apng` … `<state>.4.apng`) are picked at
-random. List your pack in `public/packs/local.json` to show it in Settings:
-
-```json
-[{ "id": "my-pack", "name": "My pack", "emoji": "🦊" }]
-```
+random. Import your pack from **Settings › My character › Import a pack**
+(folder or zip, see [pack format](docs/pack-format.md)); the release build
+bundles only the original packs (`scripts/check-bundle.mjs` fails the build otherwise).
 
 The Omo pack was made with [sprite-gen](https://github.com/aldegad/sprite-gen):
 one still image (`art/omo-cat/base.png`) → one sprite-gen run per action
@@ -127,10 +82,9 @@ one still image (`art/omo-cat/base.png`) → one sprite-gen run per action
 src/main.ts              Behavior brain: state machine, window-platform physics,
                          multi-monitor crossing, Lanbeam handoff, pack loading
 src/style.css            Per-state CSS motion and per-pack sprite sizes
-src/settings.ts          Settings panel (packs from packs.json + local.json)
+src/settings.ts          Settings panel (packs, band pack license, My character)
 src-tauri/               Tauri shell: transparent window, window list, Lanbeam bridge client
 public/packs/omo-cat/    The bundled Omo pack (APNG per action)
-scripts/                 make-chiikawa-pack.mjs (local fan-made packs)
 art/                     Omo source still + sprite-gen run records
 ```
 
@@ -140,10 +94,12 @@ art/                     Omo source still + sprite-gen run records
   desktop-pet engine, window-platform physics, and multi-monitor/iPad features
 - **Sprite generation** — [sprite-gen](https://github.com/aldegad/sprite-gen) (@aldegad)
 - **Omo** is an original character by CMORE
-- Chiikawa © nagano / chiikawa committee (fan-made local packs only; not included)
+- **OmO** © Sisyphus Labs (OmO Native), used with permission (OmO © Sisyphus Labs (OmO Native), 허락 받아 사용)
+- **Jabdori (잡도리)** © Sisyphus Labs (OmO Native), used with permission (잡도리 © Sisyphus Labs (OmO Native), 허락 받아 사용)
 
 ## License
 
 [MIT](./LICENSE) — covers the code and the Omo artwork (`art/`,
-`public/packs/omo-cat/`). Characters you build locally with the Chiikawa script
-belong to their rights holders and are not covered.
+`public/packs/omo-cat/`). OmO (`art/omo-official-video/`, `public/packs/omo/`) and
+Jabdori (`art/jabdori-video/`, `public/packs/jabdori/`) are not they belong to Sisyphus Labs and ship here with their permission, so do not reuse them
+without asking them.

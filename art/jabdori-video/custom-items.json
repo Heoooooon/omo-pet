@@ -1,0 +1,58 @@
+{
+ "rocket": {
+  "img": "rocket",
+  "last": "rocket",
+  "shape": "tall",
+  "dur": 3,
+  "cycle": "pinned",
+  "prompt": "2D game sprite animation. Jabdori the chibi white puppy with big floppy dark-gray ears, aviator goggles pushed up on its forehead and a short red scarf, sits astride the top of a retro silver-and-red rocket that launches straight upward in place: the big multi-layer exhaust flame under the nozzle (white-hot core, orange, violet edge) flickers and pulses quickly with its trailing streak, the small star sparkles twinkle, the small light-gray smoke puff stays attached right at the nozzle and only churns in place (no detached smoke rings, no drifting clouds, no puffs breaking off), the flame always keeps its white-hot core, orange body and a clearly visible bright violet-purple outer edge along its whole length, the puppy's floppy ears, tail and the two scarf tails flutter in the rushing air, while the rocket body and the puppy hold perfectly still in the frame with only a faint one-pixel rumble. The puppy keeps hugging the nose cone and its excited open-mouth smile the whole time, facing the viewer. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom in, no zoom out, no pan, no reframing: the rocket and the puppy keep exactly the same size and the same position in the frame from the first frame to the last, never growing, shrinking or drifting. The background stays a perfectly flat, pure bright green (#00FF00) chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image: the retro silver rocket with its red nose cone, red stripe, two blue portholes and red fins, the puppy's goggles on the forehead and red scarf all stay exactly as drawn. The last frame returns to the exact pose of the first frame, so the animation loops seamlessly."
+ },
+ "jet": {
+  "img": "jet",
+  "last": "jet",
+  "shape": "wide",
+  "dur": 3,
+  "cycle": "pinned",
+  "prompt": "2D game sprite animation. Jabdori the chibi white puppy with big floppy dark-gray ears, aviator goggles pushed up on its forehead and a short red scarf, rides on top of a retro silver-and-red rocket flying horizontally to the right in place, seen from the exact side: the big multi-layer exhaust flame behind the rocket (white-hot core, orange, violet edge) flickers and pulses quickly with its long trailing streak to the left, the small star sparkles twinkle, the small light-gray smoke puff stays attached right at the nozzle and only churns in place (no detached smoke rings, no drifting clouds, no puffs breaking off), the flame always keeps its white-hot core, orange body and a clearly visible bright violet-purple outer edge along its whole length, the puppy's floppy ears, tail and the two scarf tails stream and flutter backwards in the wind, and the puppy and the rocket bob gently up and down by a few pixels. The puppy keeps leaning forward gripping the fuselage with its determined small smile the whole time, facing right. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure bright green (#00FF00) chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image: the retro silver rocket with its red nose cone, red stripe, two blue portholes and red fins, the puppy's goggles on the forehead and red scarf all stay exactly as drawn. The last frame returns to the exact pose of the first frame, so the animation loops seamlessly."
+ },
+ "jet-climb": {
+  "img": "jet-climb",
+  "last": "jet-climb",
+  "shape": "square",
+  "dur": 3,
+  "cycle": "pinned",
+  "prompt": "2D game sprite animation. Jabdori the chibi white puppy with big floppy dark-gray ears, aviator goggles pushed up on its forehead and a short red scarf, rides astride a retro silver-and-red rocket that flies diagonally up toward the upper right in place, seen from a three-quarter front view: the big multi-layer exhaust flame behind the rocket (white-hot core, orange, violet edge) flickers and pulses quickly with its long trailing streak toward the lower left, the small star sparkles twinkle, the small light-gray smoke puff stays attached right at the nozzle and only churns in place (no detached smoke rings, no drifting clouds), the flame always keeps its white-hot core, orange body and a clearly visible bright violet-purple outer edge along its whole length, the puppy's floppy ears, tail and the two scarf tails stream and flutter back toward the lower left, and the puppy and the rocket bob gently along the flight direction by a few pixels. The puppy keeps gripping the chrome handlebar with its confident grin the whole time, head turned slightly toward the viewer, and the rocket keeps its 45-degree climbing angle. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure bright green (#00FF00) chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image: the retro silver rocket with its red nose cone, red stripe, two blue portholes and red fins, the puppy's goggles on the forehead and red scarf all stay exactly as drawn. The last frame returns to the exact pose of the first frame, so the animation loops seamlessly."
+ },
+ "fall-glide": {
+  "img": "glide",
+  "last": "glide",
+  "shape": "tall",
+  "dur": 3,
+  "cycle": "pinned",
+  "prompt": "2D game sprite animation. Jabdori the chibi white puppy with big floppy dark-gray ears glides down under its open round tan parachute, held in place in the frame: the puppy and canopy sway together in a slow, gentle left-right pendulum, the puppy's legs, floppy ears and tail flutter softly, and the canopy fabric ripples slightly while staying fully open. The puppy keeps holding the straps with a calm happy face. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image. The last frame returns to the exact pose of the first frame, so the animation loops seamlessly."
+ },
+ "fall-open": {
+  "img": "freefall",
+  "last": "glide",
+  "shape": "tall",
+  "dur": 2,
+  "cycle": "oneshot",
+  "prompt": "2D game sprite animation. Jabdori the chibi white puppy with big floppy dark-gray ears falls with both arms up, then the small tan backpack on its back pops open and a compact round tan parachute unfolds and inflates directly above its head on short lines; the puppy settles hanging calmly on the straps, ending exactly as the final image. The canopy never rises higher above the puppy than in the final image and the lines never stretch longer; the puppy stays at the same height in the frame the whole time. Seen from the front. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image. Smooth, natural, evenly timed motion with no motion blur; the clip ends exactly on the pose of the final image."
+ },
+ "fall-land": {
+  "img": "land",
+  "last": "stand",
+  "shape": "square",
+  "dur": 2,
+  "cycle": "oneshot",
+  "prompt": "2D game sprite animation. Jabdori the chibi white puppy with big floppy dark-gray ears has just landed on its feet in a crouch with arms out for balance: it bends its knees a little deeper to absorb the impact, then rises back up, lowers its arms to its sides and stands upright and cheerful, ending exactly as the final image. Its feet stay planted on the same spot the whole time. Seen from the front. No parachute. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image. Smooth, natural, evenly timed motion with no motion blur; the clip ends exactly on the pose of the final image."
+ },
+ "edge": {
+  "img": "hang",
+  "last": "sit",
+  "shape": "square",
+  "dur": 3,
+  "cycle": "oneshot",
+  "prompt": "2D game sprite animation. Jabdori the chibi white puppy with big floppy dark-gray ears hangs from an invisible ledge with both paws gripping above its head, then pulls itself straight up with its arms, hooks one leg up over the invisible edge, climbs on and settles sitting relaxed on the invisible ledge corner with legs dangling, ending exactly as the final image. The body stays upright the whole time: no flip, no somersault, no spin, never upside down. Seen from the exact side, facing right. Draw no ledge. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image. Smooth, natural, evenly timed motion with no motion blur; the clip ends exactly on the pose of the final image."
+ }
+}

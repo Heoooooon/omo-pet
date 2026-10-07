@@ -9,10 +9,27 @@ import {
 } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
-import { listen } from "@tauri-apps/api/event";
+import { emit, listen } from "@tauri-apps/api/event";
 import { initI18n, t } from "./i18n";
 import { retimeApng } from "./apng";
-import { listPacks, packStride, spriteUrl, type PackInfo } from "./packs";
+import { jetSpriteFor, type JetSprite } from "./jet-sprite";
+import {
+  apngAlphaMask,
+  drawnColumns,
+  hitsMask,
+  insideRect,
+  spritePoint,
+  type AlphaMask,
+} from "./hit-mask";
+import {
+  getLicense,
+  hasBand,
+  LICENSE_EVENT,
+  listUsablePacks,
+  packStride,
+  spriteUrl,
+  type PackInfo,
+} from "./packs";
 import {
   BAND_ENDED,
   BAND_OPEN,
@@ -31,7 +48,13 @@ const appWindow = getCurrentWindow();
 // The original pet ("main") owns the iPad handoff; spawned friends are
 // local-only and get a slightly different size and stride for personality.
 const isMainPet = appWindow.label === "main";
-const personality = isMainPet ? 1 : 0.72 + Math.random() * 0.36;
+// Companions (Settings > Character, e.g. Jabdori next to Omo) are full-size
+// pets in their own window; the main pet opens them and each closes itself
+// once it is switched off. Companions and friends carry their pack in the URL.
+const BUDDY_PREFIX = "pet-buddy-";
+const isBuddy = appWindow.label.startsWith(BUDDY_PREFIX);
+const urlPack = new URLSearchParams(location.search).get("pack");
+const personality = isMainPet || isBuddy ? 1 : 0.72 + Math.random() * 0.36;
 
 // User-tunable knobs from the settings panel, applied live.
 let cfg: PetSettings = loadSettings();
@@ -49,7 +72,11 @@ type State =
   | "fall"
   | "edge"
   | "rocket"
-  | "jet";
+  | "jet"
+  | "sleep"
+  | "stretch"
+  | "climb"
+  | "typing";
 let state: State = "idle";
 let stateVersion = 0;
 let walkTimer: ReturnType<typeof setTimeout> | null = null;
@@ -58,6 +85,7 @@ let fallFrame: (() => void) | null = null;
 let edgeTimer: ReturnType<typeof setTimeout> | null = null;
 let rocketFrame: (() => void) | null = null;
 let jetFrame: (() => void) | null = null;
+let climbFrame: (() => void) | null = null;
 
 // Await each native move and tick: WebKit can throttle background timers
 // to 1 Hz, so neither setInterval nor requestAnimationFrame is a motion clock.
@@ -87,7 +115,7 @@ function walkSpeed(): number {
   // Six frames at 8 fps make one stride. Short-legged local packs take
   // smaller steps; zoom/personality scale the stride, not the cycle rate.
   const stride = currentPack === DEFAULTS.pack
-    ? 56
+    ? 43 // OmO's packs.json stride, also before the pack list has loaded
     : packStride(packInfos.find((p) => p.id === currentPack));
   const rate = state === "walk"
     ? [...walkPlayback.values()].find(({ src }) => src === pet.src)?.speed ?? 1
@@ -107,14 +135,26 @@ const ALL_STATES: readonly State[] = [
   "edge",
   "rocket",
   "jet",
+  "sleep",
+  "stretch",
+  "climb",
+  "typing",
 ];
 
 // One-shot APNGs (plays=1) need a cache-buster to replay on re-entry.
-const ONE_SHOT: ReadonlySet<State> = new Set(["fall", "edge"]);
+const ONE_SHOT: ReadonlySet<State> = new Set(["fall", "edge", "stretch"]);
 
 // Optional multi-phase variants a pack may ship (fall gets three phases:
-// deploy one-shot → glide loop → landing one-shot).
-const EXTRA_SPRITES = ["fall-open", "fall-glide", "fall-land"] as const;
+// deploy one-shot → glide loop → landing one-shot; sleep ends in a startled
+// wake; a wall climb ends sliding back down).
+const EXTRA_SPRITES = [
+  "fall-open",
+  "fall-glide",
+  "fall-land",
+  "jet-climb",
+  "wake",
+  "climb-slide",
+] as const;
 
 // Each state can ship variants: <key>.apng (base) plus <key>.2.apng …
 // <key>.4.apng. Entering a state picks one at random, so the same action
@@ -123,10 +163,19 @@ const VARIANT_SUFFIXES = [2, 3, 4];
 const spriteVariants = new Map<string, string[]>();
 const walkPlayback = new Map<string, Readonly<{ speed: number; src: string }>>();
 let currentPack = "";
-let packInfos: PackInfo[] = [];
-void listPacks().then((p) => {
-  packInfos = p;
-});
+let packInfos: PackInfo[] = []; // only the packs this computer may use
+let bandOwned = false;
+
+async function refreshEntitlements() {
+  const [packs, lic] = await Promise.all([listUsablePacks(), getLicense()]);
+  packInfos = packs;
+  bandOwned = hasBand(lic);
+}
+
+// A saved choice that is no longer usable (paid pack without a license,
+// deleted pack) falls back to the free default.
+const allowedPack = (id: string) =>
+  packInfos.some((p) => p.id === id) ? id : DEFAULTS.pack;
 
 function packUrl(pack: string, key: string): string {
   return spriteUrl(pack, `${key}.apng`);
@@ -203,10 +252,16 @@ function setState(next: State) {
     rocketFrame?.();
     jetFrame?.();
     crossFrame?.();
+    climbFrame?.();
+    if (next === "sleep") startZzz();
+    else stopZzz();
   }
   state = next;
   document.body.dataset.state = next;
   delete document.body.dataset.fallPhase; // fall() re-tags its own phases
+  delete document.body.dataset.jetPhase; // jet rides re-tag their climb
+  delete document.body.dataset.sleepPhase; // wakeUp() tags the startled hop
+  delete document.body.dataset.climbPhase; // climbWall() tags the slide down
   if (!changed && !ONE_SHOT.has(next)) return; // keep the current variant
   const src = spriteFor(next);
   if (ONE_SHOT.has(next) && spriteVariants.has(next)) {
@@ -399,6 +454,8 @@ function scheduleNext() {
         else walk();
       } else if (roll < 0.8) {
         walk();
+      } else if (roll < 0.88 && hasSprite("stretch")) {
+        stretch();
       } else {
         scheduleNext();
       }
@@ -431,6 +488,14 @@ async function jetDash() {
   setState("jet");
   const version = stateVersion;
 
+  // Climb to cruise height over the first part of the dash, then level off.
+  // A pack with a jet-climb loop shows it while the climb is steep. 0.3 keeps
+  // the climb short enough to read as a climb on a wide (2560px) display.
+  const climbShare = 0.3;
+  let climbing = showJetPhase(
+    jetSpriteFor((targetX - pos.x) * easeMotion(climbShare), cruiseY - pos.y, hasSprite),
+  );
+
   const duration = Math.max(1.1, Math.abs(targetX - pos.x) / (700 * scale) * 1.5);
   let y = pos.y;
   let t = 0;
@@ -441,8 +506,9 @@ async function jetDash() {
     const progress = Math.min(1, t / duration);
     const eased = easeMotion(progress);
     const x = pos.x + (targetX - pos.x) * eased;
-    y = pos.y + (cruiseY - pos.y) * eased
+    y = pos.y + (cruiseY - pos.y) * easeMotion(Math.min(1, progress / climbShare))
       + Math.sin(t * 5.5) * 7 * scale * Math.sin(Math.PI * progress) ** 2;
+    if (climbing && progress >= climbShare) climbing = showJetPhase("jet");
     const arrived = progress === 1;
     if (arrived) {
       stopJet();
@@ -462,6 +528,19 @@ async function jetDash() {
 function stopJet() {
   jetFrame?.();
   jetFrame = null;
+}
+
+const hasSprite = (key: string) => spriteVariants.has(key);
+
+// Swap the jet ride's sprite between the level loop and the diagonal climb
+// (when the pack ships one). Returns whether the climb loop is showing.
+function showJetPhase(sprite: JetSprite): boolean {
+  const climb = sprite === "jet-climb";
+  if (climb) document.body.dataset.jetPhase = "climb";
+  else delete document.body.dataset.jetPhase;
+  const src = spriteFor(sprite);
+  if (!pet.src.endsWith(src)) pet.src = src;
+  return climb;
 }
 
 // ---------- rocket: blast off, cut the engine, parachute down ----------
@@ -601,8 +680,187 @@ async function arriveAtEnd(dir: -1 | 1) {
       if (next) return crossTo(next, dir);
     }
     if (cfg.ipadHandoff && (await tryCrossToIPad(dir))) return;
+    // The side of the screen is a wall: a stunt-loving pet climbs it.
+    if (hasSprite("climb") && Math.random() < Math.min(0.8, 0.3 * cfg.stunts)) {
+      return void climbWall(dir);
+    }
   }
   enterEdge(dir);
+}
+
+// ---------- climb: up the side of the screen, then slip back down ----------
+
+async function climbWall(dir: -1 | 1) {
+  standingOn = null;
+  setFlip(dir);
+  setState("climb");
+  const version = stateVersion;
+  const mask = await maskFor(spriteFor("climb"));
+  const pos = await appWindow.outerPosition();
+  if (stateVersion !== version) return;
+
+  // Put the drawn hands and feet against the screen edge: the sprite faces
+  // the wall, so its far drawn column (mirrored when flipped) touches it.
+  const reach = mask && drawnColumns(mask);
+  const rect = pet.getBoundingClientRect();
+  let wallX = pos.x;
+  if (mask && reach && rect.width) {
+    const fromSide = ((reach.right + 1) / mask.width) * rect.width;
+    wallX = dir === 1
+      ? Math.round(monX + monW - (rect.left + fromSide) * scale)
+      : Math.round(monX - (rect.right - fromSide) * scale);
+  }
+  const floorY = floorPlatform().y - winH;
+  const topY = Math.max(
+    monY + Math.round(40 * scale),
+    floorY - Math.round(monH * (0.2 + Math.random() * 0.3)),
+  );
+  const climbSpeed = 70 * scale * cfg.speed; // physical px/s
+  let y = pos.y;
+  let vy = 0;
+  let t = 0;
+  let held = 0;
+
+  climbFrame = motionLoop(async (dt) => {
+    if (state !== "climb") return stopClimb();
+    t += dt;
+    const x = pos.x + (wallX - pos.x) * easeMotion(Math.min(1, t / 0.3));
+    const sliding = document.body.dataset.climbPhase === "slide";
+    if (!sliding && y > topY) {
+      y = Math.max(topY, y - climbSpeed * dt);
+    } else if (!sliding) {
+      held += dt; // a moment of hanging on before the grip gives way
+      if (held > 0.35) {
+        document.body.dataset.climbPhase = "slide";
+        const src = spriteFor(hasSprite("climb-slide") ? "climb-slide" : "climb");
+        if (!pet.src.endsWith(src)) pet.src = src;
+      }
+    } else {
+      vy = Math.min(vy + 900 * scale * dt, 520 * scale);
+      y = Math.min(floorY, y + vy * dt);
+    }
+    await appWindow.setPosition(new PhysicalPosition(Math.round(x), Math.round(y)));
+    if (stateVersion !== version) return;
+    if (sliding && y >= floorY) {
+      stopClimb();
+      standingOn = floorPlatform();
+      setState("idle");
+      scheduleNext();
+    }
+  });
+}
+
+function stopClimb() {
+  climbFrame?.();
+  climbFrame = null;
+}
+
+// ---------- quiet moves: stretch, typing along, sleeping ----------
+
+// stretch.apng and wake.apng play once; these are their lengths.
+const STRETCH_MS = 3000;
+const WAKE_MS = 1000;
+
+function stretch() {
+  if (state !== "idle") return scheduleNext();
+  setState("stretch");
+  const version = stateVersion;
+  void invoke("motion_tick", { durationMs: STRETCH_MS }).then(() => {
+    if (stateVersion !== version) return;
+    setState("idle");
+    scheduleNext();
+  });
+}
+
+// Seconds since any input and since the last key press, from the OS idle
+// counters (no keystroke contents and no permission prompt; see input_idle).
+type InputIdle = { any: number; key: number | null };
+let inputIdleWorks = true;
+let keyPolls = 0;
+
+// Fall asleep once the user has been away this long; a busier pet stays up
+// longer (activity 1 = 90 s, the slider spans 27 s to 4.5 min).
+const sleepAfterSeconds = () => 90 * cfg.activity;
+
+async function pollInput() {
+  if (!inputIdleWorks || pressed || bandActive || awayPoll) return;
+  if (state !== "idle" && state !== "typing" && state !== "sleep") return;
+  let idle: InputIdle | null = null;
+  try {
+    idle = await invoke<InputIdle | null>("input_idle");
+  } catch {
+    idle = null;
+  }
+  if (!idle) {
+    inputIdleWorks = false; // no idle counters on this OS: no typing or naps
+    return;
+  }
+  const typing = idle.key !== null && idle.key < 1.2;
+  keyPolls = typing ? keyPolls + 1 : 0;
+  if (state === "typing") {
+    if (!typing && (idle.key === null || idle.key > 4)) {
+      setState("idle");
+      scheduleNext();
+    }
+  } else if (state === "sleep") {
+    // Typing wakes her gently; a click wakes her with a start (react).
+    if (typing && !document.body.dataset.sleepPhase) wakeUp(false);
+  } else if (standingOn) {
+    // Two polls in a row filter out a single stray key.
+    if (keyPolls >= 2 && hasSprite("typing")) setState("typing");
+    else if (idle.any >= sleepAfterSeconds() && hasSprite("sleep")) setState("sleep");
+  }
+}
+setInterval(() => void pollInput(), 1000);
+
+function wakeUp(startled: boolean) {
+  stopZzz();
+  if (startled) spawnEffect("❗", 1);
+  const gentle = !startled && hasSprite("stretch");
+  if (!gentle && !hasSprite("wake")) {
+    setState("idle");
+    scheduleNext();
+    return;
+  }
+  if (gentle) {
+    setState("idle");
+    stretch();
+    return;
+  }
+  const version = stateVersion;
+  document.body.dataset.sleepPhase = "wake";
+  pet.src = `${spriteFor("wake")}?t=${Date.now()}`;
+  void invoke("motion_tick", { durationMs: WAKE_MS }).then(() => {
+    if (stateVersion !== version) return;
+    setState("idle");
+    scheduleNext();
+  });
+}
+
+let zzzTimer: ReturnType<typeof setInterval> | null = null;
+
+function startZzz() {
+  stopZzz();
+  spawnZ();
+  zzzTimer = setInterval(spawnZ, 1600);
+}
+
+function stopZzz() {
+  if (zzzTimer) clearInterval(zzzTimer);
+  zzzTimer = null;
+  for (const z of effects.querySelectorAll(".zzz")) z.remove();
+}
+
+function spawnZ() {
+  if (document.body.dataset.sleepPhase) return;
+  const z = document.createElement("span");
+  z.className = "zzz";
+  z.textContent = Math.random() < 0.5 ? "z" : "Z";
+  // Rise above the head, which faces the way the sprite does.
+  const facingLeft = pet.style.getPropertyValue("--flip").trim() === "-1";
+  z.style.left = `${(facingLeft ? 34 : 56) + Math.random() * 8}%`;
+  effects.appendChild(z);
+  setTimeout(() => z.remove(), 2600);
 }
 
 // ---------- Lanbeam handoff: the pet can move to the paired iPad ----------
@@ -849,6 +1107,9 @@ async function crossTo(m: Monitor, dir: -1 | 1) {
   setFlip(dir);
   setState(climbing ? "jet" : "walk");
   const version = stateVersion;
+  // The climb is straight up, so a pack with a jet-climb loop shows it
+  // until she levels off into the cruise.
+  let steep = climbing && showJetPhase(jetSpriteFor(0, cruiseY - y, hasSprite));
 
   let vx = 0;
   let t = 0;
@@ -861,6 +1122,7 @@ async function crossTo(m: Monitor, dir: -1 | 1) {
       // area, then cruise sideways over the boundary.
       y += (cruiseY - y) * (1 - Math.exp(-3.9 * dt));
       if (y - cruiseY < 40) {
+        if (steep) steep = showJetPhase("jet");
         const desired = Math.min(1300, Math.sqrt(5200 * Math.abs(endX - x)));
         vx += Math.max(-2600 * dt, Math.min(2600 * dt, desired - vx));
         x += dir * vx * dt;
@@ -999,7 +1261,8 @@ setInterval(async () => {
   standingOn.x2 = fresh.x2;
   standingOn.y = fresh.y;
   const restY = fresh.y - winH;
-  if ((state === "idle" || state === "edge") && Math.abs(pos.y - restY) > 2) {
+  const resting = ["idle", "edge", "sleep", "stretch", "typing"].includes(state);
+  if (resting && Math.abs(pos.y - restY) > 2) {
     await appWindow.setPosition(new PhysicalPosition(pos.x, restY));
   }
 }, 400);
@@ -1018,10 +1281,11 @@ stage.addEventListener("mousedown", (e) => {
   // mousedown would remove the target before its click event fires.
   if (menu.contains(e.target as Node)) return;
   menu.hidden = true;
-  if (state === "fall" || state === "rocket" || state === "jet") {
+  if (state === "fall" || state === "rocket" || state === "jet" || state === "climb") {
     stateVersion += 1; // cancel pending ignition/touchdown, even before dragging
     stopCross();
   }
+  if (state === "climb") stopClimb(); // pulled off the wall
   if (state === "fall") stopFall(); // caught mid-air
   if (state === "rocket") stopRocket(); // plucked off the rocket
   if (state === "jet") stopJet();
@@ -1060,9 +1324,81 @@ appWindow.onMoved(() => {
   }, 250);
 });
 
+// ---------- click-through ----------
+//
+// Only the drawn character takes the mouse; clicks on the transparent rest of
+// the window fall through to whatever is behind it. Rust reports the cursor
+// while it is over this window (the webview gets no mouse events once the
+// window ignores them) and each report re-decides from the sprite's pixels.
+
+const HIT_MARGIN = 6; // CSS px of slack around the outline
+const spriteMasks = new Map<string, Promise<AlphaMask | null>>();
+let passThrough = false;
+
+function maskFor(src: string): Promise<AlphaMask | null> {
+  const key = src.split("?")[0]; // one-shot cache-busters share a mask
+  let mask = spriteMasks.get(key);
+  if (!mask) {
+    mask = fetch(key)
+      .then((r) => r.arrayBuffer())
+      .then((b) => apngAlphaMask(new Uint8Array(b)))
+      .catch((e) => {
+        console.warn("sprite mask unavailable, using its box:", key, e);
+        return null;
+      });
+    spriteMasks.set(key, mask);
+  }
+  return mask;
+}
+
+async function takesCursor(x: number, y: number): Promise<boolean> {
+  if (pressed || dragging || state === "drag") return true;
+  if (!menu.hidden && insideRect(x, y, menu.getBoundingClientRect(), HIT_MARGIN)) return true;
+  const src = pet.currentSrc || pet.src;
+  const mask = await maskFor(src);
+  const rect = pet.getBoundingClientRect();
+  if (!mask || !rect.width || !rect.height) return insideRect(x, y, rect, HIT_MARGIN);
+  const flipped = pet.style.getPropertyValue("--flip").trim() === "-1";
+  const p = spritePoint(x, y, rect, mask, flipped);
+  return hitsMask(mask, p.x, p.y, HIT_MARGIN * p.perCss);
+}
+
+async function setPassThrough(next: boolean) {
+  if (next === passThrough) return;
+  passThrough = next;
+  await appWindow.setIgnoreCursorEvents(next).catch((e) => {
+    passThrough = !next;
+    console.warn("setIgnoreCursorEvents failed:", e);
+  });
+}
+
+type PetCursor = { x: number; y: number; inside: boolean };
+let cursorSeq = 0;
+let lastCursor: PetCursor | null = null;
+
+async function recheckCursor() {
+  const c = lastCursor;
+  if (!c?.inside) return; // elsewhere the window's mode does not matter
+  const seq = ++cursorSeq;
+  const hit = await takesCursor(c.x, c.y);
+  if (seq === cursorSeq) await setPassThrough(!hit); // a newer point wins
+}
+
+void appWindow.listen<PetCursor>("pet-cursor", ({ payload }) => {
+  lastCursor = payload;
+  void recheckCursor();
+});
+// A new sprite (state change, landing, rocket ignition) can move the drawn
+// pixels under a cursor that stays put.
+pet.addEventListener("load", () => void recheckCursor());
+
 // ---------- click reaction ----------
 
 function react() {
+  if (state === "sleep") {
+    if (!document.body.dataset.sleepPhase) wakeUp(true); // startled awake
+    return;
+  }
   if (state === "walk" && walkFrame) stopWalk();
   setState("react");
   for (let i = 0; i < 3; i++) spawnHeart();
@@ -1076,12 +1412,16 @@ function react() {
 }
 
 function spawnHeart() {
+  spawnEffect(["💖", "✨", "🌸"][Math.floor(Math.random() * 3)], 0.25);
+}
+
+function spawnEffect(text: string, maxDelay: number) {
   const heart = document.createElement("span");
   heart.className = "heart";
-  heart.textContent = ["💖", "✨", "🌸"][Math.floor(Math.random() * 3)];
+  heart.textContent = text;
   heart.style.left = `${30 + Math.random() * 40}%`;
   heart.style.bottom = `${45 + Math.random() * 25}%`;
-  heart.style.animationDelay = `${Math.random() * 0.25}s`;
+  heart.style.animationDelay = `${Math.random() * maxDelay}s`;
   effects.appendChild(heart);
   setTimeout(() => heart.remove(), 1600);
 }
@@ -1106,7 +1446,7 @@ friendBtn.addEventListener("click", () => {
   friendsSpawned += 1;
   const label = `pet-${Date.now().toString(36)}-${friendsSpawned}`;
   new WebviewWindow(label, {
-    url: "index.html",
+    url: `index.html?pack=${encodeURIComponent(currentPack)}`,
     width: 240,
     height: 320,
     transparent: true,
@@ -1128,15 +1468,16 @@ settingsBtn.addEventListener("click", () => {
   void openSettings();
 });
 
-async function openSettings() {
+async function openSettings(tab?: string) {
   const existing = await WebviewWindow.getByLabel("settings");
   if (existing) {
+    if (tab) await emit("settings-tab", tab);
     await existing.show();
     await existing.setFocus();
     return;
   }
   new WebviewWindow("settings", {
-    url: "settings.html",
+    url: tab ? `settings.html?tab=${tab}` : "settings.html",
     title: t("settingsTitle"),
     width: 360,
     height: 620,
@@ -1162,13 +1503,14 @@ let hiddenForBand = false;
 const appStartedAt = Date.now();
 
 function bandDue(): boolean {
-  if (!isMainPet || !cfg.bandRandom) return false;
+  if (!isMainPet || !bandOwned || !cfg.bandRandom) return false;
   const last = Number(localStorage.getItem(LAST_BAND_KEY) ?? 0);
   return Date.now() - appStartedAt > 20 * 60e3 && Date.now() - last > 45 * 60e3;
 }
 
 async function openBand() {
   if (!isMainPet || bandActive || awayPoll) return;
+  if (!bandOwned) return void openSettings("band"); // shows what the band pack unlocks
   if (await WebviewWindow.getByLabel("band-stage")) return;
   const monitor = await currentMonitor();
   if (!monitor) return;
@@ -1331,13 +1673,48 @@ async function applyPetSize() {
   );
 }
 
+// ---------- companions ----------
+
+const ownPack = () => urlPack ?? cfg.pack;
+
+async function syncCompanions() {
+  if (!isMainPet) return;
+  const wanted = new Set(cfg.companions.filter((id) => id !== currentPack && packInfos.some((p) => p.id === id)));
+  for (const id of wanted) {
+    const label = BUDDY_PREFIX + id;
+    if (await WebviewWindow.getByLabel(label)) continue;
+    new WebviewWindow(label, {
+      url: `index.html?pack=${encodeURIComponent(id)}`,
+      width: 240,
+      height: 320,
+      transparent: true,
+      decorations: false,
+      alwaysOnTop: true,
+      skipTaskbar: true,
+      shadow: false,
+      resizable: false,
+      acceptFirstMouse: true,
+    });
+  }
+}
+
+// A companion that was switched off, became the main pet, or is no longer
+// usable closes its own window.
+function companionUnwanted(): boolean {
+  return isBuddy && (urlPack === null || urlPack === cfg.pack || !cfg.companions.includes(urlPack)
+    || !packInfos.some((p) => p.id === urlPack));
+}
+
 void listen<PetSettings>(SETTINGS_EVENT, async (e) => {
   const sizeChanged = e.payload.size !== cfg.size;
-  const packChanged = e.payload.pack !== cfg.pack;
+  const packChanged = urlPack === null && e.payload.pack !== cfg.pack;
+  const rosterChanged = e.payload.pack !== cfg.pack || e.payload.companions.join() !== cfg.companions.join();
   cfg = e.payload;
-  if (packChanged) packInfos = await listPacks();
+  if (rosterChanged) await refreshEntitlements();
+  if (companionUnwanted()) return void appWindow.close();
   void pushSettingsToBridge();
-  if (packChanged) loadPack(cfg.pack);
+  if (packChanged) loadPack(allowedPack(ownPack()));
+  void syncCompanions();
   if (sizeChanged) {
     await applyPetSize();
     await refreshMonitor();
@@ -1361,8 +1738,18 @@ async function pushSettingsToBridge() {
   }
 }
 
+void listen(LICENSE_EVENT, async () => {
+  await refreshEntitlements();
+  if (companionUnwanted()) return void appWindow.close();
+  const pack = allowedPack(ownPack());
+  if (pack !== currentPack) loadPack(pack);
+  void syncCompanions();
+});
+
 async function init() {
-  loadPack(cfg.pack);
+  await refreshEntitlements();
+  if (companionUnwanted()) return void appWindow.close();
+  loadPack(allowedPack(ownPack()));
   await applyPetSize();
   await refreshMonitor();
   await refreshPlatforms();
@@ -1377,6 +1764,7 @@ async function init() {
   setInterval(refreshPlatforms, 500);
   scheduleNext();
   void syncBridgeAtStartup();
+  void syncCompanions();
 }
 
 init();

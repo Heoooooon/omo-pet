@@ -33,12 +33,16 @@ def sample(frames: list[Image.Image], n: int) -> list[Image.Image]:
 
 
 def fit_cells(src: list[Image.Image], reference: list[Image.Image],
-              end_on: Image.Image | None = None) -> list[Image.Image]:
+              end_on: Image.Image | None = None, fit: str = "box") -> list[Image.Image]:
     width, height = reference[0].size
     box = union_bbox(src)
     if end_on is None:
         ref_box = union_bbox(reference)
-        scale = min((ref_box[2] - ref_box[0]) / (box[2] - box[0]), (ref_box[3] - ref_box[1]) / (box[3] - box[1]))
+        by_height = (ref_box[3] - ref_box[1]) / (box[3] - box[1])
+        if fit == "height":  # longer prop than the reference: match height, stay inside the cell
+            scale = min(by_height, width / (box[2] - box[0]))
+        else:
+            scale = min((ref_box[2] - ref_box[0]) / (box[2] - box[0]), by_height)
         centre_x, bottom = (ref_box[0] + ref_box[2]) / 2, ref_box[3]
     else:
         target, last = union_bbox([end_on]), union_bbox([src[-1]])
@@ -55,6 +59,20 @@ def fit_cells(src: list[Image.Image], reference: list[Image.Image],
         cell.alpha_composite(c, (x, y))
         cells.append(cell)
     return cells
+
+
+def defringe(cells: list[Image.Image]) -> list[Image.Image]:
+    """Pull leftover magenta key out of red prop edges (rocket fins, flame): blue drops to green."""
+    out = []
+    for c in cells:
+        r, g, b, a = c.split()
+        rp, gp, bp, ap = r.load(), g.load(), b.load(), a.load()
+        for y in range(c.height):
+            for x in range(c.width):
+                if ap[x, y] and rp[x, y] - gp[x, y] > 60 and bp[x, y] - gp[x, y] > 60:
+                    bp[x, y] = gp[x, y]
+        out.append(Image.merge("RGBA", (r, g, b, a)))
+    return out
 
 
 def save_apng(cells: list[Image.Image], dst: Path, seconds: float, plays: int) -> None:
@@ -80,16 +98,23 @@ def main() -> None:
     parser.add_argument("--reference-pack", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--states", default="")
+    parser.add_argument("--spec", type=Path, default=HERE / "states.json",
+                        help="states.json of the pack being built (default: omo-cat's)")
     args = parser.parse_args()
-    spec = json.loads((HERE / "states.json").read_text(encoding="utf-8"))
+    spec = json.loads(args.spec.read_text(encoding="utf-8"))
     wanted = [s for s in args.states.split(",") if s] or list(spec)
     for state in wanted:
         item = spec[state]
         cycle = sorted((args.cycles / item["cycle"]).glob("*.png"))
+        skip = set(item.get("skip", []))  # source frames blurred into the chroma key
+        cycle = [p for i, p in enumerate(cycle) if i not in skip]
         src = [Image.open(p).convert("RGBA") for p in cycle]
         src = sample(src, max(2, round(item["seconds"] * item["fps"])))
         end_on = read_frames(args.out / f"{item['end_on']}.apng")[0] if "end_on" in item else None
-        cells = fit_cells(src, read_frames(args.reference_pack / f"{state}.apng"), end_on)
+        reference = read_frames(args.reference_pack / f"{item.get('ref', state)}.apng")  # ref: cell borrowed from another state
+        cells = fit_cells(src, reference, end_on, item.get("fit", "box"))
+        if item.get("defringe"):
+            cells = defringe(cells)
         save_apng(cells, args.out / f"{state}.apng", item["seconds"], item["plays"])
         print(state, len(cells), "frames")
 

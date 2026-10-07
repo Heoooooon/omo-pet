@@ -2,7 +2,7 @@
 // pet tuning, band mode, and "My character" (create / import packs).
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
-import { emit } from "@tauri-apps/api/event";
+import { emit, listen } from "@tauri-apps/api/event";
 import { open } from "@tauri-apps/plugin-dialog";
 import { getLanguage, initI18n, isLanguage, setLanguage, t, type MessageKey } from "./i18n";
 import {
@@ -12,13 +12,24 @@ import {
   type Instrument,
   type PetSettings,
 } from "./settings-store";
-import { jobUrl, listPacks, packLabel, type PackInfo } from "./packs";
+import {
+  getLicense,
+  hasBand,
+  isUnlocked,
+  jobUrl,
+  LICENSE_EVENT,
+  listPacks,
+  packLabel,
+  type License,
+  type PackInfo,
+} from "./packs";
 import { BAND_OPEN, INSTRUMENT_EMOJI, STAGE_ORDER } from "./band-shared";
 import { createAnimated, createStill, type Built, type StepId, type ToolStatus } from "./creator";
 
 const win = getCurrentWindow();
 let s = loadSettings();
 let packs: PackInfo[] = [];
+let license: License = { packs: [], id: null };
 
 const $ = <T extends HTMLElement>(id: string) =>
   document.getElementById(id) as T;
@@ -36,18 +47,22 @@ language.addEventListener("change", () => {
 
 // ---------- tabs ----------
 
-for (const tab of document.querySelectorAll<HTMLButtonElement>("#tabs button")) {
-  tab.addEventListener("click", () => {
-    for (const other of document.querySelectorAll<HTMLButtonElement>("#tabs button")) {
-      other.classList.toggle("active", other === tab);
-    }
-    for (const panel of document.querySelectorAll<HTMLElement>(".panel")) {
-      panel.hidden = panel.id !== `panel-${tab.dataset.tab}`;
-    }
-    $("footer").hidden = tab.dataset.tab !== "pet";
-    if (tab.dataset.tab === "custom" && !tools) void detectTools();
-  });
+function showTab(name: string) {
+  for (const tab of document.querySelectorAll<HTMLButtonElement>("#tabs button")) {
+    tab.classList.toggle("active", tab.dataset.tab === name);
+  }
+  for (const panel of document.querySelectorAll<HTMLElement>(".panel")) {
+    panel.hidden = panel.id !== `panel-${name}`;
+  }
+  $("footer").hidden = name !== "pet";
+  if (name === "custom" && !tools) void detectTools();
 }
+
+for (const tab of document.querySelectorAll<HTMLButtonElement>("#tabs button")) {
+  tab.addEventListener("click", () => showTab(tab.dataset.tab!));
+}
+// The pet opens Settings on the band tab when a locked band is requested.
+void listen<string>("settings-tab", (e) => showTab(e.payload));
 
 // ---------- pet + band settings ----------
 
@@ -58,8 +73,10 @@ function render() {
   }
   for (const key of TOGGLES) $<HTMLInputElement>(key).checked = s[key];
   $<HTMLInputElement>("bandSound").checked = !s.bandMuted;
-  for (const btn of $("packs").querySelectorAll("button")) {
-    btn.classList.toggle("active", btn.dataset.pack === s.pack);
+  for (const btn of $("packs").querySelectorAll<HTMLButtonElement>("button")) {
+    const on = btn.dataset.pack === s.pack || s.companions.includes(btn.dataset.pack!);
+    btn.classList.toggle("active", on);
+    btn.setAttribute("aria-pressed", String(on));
   }
   for (const sel of $("roster").querySelectorAll("select")) {
     sel.value = s.bandRoster[sel.dataset.inst as Instrument];
@@ -94,15 +111,26 @@ $<HTMLInputElement>("bandSound").addEventListener("change", (e) => {
 });
 
 $("packs").addEventListener("click", (e) => {
-  const pack = (e.target as HTMLElement).dataset?.pack;
+  const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("button");
+  const pack = btn?.dataset.pack;
   if (!pack) return;
-  s = { ...s, pack };
+  if (btn.classList.contains("locked")) return showTab("band");
+  // Each character is shown or hidden on its own; one always stays out.
+  if (pack === s.pack) {
+    const [next, ...rest] = s.companions;
+    if (!next) return;
+    s = { ...s, pack: next, companions: rest };
+  } else if (s.companions.includes(pack)) {
+    s = { ...s, companions: s.companions.filter((id) => id !== pack) };
+  } else {
+    s = { ...s, companions: [...s.companions, pack] };
+  }
   render();
   queueSave();
 });
 
 $("reset").addEventListener("click", () => {
-  s = { ...DEFAULTS, bandRoster: { ...DEFAULTS.bandRoster } };
+  s = { ...DEFAULTS, companions: [...DEFAULTS.companions], bandRoster: { ...DEFAULTS.bandRoster } };
   render();
   queueSave();
 });
@@ -128,7 +156,10 @@ function renderPacks() {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.dataset.pack = p.id;
-      btn.textContent = packLabel(p, lang);
+      const locked = !isUnlocked(p, license);
+      btn.classList.toggle("locked", locked);
+      btn.textContent = locked ? `🔒 ${packLabel(p, lang)}` : packLabel(p, lang);
+      if (locked) btn.title = t("lockedPack");
       return btn;
     }),
   );
@@ -139,7 +170,7 @@ function renderPacks() {
     const sel = document.createElement("select");
     sel.className = "full";
     sel.dataset.inst = inst;
-    for (const p of packs.filter((p) => p.instrument === inst)) {
+    for (const p of packs.filter((p) => p.instrument === inst && isUnlocked(p, license))) {
       sel.add(new Option(packLabel(p, lang), p.id));
     }
     sel.addEventListener("change", () => {
@@ -150,13 +181,61 @@ function renderPacks() {
   }
   $("roster").replaceChildren(...rows);
   renderMyPacks();
+  renderLicense();
   render();
 }
 
 async function refreshPacks() {
-  packs = await listPacks();
+  [packs, license] = await Promise.all([listPacks(), getLicense()]);
   renderPacks();
 }
+
+// ---------- band pack license ----------
+
+function renderLicense() {
+  const owned = hasBand(license);
+  $("store").hidden = owned;
+  $("band-controls").hidden = !owned;
+  $("license-entry").hidden = owned;
+  $("license-remove").hidden = !owned;
+  $("license-state").textContent = owned
+    ? t("licenseActive").replace("{id}", license.id ?? "")
+    : t("licenseNone");
+  $<HTMLTextAreaElement>("license-key").placeholder = t("licenseKeyPlaceholder");
+}
+
+async function applyLicense(command: string, args: Record<string, string>) {
+  try {
+    license = await invoke<License>(command, args);
+    $<HTMLTextAreaElement>("license-key").value = "";
+    message("license-msg", t("licenseDone"));
+  } catch (e) {
+    message("license-msg", friendlyError(e), true);
+  }
+  await emit(LICENSE_EVENT);
+  await refreshPacks();
+}
+
+$("license-file").addEventListener("click", async () => {
+  const path = await open({
+    multiple: false,
+    directory: false,
+    filters: [{ name: "omo-pet license", extensions: ["omopet-license", "txt"] }],
+  });
+  if (typeof path === "string") await applyLicense("license_import", { path });
+});
+
+$("license-apply").addEventListener("click", async () => {
+  const text = $<HTMLTextAreaElement>("license-key").value.trim();
+  if (text) await applyLicense("license_activate", { text });
+});
+
+$("license-remove").addEventListener("click", async () => {
+  await invoke("license_remove").catch(() => undefined);
+  message("license-msg", "");
+  await emit(LICENSE_EVENT);
+  await refreshPacks();
+});
 
 // ---------- My character ----------
 
@@ -232,6 +311,8 @@ function friendlyError(e: unknown): string {
   const text = typeof e === "string" ? e : e instanceof Error ? e.message : String(e);
   if (text.startsWith("grok-auth") || text === "grok-missing" || text === "grok-expired") return t("errGrokAuth");
   if (text.startsWith("codex-auth")) return t("errCodexAuth");
+  if (text === "slot-limit") return t("errSlotLimit");
+  if (text === "license-invalid") return t("errLicense");
   return text;
 }
 
@@ -280,6 +361,8 @@ function setBusy(on: boolean) {
 $("create").addEventListener("click", async () => {
   if (!sourcePath) return message("create-msg", t("pickFirst"), true);
   if (!$<HTMLInputElement>("cname").value.trim()) return message("create-msg", t("nameFirst"), true);
+  // Don't spend minutes of drawing on a character the free slot can't hold.
+  if (!hasBand(license) && packs.some((p) => p.user)) return message("create-msg", t("errSlotLimit"), true);
   const inst = $<HTMLSelectElement>("cinst").value as Instrument;
   const animated = canAnimate();
   const ids: StepId[] = animated
@@ -383,6 +466,8 @@ $("import-zip").addEventListener("click", () => void importFrom(false));
 
 function renderMyPacks() {
   const mine = packs.filter((p) => p.user);
+  $("slot-note").hidden = hasBand(license);
+  $("slot-note").textContent = t("slotNote").replace("{used}", String(mine.length));
   if (!mine.length) {
     const li = document.createElement("li");
     li.className = "hint";
@@ -399,7 +484,7 @@ function renderMyPacks() {
       use.className = "btn";
       use.textContent = t("usePet");
       use.addEventListener("click", () => {
-        s = { ...s, pack: p.id };
+        s = { ...s, pack: p.id, companions: s.companions.filter((id) => id !== p.id) };
         render();
         queueSave();
       });
@@ -408,7 +493,11 @@ function renderMyPacks() {
       del.textContent = t("remove");
       del.addEventListener("click", async () => {
         await invoke("delete_user_pack", { id: p.id });
-        if (s.pack === p.id) s = { ...s, pack: DEFAULTS.pack };
+        s = { ...s, companions: s.companions.filter((id) => id !== p.id) };
+        if (s.pack === p.id) {
+          const [next = DEFAULTS.pack, ...rest] = s.companions;
+          s = { ...s, pack: next, companions: rest };
+        }
         for (const inst of INSTRUMENTS) {
           if (s.bandRoster[inst] === p.id) s = { ...s, bandRoster: { ...s.bandRoster, [inst]: DEFAULTS.bandRoster[inst] } };
         }
@@ -430,3 +519,5 @@ initI18n(() => {
   renderSteps();
 });
 void refreshPacks();
+const initialTab = new URLSearchParams(location.search).get("tab");
+if (initialTab) showTab(initialTab);

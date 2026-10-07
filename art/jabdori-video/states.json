@@ -1,0 +1,81 @@
+{
+  "idle": {
+    "cycle": "set1/side-idle/loop/cycle",
+    "seconds": 3,
+    "fps": 24,
+    "plays": 0
+  },
+  "walk": {
+    "cycle": "set1/side-walk/loop/cycle",
+    "seconds": 1.07,
+    "fps": 22,
+    "plays": 0
+  },
+  "rocket": {
+    "cycle": "custom/rocket/loop/cycle",
+    "seconds": 3,
+    "fps": 24,
+    "plays": 0,
+    "fit": "height",
+    "defringe": true
+  },
+  "jet": {
+    "cycle": "custom/jet/loop/cycle",
+    "seconds": 3,
+    "fps": 24,
+    "plays": 0,
+    "fit": "height",
+    "defringe": true
+  },
+  "jet-climb": {
+    "cycle": "custom/jet-climb/loop/cycle",
+    "seconds": 3,
+    "fps": 24,
+    "plays": 0,
+    "ref": "rocket",
+    "fit": "height",
+    "defringe": true
+  },
+  "fall-glide": {
+    "cycle": "custom/fall-glide/loop/cycle",
+    "seconds": 3,
+    "fps": 24,
+    "plays": 0
+  },
+  "fall-open": {
+    "cycle": "custom/fall-open/loop/cycle",
+    "seconds": 0.55,
+    "fps": 24,
+    "plays": 1,
+    "end_on": "fall-glide",
+    "skip": [
+      24,
+      25,
+      26
+    ]
+  },
+  "fall": {
+    "cycle": "custom/fall-open/loop/cycle",
+    "seconds": 0.75,
+    "fps": 24,
+    "plays": 1,
+    "end_on": "fall-glide",
+    "skip": [
+      24,
+      25,
+      26
+    ]
+  },
+  "fall-land": {
+    "cycle": "custom/fall-land/loop/cycle",
+    "seconds": 0.45,
+    "fps": 24,
+    "plays": 1
+  },
+  "edge": {
+    "cycle": "custom/edge/loop/cycle",
+    "seconds": 2,
+    "fps": 24,
+    "plays": 1
+  }
+}

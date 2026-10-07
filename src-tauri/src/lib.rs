@@ -4,6 +4,7 @@ use tauri::tray::TrayIconBuilder;
 use tauri::{Emitter, Manager, Wry};
 
 mod creator;
+mod license;
 mod packs;
 
 /// A normal (layer-0) on-screen window, in logical screen points with the
@@ -34,9 +35,53 @@ fn list_windows() -> Vec<DesktopWindow> {
     }
 }
 
+/// Seconds since the user last touched any input device and since the last
+/// key press, read from the OS's idle counters. These are counters only — no
+/// event stream and no key contents — so macOS asks for no Input Monitoring or
+/// Accessibility permission. `key` is `None` where the OS cannot tell keys
+/// apart from other input.
+#[derive(Serialize, Clone, Copy, Debug, PartialEq)]
+pub struct InputIdle {
+    pub any: f64,
+    pub key: Option<f64>,
+}
+
+#[tauri::command]
+fn input_idle() -> Option<InputIdle> {
+    #[cfg(target_os = "macos")]
+    {
+        Some(macos::input_idle())
+    }
+    #[cfg(target_os = "windows")]
+    {
+        win::input_idle()
+    }
+    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
+    {
+        None
+    }
+}
+
 #[cfg(target_os = "macos")]
 mod macos {
-    use super::DesktopWindow;
+    use super::{DesktopWindow, InputIdle};
+
+    #[link(name = "CoreGraphics", kind = "framework")]
+    extern "C" {
+        fn CGEventSourceSecondsSinceLastEventType(state: i32, event_type: u32) -> f64;
+    }
+    const HID_SYSTEM_STATE: i32 = 1; // kCGEventSourceStateHIDSystemState
+    const ANY_INPUT: u32 = u32::MAX; // kCGAnyInputEventType
+    const KEY_DOWN: u32 = 10; // kCGEventKeyDown
+
+    pub fn input_idle() -> InputIdle {
+        unsafe {
+            InputIdle {
+                any: CGEventSourceSecondsSinceLastEventType(HID_SYSTEM_STATE, ANY_INPUT),
+                key: Some(CGEventSourceSecondsSinceLastEventType(HID_SYSTEM_STATE, KEY_DOWN)),
+            }
+        }
+    }
     use core_foundation::array::CFArray;
     use core_foundation::base::{CFType, TCFType};
     use core_foundation::dictionary::{CFDictionary, CFDictionaryRef};
@@ -109,8 +154,12 @@ mod macos {
 // NOTE: compiles but has not yet been exercised on a real Windows machine.
 #[cfg(target_os = "windows")]
 mod win {
-    use super::DesktopWindow;
-    use windows::Win32::Foundation::{BOOL, HWND, LPARAM, RECT, TRUE};
+    use super::{DesktopWindow, InputIdle};
+    use std::sync::Mutex;
+    use windows::Win32::Foundation::{BOOL, HWND, LPARAM, POINT, RECT, TRUE};
+    use windows::Win32::System::SystemInformation::GetTickCount;
+    use windows::Win32::UI::Input::KeyboardAndMouse::{GetLastInputInfo, LASTINPUTINFO};
+    use windows::Win32::UI::WindowsAndMessaging::GetCursorPos;
     use windows::Win32::Graphics::Dwm::{
         DwmGetWindowAttribute, DWMWA_CLOAKED, DWMWA_EXTENDED_FRAME_BOUNDS,
     };
@@ -128,6 +177,33 @@ mod win {
         "Shell_TrayWnd",
         "Shell_SecondaryTrayWnd",
     ];
+
+    /// Cursor at the previous poll.
+    static LAST: Mutex<Option<(i32, i32)>> = Mutex::new(None);
+
+    /// Windows has one idle counter for every device. Without a global hook
+    /// (which would make the pet a key logger) keys are told apart from the
+    /// mouse by elimination: input that arrived while the cursor stayed put is
+    /// counted as typing. A click or wheel without moving also counts.
+    pub fn input_idle() -> Option<InputIdle> {
+        let mut info = LASTINPUTINFO {
+            cbSize: std::mem::size_of::<LASTINPUTINFO>() as u32,
+            dwTime: 0,
+        };
+        let mut cursor = POINT::default();
+        unsafe {
+            if !GetLastInputInfo(&mut info).as_bool() || GetCursorPos(&mut cursor).is_err() {
+                return None;
+            }
+        }
+        let any = unsafe { GetTickCount() }.wrapping_sub(info.dwTime) as f64 / 1000.0;
+        let here = (cursor.x, cursor.y);
+        let mut last = LAST.lock().ok()?;
+        // Only fresh input with a resting cursor says anything about keys.
+        let key = if *last == Some(here) && any < 1.5 { any } else { 1.0e9 };
+        *last = Some(here);
+        Some(InputIdle { any, key: Some(key) })
+    }
 
     pub fn list_windows() -> Vec<DesktopWindow> {
         let mut out: Vec<DesktopWindow> = Vec::new();
@@ -295,6 +371,101 @@ async fn pet_bridge_settings(
     .map_err(|e| e.to_string())?
 }
 
+// ---------- click-through ----------
+//
+// A pet window is a 240x320 transparent box, but only the drawn character
+// should take the mouse. While the window ignores cursor events the webview
+// sees no mouse at all, so the cursor is followed here: whenever it is over a
+// pet window (or just left it) that window gets its local point and decides,
+// from the sprite's pixels, whether to keep taking clicks.
+
+const CURSOR_POLL: std::time::Duration = std::time::Duration::from_millis(33);
+
+#[derive(Serialize, Clone, Copy, PartialEq, Debug)]
+struct PetCursor {
+    x: f64,
+    y: f64,
+    inside: bool,
+}
+
+fn is_pet_window(label: &str) -> bool {
+    label == "main" || label.starts_with("pet-")
+}
+
+/// The cursor in window-local logical points (whole points, so a resting
+/// cursor sends nothing), or `inside: false` when it is outside the window.
+fn local_cursor(cursor: (f64, f64), origin: (f64, f64), size: (f64, f64), scale: f64) -> PetCursor {
+    let x = (cursor.0 - origin.0) / scale;
+    let y = (cursor.1 - origin.1) / scale;
+    if x < 0.0 || y < 0.0 || x >= size.0 / scale || y >= size.1 / scale {
+        return PetCursor { x: -1.0, y: -1.0, inside: false };
+    }
+    PetCursor { x: x.floor(), y: y.floor(), inside: true }
+}
+
+fn spawn_cursor_watch(app: tauri::AppHandle) {
+    std::thread::spawn(move || {
+        let mut last: std::collections::HashMap<String, PetCursor> = Default::default();
+        loop {
+            std::thread::sleep(CURSOR_POLL);
+            let Ok(cursor) = app.cursor_position() else {
+                continue;
+            };
+            let windows = app.webview_windows();
+            last.retain(|label, _| windows.contains_key(label));
+            for (label, window) in windows {
+                if !is_pet_window(&label) {
+                    continue;
+                }
+                let (Ok(origin), Ok(size), Ok(scale)) =
+                    (window.outer_position(), window.outer_size(), window.scale_factor())
+                else {
+                    continue;
+                };
+                let now = local_cursor(
+                    (cursor.x, cursor.y),
+                    (origin.x as f64, origin.y as f64),
+                    (size.width as f64, size.height as f64),
+                    scale,
+                );
+                let before = last.insert(label.clone(), now);
+                if before == Some(now) || (!now.inside && !before.is_some_and(|b| b.inside)) {
+                    continue;
+                }
+                let _ = app.emit_to(label.as_str(), "pet-cursor", now);
+            }
+        }
+    });
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn cursor_maps_into_logical_window_points() {
+        let c = local_cursor((1100.0, 700.0), (1000.0, 600.0), (480.0, 640.0), 2.0);
+        assert_eq!(c, PetCursor { x: 50.0, y: 50.0, inside: true });
+        let edge = local_cursor((1479.0, 1239.0), (1000.0, 600.0), (480.0, 640.0), 2.0);
+        assert_eq!(edge, PetCursor { x: 239.0, y: 319.0, inside: true });
+    }
+
+    #[test]
+    fn cursor_outside_the_window_is_reported_as_outside() {
+        for p in [(999.0, 700.0), (1480.0, 700.0), (1100.0, 599.0), (1100.0, 1240.0)] {
+            assert!(!local_cursor(p, (1000.0, 600.0), (480.0, 640.0), 2.0).inside, "{p:?}");
+        }
+    }
+
+    #[test]
+    fn only_pet_windows_follow_the_cursor() {
+        assert!(is_pet_window("main"));
+        assert!(is_pet_window("pet-buddy-jabdori"));
+        assert!(!is_pet_window("settings"));
+        assert!(!is_pet_window("band-stage"));
+    }
+}
+
 // ---------- tray ----------
 //
 // The pet can be hidden (iPad handoff, band show), so the tray is the one
@@ -356,10 +527,12 @@ pub fn run() {
         })
         .setup(|app| {
             setup_tray(app)?;
+            spawn_cursor_watch(app.handle().clone());
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             list_windows,
+            input_idle,
             pet_bridge_state,
             pet_bridge_handoff,
             pet_bridge_settings,
@@ -368,6 +541,10 @@ pub fn run() {
             packs::list_user_packs,
             packs::delete_user_pack,
             packs::import_pack,
+            license::license_status,
+            license::license_activate,
+            license::license_import,
+            license::license_remove,
             creator::creator_detect,
             creator::creator_grok_refresh,
             creator::creator_new_job,

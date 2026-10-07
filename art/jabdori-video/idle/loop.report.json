@@ -1,0 +1,94 @@
+{
+  "kind": "sprite-gen-video-loop-report",
+  "frames_dir": "D:\\omonyang-work\\omopet-jabdori\\gen\\set1\\side-idle\\frames\\keyed",
+  "out_dir": "D:\\omonyang-work\\omopet-jabdori\\gen\\set1\\side-idle\\loop",
+  "state": "idle",
+  "fps": 24.0,
+  "frames_total": 73,
+  "window": [
+    44,
+    69
+  ],
+  "profile": "breathing is slow and not strictly periodic; the lowest seam is a long window",
+  "cycle_mode": "pinned",
+  "seam_max": 2.0,
+  "anchor": "none",
+  "seam_measurement": "source-frames",
+  "jump_repair": {
+    "applied": false,
+    "why": "not a gait state (idle)"
+  },
+  "cycle": {
+    "kind": "pinned",
+    "start": 0,
+    "length": 72,
+    "seam": 0.0009565201471559703,
+    "inner_mean_adjacent": 0.0021580085158348083,
+    "ratio": 0.4432420632899811,
+    "pin_error": 0.0008481584372930229,
+    "pin_tolerance": 0.005,
+    "period_global": null,
+    "periodicity": null
+  },
+  "periodic_attempt": null,
+  "cycle_seconds": 3.0,
+  "n_out": 64,
+  "gif_fps": 24.0,
+  "delay_ms": 47,
+  "status": "passed",
+  "resampled_seam": 0.0009565201471559703,
+  "resampled_inner_mean_adjacent": 0.0023977041710168123,
+  "resampled_seam_ratio": 0.3989,
+  "scrubbed_rgb_pixels": 0,
+  "specks_dropped": 1341,
+  "strip": {
+    "path": "D:\\omonyang-work\\omopet-jabdori\\gen\\set1\\side-idle\\loop\\side-idle.strip.png",
+    "frames": 64,
+    "w": 327,
+    "h": 520,
+    "kind": "pinned",
+    "loop": true,
+    "body_h": 513,
+    "body_src_h": 627,
+    "body_ref": "tallest-grounded",
+    "scale": 0.8176,
+    "delay_ms": 46.88,
+    "cycle_frames": 72,
+    "cycle_seconds": 3.0,
+    "subsampled": true,
+    "cell_cap": 64,
+    "top_margin_px": 33,
+    "cell_height_cap": 520,
+    "body_height_target": null,
+    "foot_anchor": "none",
+    "drift_px": 0,
+    "foot_sway_px": 0,
+    "foot_x": null
+  },
+  "gif": {
+    "file": "side-idle.gif",
+    "format": "GIF",
+    "n_frames": 64,
+    "loop": 0,
+    "size": [
+      327,
+      520
+    ],
+    "corners_transparent": true,
+    "stale_rgb_under_alpha0": 0,
+    "bytes": 3436701
+  },
+  "webp": {
+    "file": "side-idle.webp",
+    "format": "WEBP",
+    "n_frames": 64,
+    "loop": 0,
+    "size": [
+      327,
+      520
+    ],
+    "corners_transparent": true,
+    "stale_rgb_under_alpha0": 0,
+    "bytes": 4808998
+  }
+}

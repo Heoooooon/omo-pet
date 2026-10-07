@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use tauri::{AppHandle, Manager, Runtime};
 
 /// Sprite files a pack may ship, without the `.apng` extension.
-pub const STATES: [&str; 10] = [
+pub const STATES: [&str; 17] = [
     "idle",
     "walk",
     "fall",
@@ -17,7 +17,14 @@ pub const STATES: [&str; 10] = [
     "edge",
     "rocket",
     "jet",
+    "jet-climb",
     "play",
+    "sleep",
+    "wake",
+    "stretch",
+    "climb",
+    "climb-slide",
+    "typing",
 ];
 pub const INSTRUMENTS: [&str; 5] = ["vocal", "guitar", "bass", "drums", "keys"];
 const MAX_FILE_BYTES: u64 = 40 * 1024 * 1024;
@@ -156,6 +163,17 @@ pub fn list_user_packs<R: Runtime>(app: AppHandle<R>) -> Result<Vec<PackManifest
     Ok(out)
 }
 
+/// Free copies hold one "My character" pack; the band pack lifts the limit.
+pub fn ensure_free_slot<R: Runtime>(app: &AppHandle<R>) -> Result<(), String> {
+    if crate::license::status(app).has("band") {
+        return Ok(());
+    }
+    if list_user_packs(app.clone())?.len() >= crate::license::FREE_USER_SLOTS {
+        return Err("slot-limit".into());
+    }
+    Ok(())
+}
+
 #[tauri::command]
 pub fn delete_user_pack<R: Runtime>(app: AppHandle<R>, id: String) -> Result<(), String> {
     if !id.starts_with("user-") || !safe_segment(&id) {
@@ -277,6 +295,7 @@ fn import_pack_blocking<R: Runtime>(app: &AppHandle<R>, path: &Path) -> Result<P
         stride: None,
         source: None,
     });
+    ensure_free_slot(app)?;
     let has_play = files.iter().any(|(n, _)| n == "play.apng");
     let id = new_pack_id(app, &m.name)?;
     let mut m = clean_manifest(m, &id);

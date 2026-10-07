@@ -78,42 +78,232 @@ body[data-state="jet"].has-jet #pet {
   width: 216px;
 }
 
-/* Omo cat pack: states whose cell is shared with a prop (parachute, rocket)
-   or drawn in a shorter cell get a wider display so the body reads the same
-   size as idle (measured: idle body ~205px tall at 176px wide). */
+/* Omo (omo-cat) and OmO keep one character size in every state, like Jabdori
+   below: each width puts the head at the rocket and jet rides' size (Omo:
+   head width, ~59px; OmO: the glowing "O" eye height, ~15px). margin-bottom
+   keeps the feet where they stood before the shrink. The fall width fits the
+   end of the parachute opening, which zooms out into the glide. */
+body[data-pack="omo-cat"] #pet {
+  width: 100px;
+  margin-bottom: 6.3px;
+}
+body[data-pack="omo-cat"][data-state="drag"] #pet {
+  width: 97px;
+}
 body[data-pack="omo-cat"][data-state="walk"].has-walk #pet {
-  width: 220px;
+  width: 140px;
+  margin-bottom: 6px;
+}
+body[data-pack="omo-cat"][data-state="edge"].has-edge #pet {
+  width: 131px;
+  margin-bottom: 8.8px;
 }
 body[data-pack="omo-cat"][data-state="fall"].has-fall #pet {
-  width: 238px;
+  width: 170px;
+  margin-bottom: 0;
 }
 body[data-pack="omo-cat"][data-state="fall"][data-fall-phase="land"] #pet {
-  width: 190px;
+  width: 119px;
+  margin-bottom: 5.9px;
 }
 body[data-pack="omo-cat"][data-state="rocket"].has-rocket #pet {
   width: 160px;
-}
-body[data-pack="omo-cat"][data-state="edge"].has-edge #pet {
-  width: 208px;
+  margin-bottom: 0;
 }
 body[data-pack="omo-cat"][data-state="jet"].has-jet #pet {
   width: 238px;
+  margin-bottom: 0;
 }
 
-/* Fan-made Chiikawa packs (scripts/make-chiikawa-pack.mjs): every state is
-   drawn on a window-sized 240x320 canvas at one body scale, so show them
-   1:1 in every state (this also overrides the wider jet rule above). */
-body:is(
-    [data-pack="chiikawa"],
-    [data-pack="hachiware"],
-    [data-pack="usagi"],
-    [data-pack="momonga"],
-    [data-pack="kurimanju"],
-    [data-pack="yoroi"],
-    [data-pack="yusangyun"]
-  )[data-state]
-  #pet {
-  width: 240px;
+body[data-pack="omo"] #pet {
+  width: 120px;
+  margin-bottom: 4.7px;
+}
+body[data-pack="omo"][data-state="drag"] #pet {
+  width: 116px;
+}
+body[data-pack="omo"][data-state="walk"].has-walk #pet {
+  width: 169px;
+  margin-bottom: 4px;
+}
+body[data-pack="omo"][data-state="edge"].has-edge #pet {
+  width: 158px;
+  margin-bottom: 5.2px;
+}
+body[data-pack="omo"][data-state="fall"].has-fall #pet {
+  width: 205px;
+  margin-bottom: 0;
+}
+body[data-pack="omo"][data-state="fall"][data-fall-phase="land"] #pet {
+  width: 137px;
+  margin-bottom: 4.4px;
+}
+body[data-pack="omo"][data-state="rocket"].has-rocket #pet {
+  width: 160px;
+  margin-bottom: 0;
+}
+body[data-pack="omo"][data-state="jet"].has-jet #pet {
+  width: 238px;
+  margin-bottom: 0;
+}
+
+/* Diagonal climb loop (packs that ship jet-climb): drawn in the rocket's tall cell. */
+body[data-state="jet"][data-jet-phase="climb"] #pet {
+  width: 176px;
+}
+/* Sized so the head matches the level jet's (measured: 72px head at 238px jet width). */
+body[data-pack="omo-cat"][data-state="jet"][data-jet-phase="climb"] #pet,
+body[data-pack="omo"][data-state="jet"][data-jet-phase="climb"] #pet {
+  width: 140px;
+}
+/* Jabdori's rocket loops (sprite-gen 2.38): the climb and level jet are sized so the
+   rocket and the puppy keep one size when the dash switches from climb to level
+   (measured on the portholes and goggles: 14.8px scale at 221px for both). */
+body[data-pack="jabdori"][data-state="jet"].has-jet #pet,
+body[data-pack="jabdori"][data-state="jet"][data-jet-phase="climb"] #pet {
+  width: 221px;
+  margin-bottom: 0;
+}
+
+/* Jabdori keeps one character size in every state: each width puts the head
+   (face between the ears, measured on every frame) at the rocket rides' ~47px.
+   margin-bottom keeps the feet where they stood before the shrink, so landing
+   and sitting still meet the platform at the same height. */
+body[data-pack="jabdori"] #pet {
+  width: 97px;
+  margin-bottom: 6.6px;
+}
+/* The drag dangle scales by 1.03, so start that much smaller. */
+body[data-pack="jabdori"][data-state="drag"] #pet {
+  width: 94px;
+}
+body[data-pack="jabdori"][data-state="walk"].has-walk #pet {
+  width: 133px;
+  margin-bottom: 6.8px;
+}
+body[data-pack="jabdori"][data-state="edge"].has-edge #pet {
+  width: 117px;
+  margin-bottom: 10.9px;
+}
+body[data-pack="jabdori"][data-state="fall"].has-fall #pet {
+  width: 136px;
+  margin-bottom: 0;
+}
+body[data-pack="jabdori"][data-state="fall"][data-fall-phase="land"] #pet {
+  width: 106px;
+  margin-bottom: 7px;
+}
+body[data-pack="jabdori"][data-state="rocket"].has-rocket #pet {
+  width: 160px;
+  margin-bottom: 0;
+}
+
+/* Sleep, stretch, wall climb and typing are fully drawn loops/one-shots. */
+body[data-state="sleep"].has-sleep #pet,
+body[data-state="stretch"].has-stretch #pet,
+body[data-state="climb"].has-climb #pet,
+body[data-state="typing"].has-typing #pet {
+  animation: none;
+}
+
+/* Snoring: letters drift up and away from the sleeping head. */
+.zzz {
+  position: absolute;
+  bottom: 38%;
+  font: 700 15px/1 ui-rounded, "SF Pro Rounded", system-ui, sans-serif;
+  color: #8f9bb3;
+  text-shadow: 0 0 2px #fff, 0 0 2px #fff;
+  animation: zzz-up 2.6s ease-out forwards;
+}
+
+@keyframes zzz-up {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.6);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(16px, -46px) scale(1.25);
+  }
+}
+
+/* New moves (sleep, wake, stretch, wall climb, typing): each sprite is cut at the rocket
+   rides' head size (see art/moves/README.md), so these widths keep the head the same as on
+   the rocket; margin-bottom is the pack's idle one, so feet stay on the same line. */
+body[data-pack="omo-cat"][data-state="sleep"].has-sleep #pet {
+  width: 117.7px;
+  margin-bottom: 6.3px;
+}
+body[data-pack="omo-cat"][data-state="sleep"][data-sleep-phase="wake"] #pet {
+  width: 116.7px;
+  margin-bottom: 6.3px;
+}
+body[data-pack="omo-cat"][data-state="stretch"].has-stretch #pet {
+  width: 106.2px;
+  margin-bottom: 6.3px;
+}
+body[data-pack="omo-cat"][data-state="climb"].has-climb #pet {
+  width: 111.5px;
+  margin-bottom: 6.3px;
+}
+body[data-pack="omo-cat"][data-state="climb"][data-climb-phase="slide"] #pet {
+  width: 106.2px;
+  margin-bottom: 6.3px;
+}
+body[data-pack="omo-cat"][data-state="typing"].has-typing #pet {
+  width: 107.3px;
+  margin-bottom: 6.3px;
+}
+body[data-pack="omo"][data-state="sleep"].has-sleep #pet {
+  width: 146.2px;
+  margin-bottom: 4.7px;
+}
+body[data-pack="omo"][data-state="sleep"][data-sleep-phase="wake"] #pet {
+  width: 146.2px;
+  margin-bottom: 4.7px;
+}
+body[data-pack="omo"][data-state="stretch"].has-stretch #pet {
+  width: 135px;
+  margin-bottom: 4.7px;
+}
+body[data-pack="omo"][data-state="climb"].has-climb #pet {
+  width: 105px;
+  margin-bottom: 4.7px;
+}
+body[data-pack="omo"][data-state="climb"][data-climb-phase="slide"] #pet {
+  width: 97.5px;
+  margin-bottom: 4.7px;
+}
+body[data-pack="omo"][data-state="typing"].has-typing #pet {
+  width: 118.8px;
+  margin-bottom: 4.7px;
+}
+body[data-pack="jabdori"][data-state="sleep"].has-sleep #pet {
+  width: 119.2px;
+  margin-bottom: 6.6px;
+}
+body[data-pack="jabdori"][data-state="sleep"][data-sleep-phase="wake"] #pet {
+  width: 116.2px;
+  margin-bottom: 6.6px;
+}
+body[data-pack="jabdori"][data-state="stretch"].has-stretch #pet {
+  width: 112.2px;
+  margin-bottom: 6.6px;
+}
+body[data-pack="jabdori"][data-state="climb"].has-climb #pet {
+  width: 82.9px;
+  margin-bottom: 6.6px;
+}
+body[data-pack="jabdori"][data-state="climb"][data-climb-phase="slide"] #pet {
+  width: 96px;
+  margin-bottom: 6.6px;
+}
+body[data-pack="jabdori"][data-state="typing"].has-typing #pet {
+  width: 96px;
+  margin-bottom: 6.6px;
 }
 
 body.ignite #pet {
