@@ -60,9 +60,9 @@ let world: World = { width: innerWidth, height: innerHeight, platforms: [], avoi
 
 const boxW = () => BOX_W * size;
 const boxH = () => BOX_H * size;
-// Widest standing sprite (OmO's parachute is 205 of the 240 px box) and the
-// tallest drawn frame; geometry keeps this body clear of the composer.
-const body = (): Body => ({ half: 105 * size, height: 280 * size });
+// The whole box width, so the wider jet sprite is clear of the composer from
+// its first frame, and the tallest drawn frame; geometry keeps this body clear.
+const body = (): Body => ({ half: boxW() / 2, height: 280 * size });
 const centerX = () => x + boxW() / 2;
 const spriteUrl = (key: string) => `${base}packs/${pack?.id}/${key}.apng`;
 const has = (key: string) => !!pack?.states.includes(key);
@@ -339,7 +339,11 @@ function jet() {
       show("jet");
     }
     const bob = Math.sin(t * 5.5) * 7 * size * Math.sin(Math.PI * p) ** 2;
-    place(startX + (targetX - startX) * ease(p), startFeet + (cruise - startFeet) * ease(Math.min(1, p / climbShare)) + bob);
+    const nx = startX + (targetX - startX) * ease(p);
+    const ny = startFeet + (cruise - startFeet) * ease(Math.min(1, p / climbShare)) + bob;
+    // Still climbing when the path reaches the composer: rise over it first.
+    const over = flightCeiling(world, nx + boxW() / 2, nx + boxW() / 2, { half: boxW() / 2, height: 0 });
+    place(nx, Math.min(ny, over));
     if (p === 1) {
       fall();
       return false;
@@ -519,7 +523,7 @@ function openMenu(cx: number, cy: number) {
   });
   menu.append(hide);
   menu.hidden = false;
-  const w = 132;
+  const w = 156;
   menu.style.left = `${Math.max(4, Math.min(innerWidth - w - 4, cx - w / 2))}px`;
   menu.style.top = `${Math.max(4, cy - 12 - 34 * menu.children.length)}px`;
 }
@@ -576,6 +580,7 @@ Object.assign(window, {
       return pack?.id;
     },
     rect: () => pet.getBoundingClientRect(),
+    at: (cx: number, feetY: number) => place(cx - boxW() / 2, feetY),
     hits: onPet,
     avoid: () => world.avoid,
     do: (what: "walk" | "rocket" | "jet" | "fall" | "idle") => ({ walk, rocket, jet, fall, idle })[what](),
