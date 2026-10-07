@@ -1,0 +1,119 @@
+/* Web overlay layer. The per-pack and per-state sprite sizes are appended by
+   scripts/build-overlay.mjs from src/style.css, so the web pet keeps the
+   desktop pet's sizes. Nothing here takes the pointer except the menu and a
+   hovered character pixel. */
+.omopet {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  pointer-events: none;
+  overflow: hidden;
+  contain: strict;
+}
+
+.omopet[hidden] {
+  display: none;
+}
+
+.omopet-box {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.omopet-pet {
+  --flip: 1;
+  width: 176px;
+  max-width: none;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+  transform-origin: bottom center;
+  transform: scaleX(var(--flip));
+  animation: omopet-breathe 3.4s ease-in-out infinite;
+}
+
+.omopet-box .omopet-pet.omopet-hot {
+  pointer-events: auto;
+  cursor: grab;
+}
+
+.omopet-box[data-state="drag"] .omopet-pet {
+  cursor: grabbing;
+}
+
+.omopet-effects {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.omopet-heart {
+  position: absolute;
+  font-size: 20px;
+  animation: omopet-float-up 1.1s ease-out forwards;
+}
+
+@keyframes omopet-float-up {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.6);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-70px) scale(1.15);
+  }
+}
+
+.omopet-menu {
+  position: absolute;
+  width: 132px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 10px;
+  background: rgba(20, 20, 24, 0.92);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  pointer-events: auto;
+  font: 13px/1.2 system-ui, sans-serif;
+}
+
+.omopet-menu[hidden] {
+  display: none;
+}
+
+.omopet-menu button {
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #fff;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.omopet-menu button:hover,
+.omopet-menu button:focus-visible {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.omopet-menu button[aria-pressed="true"]::after {
+  content: " ✓";
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .omopet-pet {
+    animation: none !important;
+  }
+}
