@@ -4,21 +4,21 @@
   "auth_source": "grok-login",
   "model": "grok-imagine-video-1.5",
   "mode": "first-last",
-  "request_id": "27734506-d8f3-91de-8498-1d6af9ba7295",
-  "image": "/Users/gwon-yeheon/.omonyang/omopet-rocket-sprites/gen/custom/jet-climb-b/canvas.png",
+  "request_id": "0a6c2095-b970-981c-b6fb-126bdca1bace",
+  "image": "/Users/gwon-yeheon/.omonyang/omopet-rocket-sprites/v238/custom/jet-climbb/canvas.png",
   "inputs": {
-    "image": "/Users/gwon-yeheon/.omonyang/omopet-rocket-sprites/gen/custom/jet-climb-b/canvas.png",
-    "last_frame": "/Users/gwon-yeheon/.omonyang/omopet-rocket-sprites/gen/custom/jet-climb-b/canvas-last.png"
+    "image": "/Users/gwon-yeheon/.omonyang/omopet-rocket-sprites/v238/custom/jet-climbb/canvas.png",
+    "last_frame": "/Users/gwon-yeheon/.omonyang/omopet-rocket-sprites/v238/custom/jet-climbb/canvas-last.png"
   },
-  "prompt": "2D game sprite animation. Jabdori the chibi white puppy with big floppy dark-gray ears, aviator goggles pushed up on its forehead and a short red scarf, rides astride a retro silver-and-red rocket that flies diagonally up toward the upper right in place, seen from a three-quarter front view: the big multi-layer exhaust flame behind the rocket (white-hot core, orange, violet edge) flickers and pulses quickly with its long trailing streak toward the lower left, the small star sparkles twinkle, the small light-gray smoke puff stays attached right at the nozzle and only churns in place (no detached smoke rings, no drifting clouds), the flame always keeps its white-hot core, orange body and violet-purple outer edge, the puppy's floppy ears, tail and the two scarf tails stream and flutter back toward the lower left, and the puppy and the rocket bob gently along the flight direction by a few pixels. The puppy keeps gripping the chrome handlebar with its confident grin the whole time, head turned slightly toward the viewer, and the rocket keeps its 45-degree climbing angle. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image: the retro silver rocket with its red nose cone, red stripe, two blue portholes and red fins, the puppy's goggles on the forehead and red scarf all stay exactly as drawn. The last frame returns to the exact pose of the first frame, so the animation loops seamlessly.",
-  "out": "/Users/gwon-yeheon/.omonyang/omopet-rocket-sprites/gen/custom/jet-climb-b/clip.mp4",
-  "bytes": 900329,
+  "prompt": "2D game sprite animation. Jabdori the chibi white puppy with big floppy dark-gray ears, aviator goggles pushed up on its forehead and a short red scarf, rides astride a retro silver-and-red rocket that flies diagonally up toward the upper right in place, seen from a three-quarter front view: the big multi-layer exhaust flame behind the rocket (white-hot core, orange, violet edge) flickers and pulses quickly with its long trailing streak toward the lower left, the small star sparkles twinkle, the small light-gray smoke puff stays attached right at the nozzle and only churns in place (no detached smoke rings, no drifting clouds), the flame always keeps its white-hot core, orange body and a clearly visible bright violet-purple outer edge along its whole length, the puppy's floppy ears, tail and the two scarf tails stream and flutter back toward the lower left, and the puppy and the rocket bob gently along the flight direction by a few pixels. The puppy keeps gripping the chrome handlebar with its confident grin the whole time, head turned slightly toward the viewer, and the rocket keeps its 45-degree climbing angle. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure bright green (#00FF00) chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image: the retro silver rocket with its red nose cone, red stripe, two blue portholes and red fins, the puppy's goggles on the forehead and red scarf all stay exactly as drawn. The last frame returns to the exact pose of the first frame, so the animation loops seamlessly.",
+  "out": "/Users/gwon-yeheon/.omonyang/omopet-rocket-sprites/v238/custom/jet-climbb/clip.mp4",
+  "bytes": 1003046,
   "host": "vidgen.x.ai",
   "duration_requested": 3,
   "duration_reported": 3,
   "resolution": "720p",
   "aspect_ratio": null,
   "generate_audio": false,
-  "elapsed_seconds": 38.462,
+  "elapsed_seconds": 39.673,
   "polls": 9
 }

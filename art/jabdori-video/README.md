@@ -1,4 +1,4 @@
-# Jabdori pack sources (sprite-gen 2.18; rocket, jet and jet-climb redone with 2.35)
+# Jabdori pack sources (sprite-gen 2.18; rocket, jet and jet-climb redone with 2.38)
 
 **Jabdori (잡도리) © Sisyphus Labs (OmO Native), 허락 받아 사용 / used with permission.**
 This character is not covered by the repository's MIT license. Do not reuse the art in this folder or in
@@ -21,13 +21,15 @@ dark tail, no outfit) and is drawn in the same style as Omo. It was made with th
 |---|---|---|
 | idle | `video-set --states idle` from `stills/base-side.png` | whole pinned clip, 3 s |
 | walk | `video-set --states walk --anchor motion-auto`, then `video-cycle-align --length 24` (RIFE 16 -> 24 frames) | 24 frames over 1.07 s |
-| rocket, jet, jet-climb | `video --image X --last-frame X` (sprite-gen 2.35, canvas `tall --headroom 0.18` / `wide` / `square`) | whole pinned clip, 3 s; `fit: height` and `defringe`; jet-climb is fitted into the rocket cell (`ref: rocket`) |
+| rocket, jet, jet-climb | `video --image X --last-frame X` (sprite-gen 2.38, still `stills/X-green.png`, canvas `tall --headroom 0.18` / `wide` / `square`; jet-climb's still has 22 % more room left and below so the flame tip stays in frame) | whole pinned clip, 3 s; `fit: height` and `defringe`; jet-climb is fitted into the rocket cell (`ref: rocket`) |
 | fall-glide | `video --image glide --last-frame glide` | whole pinned clip, 3 s |
 | fall-open, fall | `video --image freefall --last-frame glide` | 0.55 s and 0.75 s; source frames 24-26 skipped (canopy blurred into the key) |
 | fall-land | `video --image land --last-frame stand` | 0.45 s |
 | edge | `video --image hang --last-frame sit` | 2 s |
 
-All clips are 720p, 24 fps, keyed with `video-frames --key magenta --decontam palette`.
+All clips are 720p, 24 fps, keyed with `video-frames --key magenta --decontam palette`, except rocket, jet and jet-climb:
+their violet flame edge is close to the magenta key and was keyed away, so their stills are moved onto a green key
+(`stills/*-green.png`, the concept still matted by hue) and keyed with `video-frames --key green --spill auto --decontam palette`.
 
 ## Rocket stunt (retro-SF rocket, 2026-10-06)
 
