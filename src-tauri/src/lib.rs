@@ -35,9 +35,53 @@ fn list_windows() -> Vec<DesktopWindow> {
     }
 }
 
+/// Seconds since the user last touched any input device and since the last
+/// key press, read from the OS's idle counters. These are counters only — no
+/// event stream and no key contents — so macOS asks for no Input Monitoring or
+/// Accessibility permission. `key` is `None` where the OS cannot tell keys
+/// apart from other input.
+#[derive(Serialize, Clone, Copy, Debug, PartialEq)]
+pub struct InputIdle {
+    pub any: f64,
+    pub key: Option<f64>,
+}
+
+#[tauri::command]
+fn input_idle() -> Option<InputIdle> {
+    #[cfg(target_os = "macos")]
+    {
+        Some(macos::input_idle())
+    }
+    #[cfg(target_os = "windows")]
+    {
+        win::input_idle()
+    }
+    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
+    {
+        None
+    }
+}
+
 #[cfg(target_os = "macos")]
 mod macos {
-    use super::DesktopWindow;
+    use super::{DesktopWindow, InputIdle};
+
+    #[link(name = "CoreGraphics", kind = "framework")]
+    extern "C" {
+        fn CGEventSourceSecondsSinceLastEventType(state: i32, event_type: u32) -> f64;
+    }
+    const HID_SYSTEM_STATE: i32 = 1; // kCGEventSourceStateHIDSystemState
+    const ANY_INPUT: u32 = u32::MAX; // kCGAnyInputEventType
+    const KEY_DOWN: u32 = 10; // kCGEventKeyDown
+
+    pub fn input_idle() -> InputIdle {
+        unsafe {
+            InputIdle {
+                any: CGEventSourceSecondsSinceLastEventType(HID_SYSTEM_STATE, ANY_INPUT),
+                key: Some(CGEventSourceSecondsSinceLastEventType(HID_SYSTEM_STATE, KEY_DOWN)),
+            }
+        }
+    }
     use core_foundation::array::CFArray;
     use core_foundation::base::{CFType, TCFType};
     use core_foundation::dictionary::{CFDictionary, CFDictionaryRef};
@@ -110,8 +154,12 @@ mod macos {
 // NOTE: compiles but has not yet been exercised on a real Windows machine.
 #[cfg(target_os = "windows")]
 mod win {
-    use super::DesktopWindow;
-    use windows::Win32::Foundation::{BOOL, HWND, LPARAM, RECT, TRUE};
+    use super::{DesktopWindow, InputIdle};
+    use std::sync::Mutex;
+    use windows::Win32::Foundation::{BOOL, HWND, LPARAM, POINT, RECT, TRUE};
+    use windows::Win32::System::SystemInformation::GetTickCount;
+    use windows::Win32::UI::Input::KeyboardAndMouse::{GetLastInputInfo, LASTINPUTINFO};
+    use windows::Win32::UI::WindowsAndMessaging::GetCursorPos;
     use windows::Win32::Graphics::Dwm::{
         DwmGetWindowAttribute, DWMWA_CLOAKED, DWMWA_EXTENDED_FRAME_BOUNDS,
     };
@@ -129,6 +177,33 @@ mod win {
         "Shell_TrayWnd",
         "Shell_SecondaryTrayWnd",
     ];
+
+    /// Cursor at the previous poll.
+    static LAST: Mutex<Option<(i32, i32)>> = Mutex::new(None);
+
+    /// Windows has one idle counter for every device. Without a global hook
+    /// (which would make the pet a key logger) keys are told apart from the
+    /// mouse by elimination: input that arrived while the cursor stayed put is
+    /// counted as typing. A click or wheel without moving also counts.
+    pub fn input_idle() -> Option<InputIdle> {
+        let mut info = LASTINPUTINFO {
+            cbSize: std::mem::size_of::<LASTINPUTINFO>() as u32,
+            dwTime: 0,
+        };
+        let mut cursor = POINT::default();
+        unsafe {
+            if !GetLastInputInfo(&mut info).as_bool() || GetCursorPos(&mut cursor).is_err() {
+                return None;
+            }
+        }
+        let any = unsafe { GetTickCount() }.wrapping_sub(info.dwTime) as f64 / 1000.0;
+        let here = (cursor.x, cursor.y);
+        let mut last = LAST.lock().ok()?;
+        // Only fresh input with a resting cursor says anything about keys.
+        let key = if *last == Some(here) && any < 1.5 { any } else { 1.0e9 };
+        *last = Some(here);
+        Some(InputIdle { any, key: Some(key) })
+    }
 
     pub fn list_windows() -> Vec<DesktopWindow> {
         let mut out: Vec<DesktopWindow> = Vec::new();
@@ -457,6 +532,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             list_windows,
+            input_idle,
             pet_bridge_state,
             pet_bridge_handoff,
             pet_bridge_settings,

@@ -1,0 +1,24 @@
+{
+  "kind": "sprite-gen-video-report",
+  "provider": "grok-imagine",
+  "auth_source": "grok-login",
+  "model": "grok-imagine-video-1.5",
+  "mode": "first-last",
+  "request_id": "8aa97db1-cb7a-94e7-a128-e39c3151a52c",
+  "image": "/Users/gwon-yeheon/.omonyang/omopet-moves/gen/omo-cat/custom/sleep/canvas.png",
+  "inputs": {
+    "image": "/Users/gwon-yeheon/.omonyang/omopet-moves/gen/omo-cat/custom/sleep/canvas.png",
+    "last_frame": "/Users/gwon-yeheon/.omonyang/omopet-moves/gen/omo-cat/custom/sleep/canvas-last.png"
+  },
+  "prompt": "2D game sprite animation. Omo the chibi gray kitten with a mint-green scarf sleeps peacefully curled up in place: its body rises and falls with slow, deep sleeping breaths, its ears twitch once, its eyes stay closed the whole time. Seen from the exact side, facing right. No letters, no Z symbols, no bubbles. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image. Smooth, natural, evenly timed motion with no motion blur; the clip ends exactly on the pose of the final image.",
+  "out": "/Users/gwon-yeheon/.omonyang/omopet-moves/gen/omo-cat/custom/sleep/clip.mp4",
+  "bytes": 408705,
+  "host": "vidgen.x.ai",
+  "duration_requested": 3,
+  "duration_reported": 3,
+  "resolution": "720p",
+  "aspect_ratio": null,
+  "generate_audio": false,
+  "elapsed_seconds": 33.795,
+  "polls": 8
+}

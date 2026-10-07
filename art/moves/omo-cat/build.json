@@ -1,0 +1,78 @@
+{
+ "pack": "omo-cat",
+ "target_head_css": 57.682291666666664,
+ "ride_heads_css": [
+  57.682291666666664
+ ],
+ "ref_cellpx": 110.75,
+ "idle_feet_px": 16,
+ "arc_ratio": null,
+ "states": {
+  "wake": {
+   "src_head": 282.0,
+   "found": "8/24",
+   "scale": 0.39273049645390073,
+   "cell": [
+    224,
+    336
+   ],
+   "css_width": 116.7,
+   "frames": 24
+  },
+  "sleep": {
+   "src_head": 302.2352994052345,
+   "found": "from wake/72",
+   "scale": 0.3664363501481915,
+   "cell": [
+    226,
+    166
+   ],
+   "css_width": 117.7,
+   "frames": 72
+  },
+  "stretch": {
+   "src_head": 302.0,
+   "found": "72/72",
+   "scale": 0.3667218543046358,
+   "cell": [
+    204,
+    325
+   ],
+   "css_width": 106.2,
+   "frames": 72
+  },
+  "climb": {
+   "src_head": 257.0,
+   "found": "48/48",
+   "scale": 0.43093385214007784,
+   "cell": [
+    214,
+    318
+   ],
+   "css_width": 111.5,
+   "frames": 48
+  },
+  "climb-slide": {
+   "src_head": 240.0,
+   "found": "48/48",
+   "scale": 0.46145833333333336,
+   "cell": [
+    204,
+    403
+   ],
+   "css_width": 106.2,
+   "frames": 48
+  },
+  "typing": {
+   "src_head": 339.0,
+   "found": "48/48",
+   "scale": 0.32669616519174044,
+   "cell": [
+    206,
+    227
+   ],
+   "css_width": 107.3,
+   "frames": 48
+  }
+ }
+}

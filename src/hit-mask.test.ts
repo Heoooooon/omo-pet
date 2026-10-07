@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
 import { encodeApng } from "./apng.ts";
-import { apngAlphaMask, hitsMask, insideRect, spritePoint } from "./hit-mask.ts";
+import { apngAlphaMask, drawnColumns, hitsMask, insideRect, spritePoint } from "./hit-mask.ts";
 
 async function deflate(data: Uint8Array): Promise<Uint8Array> {
   const stream = new Blob([data as BlobPart]).stream().pipeThrough(new CompressionStream("deflate"));
@@ -118,6 +118,15 @@ test("the margin lets a click just outside the outline still grab the pet", () =
   assert.equal(hitsMask(mask, 14.5, 10.5, 3), false);
   assert.equal(hitsMask(mask, 14.5, 10.5, 4), true);
   assert.equal(hitsMask(mask, 13.5, 13.5, 4), false); // the margin is round, not square
+});
+
+test("the drawn columns span the outermost drawn pixels of any row", () => {
+  const data = new Uint8Array(6 * 3);
+  data[0 * 6 + 3] = 1;
+  data[1 * 6 + 1] = 1;
+  data[2 * 6 + 4] = 1;
+  assert.deepEqual(drawnColumns({ width: 6, height: 3, data }), { left: 1, right: 4 });
+  assert.equal(drawnColumns({ width: 6, height: 3, data: new Uint8Array(18) }), null);
 });
 
 test("window points map onto the sprite grid, mirrored when the pet faces left", () => {

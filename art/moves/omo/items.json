@@ -1,0 +1,50 @@
+{
+ "sleep": {
+  "img": "sleep",
+  "last": "sleep",
+  "shape": "square",
+  "dur": 3,
+  "cycle": "pinned",
+  "key": "magenta"
+ },
+ "wake": {
+  "img": "sleep",
+  "last": "stand",
+  "shape": "tall",
+  "dur": 2,
+  "cycle": "oneshot",
+  "key": "magenta"
+ },
+ "stretch": {
+  "img": "stand",
+  "last": "stand",
+  "shape": "tall",
+  "dur": 3,
+  "cycle": "oneshot",
+  "key": "magenta"
+ },
+ "climb": {
+  "img": "climb",
+  "last": "climb",
+  "shape": "tall",
+  "dur": 2,
+  "cycle": "pinned",
+  "key": "magenta"
+ },
+ "climb-slide": {
+  "img": "slide",
+  "last": "slide",
+  "shape": "tall",
+  "dur": 2,
+  "cycle": "pinned",
+  "key": "magenta"
+ },
+ "typing": {
+  "img": "typing",
+  "last": "typing",
+  "shape": "square",
+  "dur": 2,
+  "cycle": "pinned",
+  "key": "magenta"
+ }
+}

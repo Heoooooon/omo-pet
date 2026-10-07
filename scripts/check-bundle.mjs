@@ -16,7 +16,7 @@ const LICENSED_PACKS = {
   jabdori: "잡도리 © Sisyphus Labs (OmO Native), 허락 받아 사용 (permission from 김연규, 2026-10-05)",
 };
 const ALLOWED_PACKS = [...ORIGINAL_PACKS, ...Object.keys(LICENSED_PACKS)];
-const ALLOWED_STATES = /^(idle|walk|fall|fall-open|fall-glide|fall-land|edge|rocket|jet|jet-climb|play)(\.[234])?\.apng$/;
+const ALLOWED_STATES = /^(idle|walk|fall|fall-open|fall-glide|fall-land|edge|rocket|jet|jet-climb|play|sleep|wake|stretch|climb|climb-slide|typing)(\.[234])?\.apng$/;
 
 const dist = process.argv[2] ?? "dist";
 const packsDir = join(dist, "packs");

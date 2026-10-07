@@ -196,6 +196,18 @@ export function hitsMask(mask: AlphaMask, x: number, y: number, radius: number):
   return false;
 }
 
+// The outermost drawn column on each side, or null for an empty mask.
+export function drawnColumns(mask: AlphaMask): { left: number; right: number } | null {
+  let left = mask.width;
+  let right = -1;
+  for (let y = 0; y < mask.height; y++) {
+    const row = y * mask.width;
+    for (let x = 0; x < left; x++) if (mask.data[row + x]) { left = x; break; }
+    for (let x = mask.width - 1; x > right; x--) if (mask.data[row + x]) { right = x; break; }
+  }
+  return right < 0 ? null : { left, right };
+}
+
 export function insideRect(x: number, y: number, rect: Rect, margin: number): boolean {
   return (
     x >= rect.left - margin &&

@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use tauri::{AppHandle, Manager, Runtime};
 
 /// Sprite files a pack may ship, without the `.apng` extension.
-pub const STATES: [&str; 11] = [
+pub const STATES: [&str; 17] = [
     "idle",
     "walk",
     "fall",
@@ -19,6 +19,12 @@ pub const STATES: [&str; 11] = [
     "jet",
     "jet-climb",
     "play",
+    "sleep",
+    "wake",
+    "stretch",
+    "climb",
+    "climb-slide",
+    "typing",
 ];
 pub const INSTRUMENTS: [&str; 5] = ["vocal", "guitar", "bass", "drums", "keys"];
 const MAX_FILE_BYTES: u64 = 40 * 1024 * 1024;
