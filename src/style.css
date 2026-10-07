@@ -78,31 +78,26 @@ body[data-state="jet"].has-jet #pet {
   width: 216px;
 }
 
-/* Omo cat, OmO and Jabdori packs (OmO's and Jabdori's cells are fitted to Omo's): states whose cell is shared with a prop (parachute, rocket)
+/* Omo cat and OmO packs (OmO's cells are fitted to Omo's): states whose cell is shared with a prop (parachute, rocket)
    or drawn in a shorter cell get a wider display so the body reads the same
    size as idle (measured: idle body ~205px tall at 176px wide). */
 body[data-pack="omo-cat"][data-state="walk"].has-walk #pet,
-body[data-pack="jabdori"][data-state="walk"].has-walk #pet,
 body[data-pack="omo"][data-state="walk"].has-walk #pet {
   width: 220px;
 }
 body[data-pack="omo-cat"][data-state="fall"].has-fall #pet,
-body[data-pack="jabdori"][data-state="fall"].has-fall #pet,
 body[data-pack="omo"][data-state="fall"].has-fall #pet {
   width: 238px;
 }
 body[data-pack="omo-cat"][data-state="fall"][data-fall-phase="land"] #pet,
-body[data-pack="jabdori"][data-state="fall"][data-fall-phase="land"] #pet,
 body[data-pack="omo"][data-state="fall"][data-fall-phase="land"] #pet {
   width: 190px;
 }
 body[data-pack="omo-cat"][data-state="rocket"].has-rocket #pet,
-body[data-pack="jabdori"][data-state="rocket"].has-rocket #pet,
 body[data-pack="omo"][data-state="rocket"].has-rocket #pet {
   width: 160px;
 }
 body[data-pack="omo-cat"][data-state="edge"].has-edge #pet,
-body[data-pack="jabdori"][data-state="edge"].has-edge #pet,
 body[data-pack="omo"][data-state="edge"].has-edge #pet {
   width: 208px;
 }
@@ -118,7 +113,6 @@ body[data-state="jet"][data-jet-phase="climb"] #pet {
 }
 /* Sized so the head matches the level jet's (measured: 72px head at 238px jet width). */
 body[data-pack="omo-cat"][data-state="jet"][data-jet-phase="climb"] #pet,
-body[data-pack="jabdori"][data-state="jet"][data-jet-phase="climb"] #pet,
 body[data-pack="omo"][data-state="jet"][data-jet-phase="climb"] #pet {
   width: 140px;
 }
@@ -128,6 +122,40 @@ body[data-pack="omo"][data-state="jet"][data-jet-phase="climb"] #pet {
 body[data-pack="jabdori"][data-state="jet"].has-jet #pet,
 body[data-pack="jabdori"][data-state="jet"][data-jet-phase="climb"] #pet {
   width: 221px;
+  margin-bottom: 0;
+}
+
+/* Jabdori keeps one character size in every state: each width puts the head
+   (face between the ears, measured on every frame) at the rocket rides' ~47px.
+   margin-bottom keeps the feet where they stood before the shrink, so landing
+   and sitting still meet the platform at the same height. */
+body[data-pack="jabdori"] #pet {
+  width: 97px;
+  margin-bottom: 6.6px;
+}
+/* The drag dangle scales by 1.03, so start that much smaller. */
+body[data-pack="jabdori"][data-state="drag"] #pet {
+  width: 94px;
+}
+body[data-pack="jabdori"][data-state="walk"].has-walk #pet {
+  width: 133px;
+  margin-bottom: 6.8px;
+}
+body[data-pack="jabdori"][data-state="edge"].has-edge #pet {
+  width: 117px;
+  margin-bottom: 10.9px;
+}
+body[data-pack="jabdori"][data-state="fall"].has-fall #pet {
+  width: 136px;
+  margin-bottom: 0;
+}
+body[data-pack="jabdori"][data-state="fall"][data-fall-phase="land"] #pet {
+  width: 106px;
+  margin-bottom: 7px;
+}
+body[data-pack="jabdori"][data-state="rocket"].has-rocket #pet {
+  width: 160px;
+  margin-bottom: 0;
 }
 
 body.ignite #pet {
