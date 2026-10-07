@@ -6,6 +6,7 @@ use tauri::{Emitter, Manager, Wry};
 mod creator;
 mod license;
 mod packs;
+mod web_handoff;
 
 /// A normal (layer-0) on-screen window, in logical screen points with the
 /// origin at the top-left of the primary display — multiply by the monitor
@@ -453,6 +454,9 @@ pub fn run() {
         .setup(|app| {
             setup_tray(app)?;
             spawn_cursor_watch(app.handle().clone());
+            let handoff = web_handoff::Shared::default();
+            app.manage(handoff.clone());
+            web_handoff::spawn(app.handle().clone(), handoff);
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -462,6 +466,11 @@ pub fn run() {
             pet_bridge_settings,
             motion_tick,
             set_tray_labels,
+            web_handoff::web_handoff_ready,
+            web_handoff::web_view,
+            web_handoff::web_handback,
+            web_handoff::web_status,
+            web_handoff::web_handback_cancel,
             packs::list_user_packs,
             packs::delete_user_pack,
             packs::import_pack,
