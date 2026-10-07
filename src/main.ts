@@ -102,7 +102,7 @@ function walkSpeed(): number {
   // Six frames at 8 fps make one stride. Short-legged local packs take
   // smaller steps; zoom/personality scale the stride, not the cycle rate.
   const stride = currentPack === DEFAULTS.pack
-    ? 56
+    ? 43 // OmO's packs.json stride, also before the pack list has loaded
     : packStride(packInfos.find((p) => p.id === currentPack));
   const rate = state === "walk"
     ? [...walkPlayback.values()].find(({ src }) => src === pet.src)?.speed ?? 1
