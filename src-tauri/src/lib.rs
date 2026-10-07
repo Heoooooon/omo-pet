@@ -296,6 +296,101 @@ async fn pet_bridge_settings(
     .map_err(|e| e.to_string())?
 }
 
+// ---------- click-through ----------
+//
+// A pet window is a 240x320 transparent box, but only the drawn character
+// should take the mouse. While the window ignores cursor events the webview
+// sees no mouse at all, so the cursor is followed here: whenever it is over a
+// pet window (or just left it) that window gets its local point and decides,
+// from the sprite's pixels, whether to keep taking clicks.
+
+const CURSOR_POLL: std::time::Duration = std::time::Duration::from_millis(33);
+
+#[derive(Serialize, Clone, Copy, PartialEq, Debug)]
+struct PetCursor {
+    x: f64,
+    y: f64,
+    inside: bool,
+}
+
+fn is_pet_window(label: &str) -> bool {
+    label == "main" || label.starts_with("pet-")
+}
+
+/// The cursor in window-local logical points (whole points, so a resting
+/// cursor sends nothing), or `inside: false` when it is outside the window.
+fn local_cursor(cursor: (f64, f64), origin: (f64, f64), size: (f64, f64), scale: f64) -> PetCursor {
+    let x = (cursor.0 - origin.0) / scale;
+    let y = (cursor.1 - origin.1) / scale;
+    if x < 0.0 || y < 0.0 || x >= size.0 / scale || y >= size.1 / scale {
+        return PetCursor { x: -1.0, y: -1.0, inside: false };
+    }
+    PetCursor { x: x.floor(), y: y.floor(), inside: true }
+}
+
+fn spawn_cursor_watch(app: tauri::AppHandle) {
+    std::thread::spawn(move || {
+        let mut last: std::collections::HashMap<String, PetCursor> = Default::default();
+        loop {
+            std::thread::sleep(CURSOR_POLL);
+            let Ok(cursor) = app.cursor_position() else {
+                continue;
+            };
+            let windows = app.webview_windows();
+            last.retain(|label, _| windows.contains_key(label));
+            for (label, window) in windows {
+                if !is_pet_window(&label) {
+                    continue;
+                }
+                let (Ok(origin), Ok(size), Ok(scale)) =
+                    (window.outer_position(), window.outer_size(), window.scale_factor())
+                else {
+                    continue;
+                };
+                let now = local_cursor(
+                    (cursor.x, cursor.y),
+                    (origin.x as f64, origin.y as f64),
+                    (size.width as f64, size.height as f64),
+                    scale,
+                );
+                let before = last.insert(label.clone(), now);
+                if before == Some(now) || (!now.inside && !before.is_some_and(|b| b.inside)) {
+                    continue;
+                }
+                let _ = app.emit_to(label.as_str(), "pet-cursor", now);
+            }
+        }
+    });
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn cursor_maps_into_logical_window_points() {
+        let c = local_cursor((1100.0, 700.0), (1000.0, 600.0), (480.0, 640.0), 2.0);
+        assert_eq!(c, PetCursor { x: 50.0, y: 50.0, inside: true });
+        let edge = local_cursor((1479.0, 1239.0), (1000.0, 600.0), (480.0, 640.0), 2.0);
+        assert_eq!(edge, PetCursor { x: 239.0, y: 319.0, inside: true });
+    }
+
+    #[test]
+    fn cursor_outside_the_window_is_reported_as_outside() {
+        for p in [(999.0, 700.0), (1480.0, 700.0), (1100.0, 599.0), (1100.0, 1240.0)] {
+            assert!(!local_cursor(p, (1000.0, 600.0), (480.0, 640.0), 2.0).inside, "{p:?}");
+        }
+    }
+
+    #[test]
+    fn only_pet_windows_follow_the_cursor() {
+        assert!(is_pet_window("main"));
+        assert!(is_pet_window("pet-buddy-jabdori"));
+        assert!(!is_pet_window("settings"));
+        assert!(!is_pet_window("band-stage"));
+    }
+}
+
 // ---------- tray ----------
 //
 // The pet can be hidden (iPad handoff, band show), so the tray is the one
@@ -357,6 +452,7 @@ pub fn run() {
         })
         .setup(|app| {
             setup_tray(app)?;
+            spawn_cursor_watch(app.handle().clone());
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
