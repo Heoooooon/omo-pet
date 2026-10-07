@@ -111,8 +111,8 @@ def save_apng(cells: list[Image.Image], dst: Path, seconds: float, plays: int) -
     palette = quantized.getpalette("RGBA")
     if palette is None:
         raise SystemExit("quantize returned no palette")
-    for i in range(3, len(palette), 4):  # octree rounds opaque alpha to 254: snap the ends
-        palette[i] = 255 if palette[i] >= 240 else (0 if palette[i] <= 8 else palette[i])
+    for i in range(3, len(palette), 4):  # octree rounds opaque alpha to 254; near-clear key specks drop: snap the ends
+        palette[i] = 255 if palette[i] >= 240 else (0 if palette[i] <= 16 else palette[i])
     quantized.putpalette(palette, "RGBA")
     frames = [quantized.crop((0, i * height, width, (i + 1) * height)) for i in range(len(cells))]
     frames[0].save(dst, format="PNG", save_all=True, append_images=frames[1:],
@@ -122,6 +122,7 @@ def save_apng(cells: list[Image.Image], dst: Path, seconds: float, plays: int) -
 def main() -> None:
     parser = argparse.ArgumentParser(description="Build the croissant-mouse import pack.")
     parser.add_argument("--cycles", type=Path, required=True, help="sprite-gen output root")
+    parser.add_argument("--cycles-v1", type=Path, help="first generation's output root (the croissant-rocket rides)")
     parser.add_argument("--out", type=Path, required=True, help="pack folder to write")
     parser.add_argument("--states", default="")
     parser.add_argument("--zip", action="store_true", help="also write <out>.zip for Import a pack")
@@ -130,7 +131,10 @@ def main() -> None:
     args.out.mkdir(parents=True, exist_ok=True)
     for state in [s for s in args.states.split(",") if s] or list(spec):
         item = spec[state]
-        paths = sorted((args.cycles / item["cycle"]).glob("*.png"))
+        root = args.cycles_v1 if item.get("gen") == "v1" else args.cycles
+        if root is None:
+            raise SystemExit(f"{state}: needs --cycles-v1")
+        paths = sorted((root / item["cycle"]).glob("*.png"))
         skip = set(item.get("skip", []))
         paths = [p for i, p in enumerate(paths) if i not in skip]
         frames = sample([Image.open(p).convert("RGBA") for p in paths], max(2, round(item["seconds"] * item["fps"])))
