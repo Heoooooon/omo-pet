@@ -11,6 +11,7 @@
 import { apngAlphaMask, hitsMask, spritePoint, type AlphaMask } from "../hit-mask";
 import { jetSpriteFor } from "../jet-sprite";
 import { clear, flightCeiling, restingY, walkRange, type Body, type Rect, type World } from "./geometry";
+import { toScreen, toViewport, viewportOnScreen, viewportRect } from "../web-handoff";
 
 type PackManifest = { id: string; name: string; stride: number; states: string[] };
 type State = "idle" | "walk" | "drag" | "react" | "fall" | "edge" | "rocket" | "jet";
@@ -28,6 +29,10 @@ const GRAVITY = 1300; // CSS px/s², freefall before the chute opens
 const DRIFT = 130; // CSS px/s under the parachute
 const CHUTE_DELAY = 0.55;
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
+// The desktop app's local handoff listener (src-tauri/src/web_handoff.rs);
+// data-desktop="off" keeps the pet inside the page.
+const DESKTOP = opts.desktop === "off" ? null : (opts.desktop ?? "http://127.0.0.1:47838");
+const TAB = Math.random().toString(36).slice(2, 12);
 
 const root = document.createElement("div");
 root.className = "omopet";
@@ -92,6 +97,7 @@ function readWorld() {
 // Layout changed under the pet (room opened, composer grew, window resized):
 // keep her on screen and off the composer.
 function relayout() {
+  if (away) return;
   readWorld();
   applySize();
   const maxX = world.width - boxW();
@@ -214,12 +220,159 @@ function walk() {
     if (move >= left) {
       place(target - boxW() / 2, feet);
       const end = Math.abs(target - range.min) < 2 ? range.minEnd : Math.abs(target - range.max) < 2 ? range.maxEnd : null;
-      if (end === "wall") edge(dir, false);
+      if (end === "wall") leaveOrEdge(dir);
       else if (end === "drop") edge(dir, true);
       else idle();
       return false;
     }
     place(x + move * dir, feet);
+  });
+}
+
+// ---------- handoff to the desktop app ----------
+//
+// At the side of the page she walks on out and the desktop pet takes over at
+// that spot on screen; without the app she sits on the corner as before.
+
+type Entry = { x: number; feetY: number; dir: -1 | 1; state: "walk" | "fall" };
+let away = false; // the desktop app holds her
+let linked = false; // she came back from the desktop: keep it posted
+let syncTimer: ReturnType<typeof setTimeout> | null = null;
+let probe: { at: number; ok: boolean } | null = null;
+
+const screenViewport = () => viewportOnScreen(window);
+const screenView = () => viewportRect(screenViewport(), world.width, world.height);
+
+async function desktop(path: string, body?: unknown): Promise<Record<string, unknown> | null> {
+  if (!DESKTOP) return null;
+  try {
+    const r = await fetch(`${DESKTOP}/omopet/v1/${path}`, {
+      method: body ? "POST" : "GET",
+      headers: body ? { "content-type": "application/json" } : undefined,
+      body: body ? JSON.stringify(body) : undefined,
+      signal: AbortSignal.timeout(1500),
+    });
+    return r.ok ? await r.json() : null;
+  } catch {
+    return null;
+  }
+}
+
+// Is the desktop app there and free? A miss is remembered for a while so a
+// page without the app does not keep knocking.
+async function desktopReady(): Promise<boolean> {
+  if (!DESKTOP || reduceMotion.matches) return false;
+  if (probe && Date.now() - probe.at < (probe.ok ? 5000 : 60000)) return probe.ok;
+  const hello = await desktop("hello");
+  probe = { at: Date.now(), ok: hello?.ready === true };
+  return probe.ok;
+}
+
+function leaveOrEdge(dir: -1 | 1) {
+  const mine = version;
+  void desktopReady().then((ok) => {
+    if (mine !== version) return;
+    if (ok) walkOff(dir);
+    else edge(dir, false);
+  });
+}
+
+function walkOff(dir: -1 | 1) {
+  readWorld();
+  const speed = ((pack?.stride ?? 43) / 0.75) * size;
+  setFlip(dir);
+  setState("walk");
+  animate((dt) => {
+    place(x + speed * dt * dir, feet);
+    const out = dir === 1 ? centerX() >= world.width : centerX() <= 0;
+    if (!out) return;
+    void handOff(dir);
+    return false;
+  });
+}
+
+async function handOff(dir: -1 | 1) {
+  const mine = version;
+  const v = screenViewport();
+  const at = toScreen(v, dir === 1 ? world.width : 0, feet);
+  const ok = await desktop("arrive", {
+    tab: TAB,
+    pack: pack?.id,
+    state: "walk",
+    dir,
+    x: at.x,
+    feetY: at.y,
+    view: screenView(),
+  });
+  if (mine !== version) return;
+  if (!ok) {
+    probe = null;
+    place(dir === 1 ? world.width - boxW() : 0, feet);
+    return edge(dir, false);
+  }
+  setState("idle");
+  root.hidden = true;
+  away = true;
+  linked = true;
+  syncSoon();
+}
+
+// While she is on the desktop, ask every second whether she is coming back;
+// once back, a slower heartbeat tells the app this tab still has her.
+let syncFailures = 0;
+function syncSoon() {
+  if (syncTimer) clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => void syncOnce(), away ? 1000 : 2000);
+}
+
+async function syncOnce() {
+  syncTimer = null;
+  if (!linked) return;
+  readWorld();
+  const r = await desktop("sync", { tab: TAB, view: screenView() });
+  if (!r) {
+    syncFailures += 1;
+    if (syncFailures < 3) return syncSoon();
+  } else syncFailures = 0;
+  const location = r?.location;
+  if (location === "web" && r?.entry) return comeBack(r.entry as Entry);
+  if (location === "desktop" || location === "web") return syncSoon();
+  // The app quit or forgot this tab: she lives here again.
+  linked = false;
+  if (away) comeBack(null);
+}
+
+function comeBack(entry: Entry | null) {
+  away = false;
+  root.hidden = false;
+  readWorld();
+  applySize();
+  const v = screenViewport();
+  const p = entry ? toViewport(v, entry.x, entry.feetY) : { x: world.width, y: world.height };
+  const dir: -1 | 1 = entry?.dir ?? -1;
+  const cx = Math.max(0, Math.min(world.width, p.x));
+  const footY = Math.max(boxH() * 0.75, Math.min(world.height, p.y));
+  syncSoon();
+  if (entry?.state === "fall") {
+    place(Math.max(0, Math.min(world.width - boxW(), cx - boxW() / 2)), footY);
+    return fall();
+  }
+  // Walk in from the edge she came through, then rest or drop.
+  place(cx - boxW() / 2, footY);
+  const target = Math.max(boxW() / 2, Math.min(world.width - boxW() / 2, cx + dir * boxW() * 0.8));
+  const speed = ((pack?.stride ?? 43) / 0.75) * size;
+  setFlip(dir);
+  setState("walk");
+  animate((dt) => {
+    const left = target - centerX();
+    const step = speed * dt;
+    if (Math.abs(left) <= step) {
+      place(target - boxW() / 2, feet);
+      if (restingY(world, centerX(), feet, body()) > feet + 2) fall();
+      else idle();
+      return false;
+    }
+    place(x + Math.sign(left) * step, feet);
   });
 }
 
@@ -587,6 +740,10 @@ Object.assign(window, {
     usePack,
     hide: () => setHidden(true),
     show: () => setHidden(false),
+    get away() {
+      return away;
+    },
+    leave: (dir: -1 | 1) => leaveOrEdge(dir),
   },
 });
 
