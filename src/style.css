@@ -198,6 +198,114 @@ body[data-pack="jabdori"][data-state="rocket"].has-rocket #pet {
   margin-bottom: 0;
 }
 
+/* Sleep, stretch, wall climb and typing are fully drawn loops/one-shots. */
+body[data-state="sleep"].has-sleep #pet,
+body[data-state="stretch"].has-stretch #pet,
+body[data-state="climb"].has-climb #pet,
+body[data-state="typing"].has-typing #pet {
+  animation: none;
+}
+
+/* Snoring: letters drift up and away from the sleeping head. */
+.zzz {
+  position: absolute;
+  bottom: 38%;
+  font: 700 15px/1 ui-rounded, "SF Pro Rounded", system-ui, sans-serif;
+  color: #8f9bb3;
+  text-shadow: 0 0 2px #fff, 0 0 2px #fff;
+  animation: zzz-up 2.6s ease-out forwards;
+}
+
+@keyframes zzz-up {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.6);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(16px, -46px) scale(1.25);
+  }
+}
+
+/* New moves (sleep, wake, stretch, wall climb, typing): each sprite is cut at the rocket
+   rides' head size (see art/moves/README.md), so these widths keep the head the same as on
+   the rocket; margin-bottom is the pack's idle one, so feet stay on the same line. */
+body[data-pack="omo-cat"][data-state="sleep"].has-sleep #pet {
+  width: 117.7px;
+  margin-bottom: 6.3px;
+}
+body[data-pack="omo-cat"][data-state="sleep"][data-sleep-phase="wake"] #pet {
+  width: 116.7px;
+  margin-bottom: 6.3px;
+}
+body[data-pack="omo-cat"][data-state="stretch"].has-stretch #pet {
+  width: 106.2px;
+  margin-bottom: 6.3px;
+}
+body[data-pack="omo-cat"][data-state="climb"].has-climb #pet {
+  width: 111.5px;
+  margin-bottom: 6.3px;
+}
+body[data-pack="omo-cat"][data-state="climb"][data-climb-phase="slide"] #pet {
+  width: 106.2px;
+  margin-bottom: 6.3px;
+}
+body[data-pack="omo-cat"][data-state="typing"].has-typing #pet {
+  width: 107.3px;
+  margin-bottom: 6.3px;
+}
+body[data-pack="omo"][data-state="sleep"].has-sleep #pet {
+  width: 146.2px;
+  margin-bottom: 4.7px;
+}
+body[data-pack="omo"][data-state="sleep"][data-sleep-phase="wake"] #pet {
+  width: 146.2px;
+  margin-bottom: 4.7px;
+}
+body[data-pack="omo"][data-state="stretch"].has-stretch #pet {
+  width: 135px;
+  margin-bottom: 4.7px;
+}
+body[data-pack="omo"][data-state="climb"].has-climb #pet {
+  width: 105px;
+  margin-bottom: 4.7px;
+}
+body[data-pack="omo"][data-state="climb"][data-climb-phase="slide"] #pet {
+  width: 97.5px;
+  margin-bottom: 4.7px;
+}
+body[data-pack="omo"][data-state="typing"].has-typing #pet {
+  width: 118.8px;
+  margin-bottom: 4.7px;
+}
+body[data-pack="jabdori"][data-state="sleep"].has-sleep #pet {
+  width: 119.2px;
+  margin-bottom: 6.6px;
+}
+body[data-pack="jabdori"][data-state="sleep"][data-sleep-phase="wake"] #pet {
+  width: 116.2px;
+  margin-bottom: 6.6px;
+}
+body[data-pack="jabdori"][data-state="stretch"].has-stretch #pet {
+  width: 112.2px;
+  margin-bottom: 6.6px;
+}
+body[data-pack="jabdori"][data-state="climb"].has-climb #pet {
+  width: 82.9px;
+  margin-bottom: 6.6px;
+}
+body[data-pack="jabdori"][data-state="climb"][data-climb-phase="slide"] #pet {
+  width: 96px;
+  margin-bottom: 6.6px;
+}
+body[data-pack="jabdori"][data-state="typing"].has-typing #pet {
+  width: 96px;
+  margin-bottom: 6.6px;
+}
+
 body.ignite #pet {
   animation: shake 0.09s linear infinite !important;
 }

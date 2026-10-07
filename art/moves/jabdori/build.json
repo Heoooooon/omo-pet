@@ -1,0 +1,79 @@
+{
+ "pack": "jabdori",
+ "target_head_css": 47.91438802083333,
+ "ride_heads_css": [
+  47.916666666666664,
+  47.912109375
+ ],
+ "ref_cellpx": 94.84085051546391,
+ "idle_feet_px": 16,
+ "arc_ratio": null,
+ "states": {
+  "wake": {
+   "src_head": 246.0,
+   "found": "8/24",
+   "scale": 0.38553191266448744,
+   "cell": [
+    230,
+    348
+   ],
+   "css_width": 116.2,
+   "frames": 24
+  },
+  "sleep": {
+   "src_head": 263.0994463809719,
+   "found": "from wake/72",
+   "scale": 0.3604752948743683,
+   "cell": [
+    236,
+    168
+   ],
+   "css_width": 119.2,
+   "frames": 72
+  },
+  "stretch": {
+   "src_head": 263.0,
+   "found": "72/72",
+   "scale": 0.36061159891811373,
+   "cell": [
+    222,
+    267
+   ],
+   "css_width": 112.2,
+   "frames": 72
+  },
+  "climb": {
+   "src_head": 242.74033189032457,
+   "found": "ear 48/48/48",
+   "scale": 0.39070907490690543,
+   "cell": [
+    164,
+    269
+   ],
+   "css_width": 82.9,
+   "frames": 48
+  },
+  "climb-slide": {
+   "src_head": 246.5,
+   "found": "48/48",
+   "scale": 0.3847499006712532,
+   "cell": [
+    190,
+    298
+   ],
+   "css_width": 96.0,
+   "frames": 48
+  },
+  "typing": {
+   "src_head": 256.9139400119376,
+   "found": "ear 48/48/48",
+   "scale": 0.3691541631063581,
+   "cell": [
+    190,
+    227
+   ],
+   "css_width": 96.0,
+   "frames": 48
+  }
+ }
+}

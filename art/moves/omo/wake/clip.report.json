@@ -1,0 +1,24 @@
+{
+  "kind": "sprite-gen-video-report",
+  "provider": "grok-imagine",
+  "auth_source": "grok-login",
+  "model": "grok-imagine-video-1.5",
+  "mode": "first-last",
+  "request_id": "fd9132f0-9cb5-9a19-9beb-c40bb399ee5a",
+  "image": "/Users/gwon-yeheon/.omonyang/omopet-moves/gen/omo/custom/wake/canvas.png",
+  "inputs": {
+    "image": "/Users/gwon-yeheon/.omonyang/omopet-moves/gen/omo/custom/wake/canvas.png",
+    "last_frame": "/Users/gwon-yeheon/.omonyang/omopet-moves/gen/omo/custom/wake/canvas-last.png"
+  },
+  "prompt": "2D game sprite animation. OmO the chibi black hooded cat with a glowing lime-green OmO face is fast asleep curled up, then is startled awake: its eyes pop wide open (the lime face glyph changes from closed-eye arcs to the big ring eyes), it springs up in surprise with a tiny hop (its feet leave the ground only a little, the head never rises near the top of the frame) and lands standing upright, then turns to face the viewer, ending exactly as the final image. Its feet land on the same spot it slept on. No letters, no symbols. It stays centered in the frame and does not move across the screen; the whole body and everything it holds always stay fully inside the frame with margin. Camera completely locked, no zoom, no pan, no reframing. The background stays a perfectly flat, pure chroma-key fill for the whole clip — no shadows, no ground line, no particles, no lighting changes, no effects. Keep the design, colors and proportions exactly as in the image. Smooth, natural, evenly timed motion with no motion blur; the clip ends exactly on the pose of the final image. The lime-green face glyph stays glowing the whole time.",
+  "out": "/Users/gwon-yeheon/.omonyang/omopet-moves/gen/omo/custom/wake/clip.mp4",
+  "bytes": 596263,
+  "host": "vidgen.x.ai",
+  "duration_requested": 2,
+  "duration_reported": 2,
+  "resolution": "720p",
+  "aspect_ratio": null,
+  "generate_audio": false,
+  "elapsed_seconds": 29.208,
+  "polls": 7
+}
